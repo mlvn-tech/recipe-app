@@ -344,7 +344,7 @@ export default function EditRecipe() {
                 w-full border border-gray-200 rounded-md p-3
                 bg-gray-50 focus:outline-none
                 focus:border-gray-300 focus:bg-gray-50
-                transition-colors
+                transition-colors min-h-30
               "
             />
           </div>
