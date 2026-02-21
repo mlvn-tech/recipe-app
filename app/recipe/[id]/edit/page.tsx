@@ -21,6 +21,9 @@ export default function EditRecipe() {
   const [servings, setServings] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [showFloatingSave, setShowFloatingSave] = useState(true);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const deleteRef = useRef<HTMLDivElement | null>(null);
 
   const [categoryOpen, setCategoryOpen] = useState(false);
@@ -69,6 +72,10 @@ export default function EditRecipe() {
         .eq("id", id)
         .single();
 
+      if (data.image_url) {
+        setImagePreview(data.image_url);
+      }
+
       if (data) {
         setTitle(data.title || "");
         setIngredients((data.ingredients || []).join("\n"));
@@ -105,6 +112,39 @@ export default function EditRecipe() {
         .filter(Boolean);
     }
 
+    let imageUrl = imagePreview;
+
+    // 🔥 Alleen als er een nieuwe afbeelding gekozen is
+    if (imageFile) {
+      // 1️⃣ Oude afbeelding verwijderen (indien aanwezig)
+      if (imagePreview) {
+        const oldPath = imagePreview.split("/").pop();
+        if (oldPath) {
+          await supabase.storage.from("recipe-images").remove([oldPath]);
+        }
+      }
+
+      // 2️⃣ Nieuwe uploaden
+      const fileExt = imageFile.name.split(".").pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("recipe-images")
+        .upload(fileName, imageFile);
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        return;
+      }
+
+      const { data } = supabase.storage
+        .from("recipe-images")
+        .getPublicUrl(fileName);
+
+      imageUrl = data.publicUrl;
+    }
+
+    // 3️⃣ Database updaten
     const { error } = await supabase
       .from("recipes")
       .update({
@@ -115,6 +155,7 @@ export default function EditRecipe() {
         cooking_time: cookingTime,
         servings,
         notes,
+        image_url: imageUrl,
       })
       .eq("id", id);
 
@@ -147,7 +188,7 @@ export default function EditRecipe() {
       py-3
       rounded-md
       shadow-lg
-      text-md
+      text-sm
       font-semibold
       active:scale-95
       transition
@@ -161,9 +202,54 @@ export default function EditRecipe() {
   return (
     <>
       <Header title="Recept bewerken" />
-
       <main className="min-h-screen bg-[var(--color-bg)] pt-20 pb-16">
         <div className="px-4 max-w-4xl mx-auto space-y-4">
+          <div className="bg-white rounded-md p-5 shadow-sm">
+            <label className="text-sm text-gray-500 block mb-3">
+              Afbeelding <span className="text-gray-400">(optioneel)</span>
+            </label>
+
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="relative h-56 rounded-md overflow-hidden cursor-pointer group"
+            >
+              {imagePreview ? (
+                <>
+                  <img
+                    src={imagePreview}
+                    className="w-full h-full object-cover"
+                  />
+
+                  {/* 🔥 ALTIJD zichtbare overlay */}
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <span className="text-white/80 text-sm font-semibold tracking-wide">
+                      Klik om afbeelding te wijzigen
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div className="h-full bg-gray-100 flex items-center justify-center">
+                  <span className="text-gray-400 text-sm">
+                    Klik om afbeelding toe te voegen
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setImageFile(file);
+                  setImagePreview(URL.createObjectURL(file));
+                }
+              }}
+            />
+          </div>
           {/* Titel */}
           <div className="bg-white rounded-md p-5 shadow-sm">
             <label className="text-sm text-gray-500 block mb-2">Titel</label>
@@ -369,7 +455,7 @@ export default function EditRecipe() {
                 text-red-600
                 py-3
                 rounded-md
-                text-md
+                text-sm
                 font-semibold
                 transition
                 hover:bg-red-50
