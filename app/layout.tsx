@@ -30,6 +30,7 @@ export default function RootLayout({
           ${geistMono.variable} 
           antialiased 
           bg-[var(--color-brand)]
+          text-gray-800
         `}
       >
         {children}

@@ -98,7 +98,7 @@ export default function RecipeDetail() {
   );
 
   return (
-    <main className="min-h-screen bg-[var(--color-bg)] text-black">
+    <main className="min-h-screen bg-[var(--color-bg)]">
       {/* Header */}
       <Header
         title={headerTitle}
@@ -121,7 +121,7 @@ export default function RecipeDetail() {
           }
         `}
       >
-        <div className="backdrop-blur-md bg-white/80 rounded-b-xl shadow-[0_4px_14px_rgba(0,0,0,0.08)] overflow-hidden">
+        <div className="bg-white/70 backdrop-blur-lg rounded-b-md border border-white/40 shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
           <button
             onClick={() => setIngredientsOpen(!ingredientsOpen)}
             className="w-full px-4 py-3 flex justify-between font-semibold"
@@ -146,7 +146,7 @@ export default function RecipeDetail() {
             `}
           >
             <div className="overflow-hidden">
-              <div className="px-6 pb-4 pt-2">
+              <div className="px-6 pb-6 pt-2">
                 <ul className="list-disc pl-5 space-y-2">
                   {recipe.ingredients?.map((item: string, index: number) => (
                     <li key={index}>{item}</li>
