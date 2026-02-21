@@ -102,6 +102,7 @@ export default function RecipeDetail() {
       {/* Header */}
       <Header
         title={headerTitle}
+        onBack={() => router.replace("/")}
         rightContent={
           <button onClick={() => router.push(`/recipe/${recipe.id}/edit`)}>
             <Icon icon={PencilSquareIcon} className="text-white/80" />

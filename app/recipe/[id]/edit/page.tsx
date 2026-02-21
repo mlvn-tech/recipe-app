@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import Icon from "@/components/icons";
+import { toast } from "sonner";
 
 export default function EditRecipe() {
   const params = useParams();
@@ -31,7 +32,6 @@ export default function EditRecipe() {
 
   const categories = ["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"];
 
-  // 🔹 Sluit dropdown bij klik buiten
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -41,29 +41,22 @@ export default function EditRecipe() {
         setCategoryOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // 🔹 Opslaan knop floating ↔ inline
   useEffect(() => {
     const handleScroll = () => {
       if (!deleteRef.current) return;
-
       const rect = deleteRef.current.getBoundingClientRect();
-      // Zodra de verwijder-sectie binnen het scherm komt, schakel naar inline
       const isVisible = rect.top < window.innerHeight;
       setShowFloatingSave(!isVisible);
     };
-
     window.addEventListener("scroll", handleScroll);
     handleScroll();
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 🔹 Data ophalen
   useEffect(() => {
     const fetchRecipe = async () => {
       const { data } = await supabase
@@ -72,7 +65,7 @@ export default function EditRecipe() {
         .eq("id", id)
         .single();
 
-      if (data.image_url) {
+      if (data?.image_url) {
         setImagePreview(data.image_url);
       }
 
@@ -114,9 +107,7 @@ export default function EditRecipe() {
 
     let imageUrl = imagePreview;
 
-    // 🔥 Alleen als er een nieuwe afbeelding gekozen is
     if (imageFile) {
-      // 1️⃣ Oude afbeelding verwijderen (indien aanwezig)
       if (imagePreview) {
         const oldPath = imagePreview.split("/").pop();
         if (oldPath) {
@@ -124,7 +115,6 @@ export default function EditRecipe() {
         }
       }
 
-      // 2️⃣ Nieuwe uploaden
       const fileExt = imageFile.name.split(".").pop();
       const fileName = `${Date.now()}.${fileExt}`;
 
@@ -140,11 +130,9 @@ export default function EditRecipe() {
       const { data } = supabase.storage
         .from("recipe-images")
         .getPublicUrl(fileName);
-
       imageUrl = data.publicUrl;
     }
 
-    // 3️⃣ Database updaten
     const { error } = await supabase
       .from("recipes")
       .update({
@@ -160,7 +148,8 @@ export default function EditRecipe() {
       .eq("id", id);
 
     if (!error) {
-      router.push(`/recipe/${id}`);
+      toast.success("Recept aangepast");
+      router.replace(`/recipe/${id}`);
     }
   };
 
@@ -171,37 +160,36 @@ export default function EditRecipe() {
     if (!confirmed) return;
 
     const { error } = await supabase.from("recipes").delete().eq("id", id);
-
-    if (!error) router.push("/");
+    if (!error) router.replace("/");
   };
-
-  if (loading) {
-    return <p className="p-8">Laden...</p>;
-  }
 
   const SaveButton = ({ fullWidth = false }: { fullWidth?: boolean }) => (
     <button
       onClick={handleUpdate}
       className={`
-      bg-[var(--color-accent)]
-      text-white
-      py-3
-      rounded-md
-      shadow-lg
-      text-sm
-      font-semibold
-      active:scale-95
-      transition
-      ${fullWidth ? "w-full" : "px-8"}
-    `}
+        bg-[var(--color-accent)]
+        text-white
+        py-3
+        rounded-md
+        shadow-lg
+        text-sm
+        font-semibold
+        active:scale-95
+        transition
+        ${fullWidth ? "w-full" : "px-8"}
+      `}
     >
       Opslaan
     </button>
   );
 
+  if (loading) {
+    return <p className="p-8">Laden...</p>;
+  }
+
   return (
     <>
-      <Header title="Recept bewerken" />
+      <Header title="Recept bewerken" onBack={() => router.back()} />
       <main className="min-h-screen bg-[var(--color-bg)] pt-20 pb-16">
         <div className="px-4 max-w-4xl mx-auto space-y-4">
           <div className="bg-white rounded-md p-5 shadow-sm">
@@ -219,8 +207,6 @@ export default function EditRecipe() {
                     src={imagePreview}
                     className="w-full h-full object-cover"
                   />
-
-                  {/* 🔥 ALTIJD zichtbare overlay */}
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                     <span className="text-white/80 text-sm font-semibold tracking-wide">
                       Klik om afbeelding te wijzigen
@@ -250,6 +236,7 @@ export default function EditRecipe() {
               }}
             />
           </div>
+
           {/* Titel */}
           <div className="bg-white rounded-md p-5 shadow-sm">
             <label className="text-sm text-gray-500 block mb-2">Titel</label>
@@ -332,25 +319,17 @@ export default function EditRecipe() {
                       category.slice(1).toLowerCase()
                     : "Selecteer categorie"}
                 </span>
-
                 <Icon
                   icon={ChevronDownIcon}
                   size={20}
-                  className={`
-                    text-gray-500
-                    transition-transform duration-200
-                    ${categoryOpen ? "rotate-180" : ""}
-                  `}
+                  className={`text-gray-500 transition-transform duration-200 ${categoryOpen ? "rotate-180" : ""}`}
                 />
               </button>
 
-              {/* Zwevende dropdown */}
               <div
                 className={`
-                  absolute left-0 right-0 top-full
-                  mt-2
-                  bg-white rounded-md shadow-lg
-                  overflow-hidden z-50
+                  absolute left-0 right-0 top-full mt-2
+                  bg-white rounded-md shadow-lg overflow-hidden z-50
                   transition-all duration-200 ease-out origin-top
                   ${
                     categoryOpen
@@ -367,15 +346,10 @@ export default function EditRecipe() {
                           setCategory(cat);
                           setCategoryOpen(false);
                         }}
-                        className="
-                          w-full text-left px-4 py-3
-                          hover:bg-gray-50
-                          transition-colors
-                        "
+                        className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors"
                       >
                         {cat}
                       </button>
-
                       {index !== categories.length - 1 && (
                         <div className="mx-4 border-b border-gray-100" />
                       )}
@@ -435,14 +409,13 @@ export default function EditRecipe() {
             />
           </div>
 
-          {/* 🔽 Onderste sectie: opslaan + verwijderen */}
+          {/* Onderste sectie: opslaan + verwijderen */}
           <div ref={deleteRef} className="mt-6 space-y-3">
-            {/* Inline opslaan knop — alleen zichtbaar als floating verborgen is */}
             <div
               className={`
-    transition-all duration-300
-    ${showFloatingSave ? "opacity-0 pointer-events-none h-0 overflow-hidden" : "opacity-100"}
-  `}
+                transition-all duration-300
+                ${showFloatingSave ? "opacity-0 pointer-events-none h-0 overflow-hidden" : "opacity-100"}
+              `}
             >
               <SaveButton fullWidth />
             </div>
@@ -451,7 +424,7 @@ export default function EditRecipe() {
               onClick={handleDelete}
               className="
                 w-full
-                border border-red-300 border-2
+                border-2 border-red-300
                 text-red-600
                 py-3
                 rounded-md
@@ -467,10 +440,10 @@ export default function EditRecipe() {
         </div>
       </main>
 
-      {/* Floating opslaan knop — alleen zichtbaar als je nog niet onderaan bent */}
+      {/* Floating opslaan knop */}
       <div
         className={`
-          fixed bottom-6 left-1/2 -translate-x-1/2 z-50
+          fixed bottom-12 left-1/2 -translate-x-1/2 z-50
           transition-all duration-300
           ${showFloatingSave ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
         `}

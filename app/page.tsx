@@ -263,7 +263,10 @@ export default function Home() {
                               size={16}
                               className="text-gray-500"
                             />
-                            <span>{recipe.servings} personen</span>
+                            <span>
+                              {recipe.servings}{" "}
+                              {recipe.servings === 1 ? "persoon" : "personen"}
+                            </span>
                           </div>
                         )}
 
@@ -287,7 +290,7 @@ export default function Home() {
         href="/new"
         className="
           fixed
-          bottom-6
+          bottom-12
           left-1/2
           -translate-x-1/2
           w-11 h-11

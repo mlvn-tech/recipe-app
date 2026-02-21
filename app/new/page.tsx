@@ -1,10 +1,16 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import Header from "@/components/Header";
+import { useRouter } from "next/navigation";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import Icon from "@/components/icons";
+import { toast } from "sonner";
 
 export default function NewRecipe() {
+  const router = useRouter();
+
   const [title, setTitle] = useState("");
   const [ingredients, setIngredients] = useState("");
   const [steps, setSteps] = useState("");
@@ -12,9 +18,15 @@ export default function NewRecipe() {
   const [cookingTime, setCookingTime] = useState<number | null>(null);
   const [notes, setNotes] = useState("");
   const [servings, setServings] = useState<number | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const categoryRef = useRef<HTMLDivElement>(null);
+
+  const categories = ["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"];
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -63,23 +75,84 @@ export default function NewRecipe() {
       .map((step) => step.trim())
       .filter(Boolean);
 
-    const { error } = await supabase.from("recipes").insert([
-      {
-        title,
-        ingredients: cleanedIngredients,
-        steps: cleanedSteps,
-        category,
-        cooking_time: cookingTime,
-        servings,
-        notes,
-        image_url: imageUrl,
-      },
-    ]);
+    const { data, error } = await supabase
+      .from("recipes")
+      .insert([
+        {
+          title,
+          ingredients: cleanedIngredients,
+          steps: cleanedSteps,
+          category,
+          cooking_time: cookingTime,
+          servings,
+          notes,
+          image_url: imageUrl,
+        },
+      ])
+      .select()
+      .single();
 
-    if (!error) {
-      alert("Recept opgeslagen!");
+    if (!error && data) {
+      toast.success("Recept aangemaakt");
+      router.replace(`/recipe/${data.id}`);
     }
   };
+
+  // 🔹 Sluit dropdown bij klik buiten
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        categoryRef.current &&
+        !categoryRef.current.contains(event.target as Node)
+      ) {
+        setCategoryOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+  // 🔥 Dirty state detectie
+  useEffect(() => {
+    if (
+      title ||
+      ingredients ||
+      steps ||
+      category ||
+      cookingTime ||
+      servings ||
+      notes ||
+      imageFile
+    ) {
+      setIsDirty(true);
+    } else {
+      setIsDirty(false);
+    }
+  }, [
+    title,
+    ingredients,
+    steps,
+    category,
+    cookingTime,
+    servings,
+    notes,
+    imageFile,
+  ]);
+
+  // 🔥 Waarschuwing bij refresh / sluiten
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!isDirty) return;
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isDirty]);
 
   return (
     <>
@@ -175,22 +248,78 @@ export default function NewRecipe() {
               />
             </div>
 
-            <div>
+            {/* Custom Dropdown */}
+            <div ref={categoryRef} className="relative">
               <label className="text-sm text-gray-500 block mb-2">
-                Categorie <span className="text-red-500">*</span>
+                Categorie
               </label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full border border-gray-200 rounded-md p-3 bg-gray-50 focus:outline-none focus:border-gray-300"
+
+              <button
+                type="button"
+                onClick={() => setCategoryOpen(!categoryOpen)}
+                className="
+                  w-full border border-gray-200 rounded-md p-3
+                  bg-gray-50 flex justify-between items-center
+                  focus:outline-none
+                "
               >
-                <option value="">Selecteer categorie</option>
-                <option value="Ontbijt">Ontbijt</option>
-                <option value="Lunch">Lunch</option>
-                <option value="Diner">Diner</option>
-                <option value="Dessert">Dessert</option>
-                <option value="Snack">Snack</option>
-              </select>
+                <span className={category ? "" : "text-gray-400"}>
+                  {category
+                    ? category.charAt(0).toUpperCase() +
+                      category.slice(1).toLowerCase()
+                    : "Selecteer categorie"}
+                </span>
+
+                <Icon
+                  icon={ChevronDownIcon}
+                  size={20}
+                  className={`
+                    text-gray-500
+                    transition-transform duration-200
+                    ${categoryOpen ? "rotate-180" : ""}
+                  `}
+                />
+              </button>
+
+              {/* Zwevende dropdown */}
+              <div
+                className={`
+                  absolute left-0 right-0 top-full
+                  mt-2
+                  bg-white rounded-md shadow-lg
+                  overflow-hidden z-50
+                  transition-all duration-200 ease-out origin-top
+                  ${
+                    categoryOpen
+                      ? "opacity-100 translate-y-0 scale-y-100"
+                      : "opacity-0 -translate-y-2 scale-y-95 pointer-events-none"
+                  }
+                `}
+              >
+                <div className="py-2">
+                  {categories.map((cat, index) => (
+                    <div key={cat}>
+                      <button
+                        onClick={() => {
+                          setCategory(cat);
+                          setCategoryOpen(false);
+                        }}
+                        className="
+                          w-full text-left px-4 py-3
+                          hover:bg-gray-50
+                          transition-colors
+                        "
+                      >
+                        {cat}
+                      </button>
+
+                      {index !== categories.length - 1 && (
+                        <div className="mx-4 border-b border-gray-100" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -233,7 +362,7 @@ export default function NewRecipe() {
       </main>
 
       {/* Floating Save */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+      <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-50">
         <button
           onClick={handleSubmit}
           className="bg-[var(--color-accent)] text-white px-8 py-3 rounded-md shadow-lg text-sm font-semibold active:scale-95 transition"
