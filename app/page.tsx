@@ -54,12 +54,7 @@ export default function Home() {
     <main className="min-h-screen bg-[var(--color-bg)]">
       {/* 🟢 Brand Header */}
       <div className="bg-[var(--color-brand)] px-4 pt-10 pb-8">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-6xl font-bold text-white">Honger?</h1>
-          <h2 className="text-xl font-semibold text-gray-900 mb-5">
-            Zoek je favoriete recept!
-          </h2>
-
+        <div className="mx-auto">
           {/* 🔍 Search */}
           <div className="relative group">
             <input
