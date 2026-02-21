@@ -112,7 +112,7 @@ export default function Home() {
       </div>
 
       {/* 📦 Page Content */}
-      <main className="h-dvh bg-[var(--color-bg)] pt-20">
+      <main className="min-h-dvh bg-[var(--color-bg)] pt-20">
         {/* 🏷️ Filters */}
         <div className="pt-4 pb-4">
           <div className="flex gap-3 overflow-x-auto px-4 max-w-4xl mx-auto no-scrollbar">
@@ -158,10 +158,9 @@ export default function Home() {
             {/* 💀 Skeleton */}
             <div
               className={`
-                absolute inset-0 px-0
-                transition-all duration-300 ease-out
-                ${loading ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"}
-    `}
+    transition-all duration-300 ease-out
+    ${loading ? "opacity-100 translate-y-0 relative" : "opacity-0 -translate-y-2 pointer-events-none hidden"}
+  `}
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[...Array(4)].map((_, i) => (
