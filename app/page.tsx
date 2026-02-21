@@ -74,7 +74,7 @@ export default function Home() {
                 py-3
                 pl-4
                 pr-12
-                text-m
+                text-base
                 text-gray-800
                 placeholder:text-gray-400
                 focus:outline-none
