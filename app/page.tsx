@@ -112,7 +112,7 @@ export default function Home() {
       </div>
 
       {/* 📦 Page Content */}
-      <main className="min-h-dvh bg-[var(--color-bg)] pt-20">
+      <main className="h-dvh bg-[var(--color-bg)] pt-20">
         {/* 🏷️ Filters */}
         <div className="pt-4 pb-4">
           <div className="flex gap-3 overflow-x-auto px-4 max-w-4xl mx-auto no-scrollbar">
