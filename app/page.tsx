@@ -51,11 +51,11 @@ export default function Home() {
   });
 
   return (
-    <main className="min-h-screen bg-[var(--color-bg)]">
-      {/* 🟢 Brand Header */}
-      <div className="bg-[var(--color-brand)] px-4 pt-10 pb-8">
-        <div className="mx-auto">
-          {/* 🔍 Search */}
+    <>
+      {/* 🔝 Fixed Header */}
+      <div className="fixed top-0 left-0 w-full bg-[var(--color-brand)] z-50">
+        <div className="max-w-4xl mx-auto px-4 pt-10 pb-6">
+          {/* Search */}
           <div className="relative group">
             <input
               type="text"
@@ -93,131 +93,134 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 🏷️ Categorie Filters */}
-      <div className="pt-4 pb-4">
-        <div className="flex gap-3 overflow-x-auto px-4 max-w-4xl mx-auto no-scrollbar">
-          {categories.map((cat) => {
-            const count = getCount(cat);
-            const isActive = activeCategory === cat;
+      {/* 📦 Page Content */}
+      <main className="min-h-screen bg-[var(--color-bg)] pt-28">
+        {/* 🏷️ Categorie Filters */}
+        <div className="pt-4 pb-4">
+          <div className="flex gap-3 overflow-x-auto px-4 max-w-4xl mx-auto no-scrollbar">
+            {categories.map((cat) => {
+              const count = getCount(cat);
+              const isActive = activeCategory === cat;
 
-            return (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`
-                  px-4 py-2 rounded-md text-sm whitespace-nowrap
-                  border transition-colors duration-200
-                  flex items-center gap-2
-                  ${
-                    isActive
-                      ? "bg-gray-200 text-gray-900 font-medium border-gray-200"
-                      : "bg-white text-gray-600 border-gray-200"
-                  }
-                `}
-              >
-                <span>{cat}</span>
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`
+                    px-4 py-2 rounded-md text-sm whitespace-nowrap
+                    border transition-colors duration-200
+                    flex items-center gap-2
+                    ${
+                      isActive
+                        ? "bg-gray-200 text-gray-900 font-medium border-gray-200"
+                        : "bg-white text-gray-600 border-gray-200"
+                    }
+                  `}
+                >
+                  <span>{cat}</span>
 
-                {cat !== "Alles" && (
-                  <span
-                    className={`text-xs ${
-                      isActive ? "opacity-90" : "opacity-60"
-                    }`}
-                  >
-                    {count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+                  {cat !== "Alles" && (
+                    <span
+                      className={`text-xs ${
+                        isActive ? "opacity-90" : "opacity-60"
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
 
-      {/* 📦 Content */}
-      <div className="px-4 py-4 max-w-4xl mx-auto">
-        {filteredRecipes.length === 0 ? (
-          <div className="bg-white rounded-md p-8 text-center shadow-sm">
-            <p className="text-gray-600 mb-3">Hier staan nog geen recepten</p>
+        {/* 📦 Recipe Grid */}
+        <div className="px-4 py-4 max-w-4xl mx-auto">
+          {filteredRecipes.length === 0 ? (
+            <div className="bg-white rounded-md p-8 text-center shadow-sm">
+              <p className="text-gray-600 mb-3">Hier staan nog geen recepten</p>
 
-            {activeCategory !== "Alles" && (
-              <p className="text-sm text-gray-400">
-                Maak snel je eerste{" "}
-                <span className="font-medium">{activeCategory}</span> recept
-                aan!
-              </p>
-            )}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {filteredRecipes.map((recipe) => (
-              <Link
-                key={recipe.id}
-                href={`/recipe/${recipe.id}`}
-                className="
-                  block
-                  bg-white
-                  rounded-md
-                  overflow-hidden
-                  shadow-[0_2px_8px_rgba(0,0,0,0.04)]
-                  hover:shadow-md
-                  transition
-                "
-              >
-                {recipe.image_url ? (
-                  <div className="h-40 w-full">
-                    <img
-                      src={recipe.image_url}
-                      alt={recipe.title}
-                      className="w-full h-full object-cover"
-                    />
+              {activeCategory !== "Alles" && (
+                <p className="text-sm text-gray-400">
+                  Maak snel je eerste{" "}
+                  <span className="font-medium">{activeCategory}</span> recept
+                  aan!
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {filteredRecipes.map((recipe) => (
+                <Link
+                  key={recipe.id}
+                  href={`/recipe/${recipe.id}`}
+                  className="
+                    block
+                    bg-white
+                    rounded-md
+                    overflow-hidden
+                    shadow-[0_2px_8px_rgba(0,0,0,0.04)]
+                    hover:shadow-md
+                    transition
+                  "
+                >
+                  {recipe.image_url ? (
+                    <div className="h-40 w-full">
+                      <img
+                        src={recipe.image_url}
+                        alt={recipe.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="h-40 bg-gray-200 w-full" />
+                  )}
+
+                  <div className="p-4 space-y-2">
+                    <p className="text-xs text-gray-400">
+                      {new Date(recipe.created_at).toLocaleDateString("nl-NL")}
+                    </p>
+
+                    <h2 className="text-xl font-semibold text-black leading-tight">
+                      {recipe.title}
+                    </h2>
+
+                    <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                      {recipe.cooking_time && (
+                        <div className="flex items-center gap-1">
+                          <Icon
+                            icon={ClockIcon}
+                            size={16}
+                            className="text-gray-500"
+                          />
+                          <span>{recipe.cooking_time} min</span>
+                        </div>
+                      )}
+
+                      {recipe.servings && (
+                        <div className="flex items-center gap-1">
+                          <Icon
+                            icon={UserIcon}
+                            size={16}
+                            className="text-gray-500"
+                          />
+                          <span>{recipe.servings} personen</span>
+                        </div>
+                      )}
+
+                      {recipe.category && (
+                        <span className="px-2 py-1 bg-gray-100 rounded-md capitalize">
+                          {recipe.category}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                ) : (
-                  <div className="h-40 bg-gray-200 w-full" />
-                )}
-
-                <div className="p-4 space-y-2">
-                  <p className="text-xs text-gray-400">
-                    {new Date(recipe.created_at).toLocaleDateString("nl-NL")}
-                  </p>
-
-                  <h2 className="text-xl font-semibold text-black leading-tight">
-                    {recipe.title}
-                  </h2>
-
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
-                    {recipe.cooking_time && (
-                      <div className="flex items-center gap-1">
-                        <Icon
-                          icon={ClockIcon}
-                          size={16}
-                          className="text-gray-500"
-                        />
-                        <span>{recipe.cooking_time} min</span>
-                      </div>
-                    )}
-
-                    {recipe.servings && (
-                      <div className="flex items-center gap-1">
-                        <Icon
-                          icon={UserIcon}
-                          size={16}
-                          className="text-gray-500"
-                        />
-                        <span>{recipe.servings} personen</span>
-                      </div>
-                    )}
-
-                    {recipe.category && (
-                      <span className="px-2 py-1 bg-gray-100 rounded-md capitalize">
-                        {recipe.category}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
 
       {/* ➕ Floating Action Button */}
       <Link
@@ -239,6 +242,6 @@ export default function Home() {
       >
         +
       </Link>
-    </main>
+    </>
   );
 }
