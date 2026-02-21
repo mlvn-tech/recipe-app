@@ -29,7 +29,7 @@ export default function RootLayout({
     ${geistSans.variable} 
     ${geistMono.variable} 
     antialiased 
-    bg-[var(--color-brand)]
+    bg-[var(--color-bg)]
     text-[#171717]
   `}
       >
