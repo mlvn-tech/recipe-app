@@ -140,7 +140,7 @@ export default function Home() {
       {/* 📦 Content */}
       <div className="px-4 py-4 max-w-4xl mx-auto">
         {filteredRecipes.length === 0 ? (
-          <div className="bg-white rounded-2xl p-8 text-center shadow-sm">
+          <div className="bg-white rounded-md p-8 text-center shadow-sm">
             <p className="text-gray-600 mb-3">Hier staan nog geen recepten</p>
 
             {activeCategory !== "Alles" && (
@@ -160,7 +160,7 @@ export default function Home() {
                 className="
                   block
                   bg-white
-                  rounded-2xl
+                  rounded-md
                   overflow-hidden
                   shadow-[0_2px_8px_rgba(0,0,0,0.04)]
                   hover:shadow-md

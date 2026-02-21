@@ -11,6 +11,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Icon from "@/components/icons";
 import Header from "@/components/Header";
+import Card from "@/components/Card";
 
 export default function RecipeDetail() {
   const params = useParams();
@@ -169,7 +170,7 @@ export default function RecipeDetail() {
       )}
 
       {/* Content */}
-      <div className="px-4 pt-4 pb-16 space-y-6">
+      <div className="px-4 pt-4 pb-16 space-y-4">
         {/* Titel + meta */}
         <div>
           <p className="text-xs text-gray-400 tracking-wide py-2">
@@ -199,7 +200,7 @@ export default function RecipeDetail() {
             )}
 
             {recipe.category && (
-              <span className="px-3 py-1 border border-gray-300 rounded-full capitalize">
+              <span className="px-3 py-1 border border-gray-300 rounded-md capitalize">
                 {recipe.category}
               </span>
             )}
@@ -207,9 +208,8 @@ export default function RecipeDetail() {
         </div>
 
         {/* Ingrediënten kaart */}
-        <div className="bg-white rounded-2xl shadow-sm p-6">
+        <Card>
           <h2 className="font-semibold mb-4 text-lg">Ingrediënten</h2>
-
           <ul className="list-disc pl-5 space-y-2">
             {recipe.ingredients?.map((item: string, index: number) => (
               <li key={index}>{item}</li>
@@ -217,12 +217,11 @@ export default function RecipeDetail() {
           </ul>
 
           <div ref={ingredientsEndRef} className="h-1" />
-        </div>
+        </Card>
 
         {/* Bereiding kaart */}
-        <div className="bg-white rounded-2xl shadow-sm p-6">
+        <Card>
           <h2 className="font-semibold mb-4 text-lg">Bereiding</h2>
-
           <ol className="list-decimal pl-5">
             {recipe.steps?.map((step: string, index: number) => (
               <li
@@ -233,14 +232,14 @@ export default function RecipeDetail() {
               </li>
             ))}
           </ol>
-        </div>
+        </Card>
 
         {/* Notities kaart */}
         {recipe.notes && (
-          <div className="bg-white rounded-2xl shadow-sm p-6">
+          <Card>
             <h2 className="font-semibold mb-4 text-lg">Notities</h2>
             <p className="whitespace-pre-line">{recipe.notes}</p>
-          </div>
+          </Card>
         )}
       </div>
     </main>
