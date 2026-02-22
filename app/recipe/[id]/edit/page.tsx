@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import Icon from "@/components/icons";
 import { toast } from "sonner";
+import Card from "@/components/Card";
 
 export default function EditRecipe() {
   const params = useParams();
@@ -65,9 +66,7 @@ export default function EditRecipe() {
         .eq("id", id)
         .single();
 
-      if (data?.image_url) {
-        setImagePreview(data.image_url);
-      }
+      if (data?.image_url) setImagePreview(data.image_url);
 
       if (data) {
         setTitle(data.title || "");
@@ -172,9 +171,10 @@ export default function EditRecipe() {
       onClick={handleUpdate}
       className={`
         bg-[var(--color-accent)]
+        border border-[var(--color-accent)]
         text-white
         py-3
-        rounded-md
+        rounded-xl
         shadow-lg
         text-sm
         font-semibold
@@ -196,14 +196,14 @@ export default function EditRecipe() {
       <Header title="Recept bewerken" onBack={() => router.back()} />
       <main className="min-h-screen bg-[var(--color-bg)] pt-20 pb-16">
         <div className="px-4 max-w-4xl mx-auto space-y-4">
-          <div className="bg-white rounded-md p-5 shadow-sm">
+          {/* Afbeelding */}
+          <Card className="p-5">
             <label className="text-sm text-gray-500 block mb-3">
               Afbeelding <span className="text-gray-400">(optioneel)</span>
             </label>
-
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="relative h-56 rounded-md overflow-hidden cursor-pointer group"
+              className="relative h-56 rounded-xl overflow-hidden cursor-pointer group"
             >
               {imagePreview ? (
                 <>
@@ -225,7 +225,6 @@ export default function EditRecipe() {
                 </div>
               )}
             </div>
-
             <input
               ref={fileInputRef}
               type="file"
@@ -239,27 +238,27 @@ export default function EditRecipe() {
                 }
               }}
             />
-          </div>
+          </Card>
 
           {/* Titel */}
-          <div className="bg-white rounded-md p-5 shadow-sm">
+          <Card className="p-5">
             <label className="text-sm text-gray-500 block mb-2">Titel</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="
-                w-full border border-gray-200 rounded-md p-3
+                w-full border border-gray-200 rounded-xl p-3
                 bg-gray-50 text-[color:var(--color-text)]
                 placeholder:text-gray-400
                 focus:outline-none focus:border-gray-300 focus:bg-gray-50
                 transition-colors
               "
             />
-          </div>
+          </Card>
 
           {/* Meta */}
-          <div className="bg-white rounded-md p-5 shadow-sm space-y-4">
+          <Card className="p-5 space-y-4">
             <div>
               <label className="text-sm text-gray-500 block mb-2">
                 Aantal personen
@@ -273,7 +272,7 @@ export default function EditRecipe() {
                   setServings(e.target.value ? Number(e.target.value) : null)
                 }
                 className="
-                  w-full border border-gray-200 rounded-md p-3
+                  w-full border border-gray-200 rounded-xl p-3
                   bg-gray-50 text-[color:var(--color-text)]
                   focus:outline-none focus:border-gray-300 focus:bg-gray-50
                   transition-colors
@@ -294,7 +293,7 @@ export default function EditRecipe() {
                   setCookingTime(e.target.value ? Number(e.target.value) : null)
                 }
                 className="
-                  w-full border border-gray-200 rounded-md p-3
+                  w-full border border-gray-200 rounded-xl p-3
                   bg-gray-50 text-[color:var(--color-text)]
                   focus:outline-none focus:border-gray-300 focus:bg-gray-50
                   transition-colors
@@ -302,17 +301,16 @@ export default function EditRecipe() {
               />
             </div>
 
-            {/* Custom Dropdown */}
+            {/* Dropdown */}
             <div ref={categoryRef} className="relative">
               <label className="text-sm text-gray-500 block mb-2">
                 Categorie
               </label>
-
               <button
                 type="button"
                 onClick={() => setCategoryOpen(!categoryOpen)}
                 className="
-                  w-full border border-gray-200 rounded-md p-3
+                  w-full border border-gray-200 rounded-xl p-3
                   bg-gray-50 flex justify-between items-center
                   focus:outline-none
                 "
@@ -333,7 +331,7 @@ export default function EditRecipe() {
               <div
                 className={`
                   absolute left-0 right-0 top-full mt-2
-                  bg-white rounded-md shadow-lg overflow-hidden z-50
+                  bg-white rounded-xl shadow-lg overflow-hidden z-50
                   transition-all duration-200 ease-out origin-top
                   ${
                     categoryOpen
@@ -362,10 +360,10 @@ export default function EditRecipe() {
                 </div>
               </div>
             </div>
-          </div>
+          </Card>
 
           {/* Ingrediënten */}
-          <div className="bg-white rounded-md p-5 shadow-sm">
+          <Card className="p-5">
             <label className="text-sm text-gray-500 block mb-2">
               Ingrediënten (één per regel)
             </label>
@@ -373,16 +371,16 @@ export default function EditRecipe() {
               value={ingredients}
               onChange={(e) => setIngredients(e.target.value)}
               className="
-                w-full border border-gray-200 rounded-md p-3
+                w-full border border-gray-200 rounded-xl p-3
                 bg-gray-50 focus:outline-none
                 focus:border-gray-300 focus:bg-gray-50
                 transition-colors min-h-[280px]
               "
             />
-          </div>
+          </Card>
 
           {/* Bereiding */}
-          <div className="bg-white rounded-md p-5 shadow-sm">
+          <Card className="p-5">
             <label className="text-sm text-gray-500 block mb-2">
               Bereiding
             </label>
@@ -390,28 +388,28 @@ export default function EditRecipe() {
               value={steps}
               onChange={(e) => setSteps(e.target.value)}
               className="
-                w-full border border-gray-200 rounded-md p-3
+                w-full border border-gray-200 rounded-xl p-3
                 bg-gray-50 focus:outline-none
                 focus:border-gray-300 focus:bg-gray-50
                 transition-colors min-h-[280px]
               "
             />
-          </div>
+          </Card>
 
           {/* Notities */}
-          <div className="bg-white rounded-md p-5 shadow-sm">
+          <Card className="p-5">
             <label className="text-sm text-gray-500 block mb-2">Notities</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="
-                w-full border border-gray-200 rounded-md p-3
+                w-full border border-gray-200 rounded-xl p-3
                 bg-gray-50 focus:outline-none
                 focus:border-gray-300 focus:bg-gray-50
                 transition-colors min-h-30
               "
             />
-          </div>
+          </Card>
 
           {/* Onderste sectie: opslaan + verwijderen */}
           <div ref={deleteRef} className="mt-6 space-y-3">
@@ -431,7 +429,7 @@ export default function EditRecipe() {
                 border-2 border-red-300
                 text-red-600
                 py-3
-                rounded-md
+                rounded-xl
                 text-sm
                 font-semibold
                 transition

@@ -10,6 +10,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Icon from "@/components/icons";
 import Link from "next/link";
+import Card from "@/components/Card";
 
 export default function Home() {
   const [recipes, setRecipes] = useState<any[]>([]);
@@ -82,7 +83,7 @@ export default function Home() {
               onChange={(e) => setSearch(e.target.value)}
               className="
                 w-full
-                rounded-md
+                rounded-full
                 bg-white/90
                 py-2
                 pl-4
@@ -125,7 +126,7 @@ export default function Home() {
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
                   className={`
-                    px-4 py-2 rounded-md text-sm whitespace-nowrap
+                    px-4 py-2 rounded-xl text-sm whitespace-nowrap
                     border transition-colors duration-200
                     flex items-center gap-2
                     ${
@@ -168,14 +169,14 @@ export default function Home() {
                     key={i}
                     className="
             bg-white
-            rounded-md
+            rounded-xl
             overflow-hidden
             p-4
             animate-pulse
             shadow-[0_2px_8px_rgba(0,0,0,0.04)]
           "
                   >
-                    <div className="h-40 bg-gray-200 rounded-md mb-4" />
+                    <div className="h-40 bg-gray-200 rounded-xl mb-4" />
                     <div className="h-4 bg-gray-200 rounded w-2/3 mb-3" />
                     <div className="h-3 bg-gray-200 rounded w-1/2" />
                   </div>
@@ -192,11 +193,10 @@ export default function Home() {
     `}
           >
             {filteredRecipes.length === 0 ? (
-              <div className="bg-white rounded-md p-8 text-center shadow-sm">
+              <Card className="text-center">
                 <p className="text-gray-600 mb-3">
                   Hier staan nog geen recepten
                 </p>
-
                 {activeCategory !== "Alles" && (
                   <p className="text-sm text-gray-400">
                     Maak snel je eerste{" "}
@@ -204,79 +204,72 @@ export default function Home() {
                     aan!
                   </p>
                 )}
-              </div>
+              </Card>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {filteredRecipes.map((recipe) => (
                   <Link
                     key={recipe.id}
                     href={`/recipe/${recipe.id}`}
-                    className="
-              block
-              bg-white
-              rounded-md
-              overflow-hidden
-              shadow-[0_2px_8px_rgba(0,0,0,0.04)]
-              hover:shadow-md
-              transition
-            "
+                    className="block hover:shadow-md transition shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-xl"
                   >
-                    {recipe.image_url ? (
-                      <div className="h-40 w-full">
-                        <img
-                          src={recipe.image_url}
-                          alt={recipe.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="h-40 bg-gray-200 w-full" />
-                    )}
+                    <Card overflow>
+                      {recipe.image_url ? (
+                        <div className="h-40 w-full">
+                          <img
+                            src={recipe.image_url}
+                            alt={recipe.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-40 bg-gray-200 w-full" />
+                      )}
+                      <div className="p-4 space-y-2">
+                        <p className="text-xs text-gray-400">
+                          {new Date(recipe.created_at).toLocaleDateString(
+                            "nl-NL",
+                          )}
+                        </p>
 
-                    <div className="p-4 space-y-2">
-                      <p className="text-xs text-gray-400">
-                        {new Date(recipe.created_at).toLocaleDateString(
-                          "nl-NL",
-                        )}
-                      </p>
+                        <h2 className="text-xl font-semibold leading-tight">
+                          {recipe.title}
+                        </h2>
 
-                      <h2 className="text-xl font-semibold leading-tight">
-                        {recipe.title}
-                      </h2>
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                          {recipe.cooking_time && (
+                            <div className="flex items-center gap-1">
+                              <Icon
+                                icon={ClockIcon}
+                                size={16}
+                                className="text-gray-500"
+                              />
+                              <span>{recipe.cooking_time} min</span>
+                            </div>
+                          )}
 
-                      <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
-                        {recipe.cooking_time && (
-                          <div className="flex items-center gap-1">
-                            <Icon
-                              icon={ClockIcon}
-                              size={16}
-                              className="text-gray-500"
-                            />
-                            <span>{recipe.cooking_time} min</span>
-                          </div>
-                        )}
+                          {recipe.servings && (
+                            <div className="flex items-center gap-1">
+                              <Icon
+                                icon={UserIcon}
+                                size={16}
+                                className="text-gray-500"
+                              />
+                              <span>
+                                {recipe.servings}{" "}
+                                {recipe.servings === 1 ? "persoon" : "personen"}
+                              </span>
+                            </div>
+                          )}
 
-                        {recipe.servings && (
-                          <div className="flex items-center gap-1">
-                            <Icon
-                              icon={UserIcon}
-                              size={16}
-                              className="text-gray-500"
-                            />
-                            <span>
-                              {recipe.servings}{" "}
-                              {recipe.servings === 1 ? "persoon" : "personen"}
+                          {recipe.category && (
+                            <span className="px-2 py-1 bg-gray-100 rounded-lg capitalize">
+                              {recipe.category}
                             </span>
-                          </div>
-                        )}
-
-                        {recipe.category && (
-                          <span className="px-2 py-1 bg-gray-100 rounded-md capitalize">
-                            {recipe.category}
-                          </span>
-                        )}
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    </Card>
                   </Link>
                 ))}
               </div>
@@ -284,26 +277,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-
-      {/* ➕ Floating Button
-      <Link
-        href="/new"
-        className="
-          fixed
-          bottom-12
-          left-1/2
-          -translate-x-1/2
-          w-11 h-11
-          bg-[var(--color-accent)]
-          rounded-md
-          flex items-center justify-center
-          shadow-md
-          active:scale-95
-          transition
-        "
-      >
-        <Icon icon={PlusIcon} size={24} className="text-white" />
-      </Link> */}
     </>
   );
 }

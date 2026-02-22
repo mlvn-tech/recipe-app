@@ -122,7 +122,7 @@ export default function RecipeDetail() {
           }
         `}
       >
-        <div className="bg-white/70 backdrop-blur-lg rounded-b-md border border-white/40 shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
+        <div className="bg-white/70 backdrop-blur-lg rounded-b-xl border border-white/40 shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
           <button
             onClick={() => setIngredientsOpen(!ingredientsOpen)}
             className="w-full px-4 py-3 flex justify-between font-semibold"
@@ -174,7 +174,7 @@ export default function RecipeDetail() {
       )}
 
       {/* Content */}
-      <div className="px-4 pt-4 pb-16 space-y-4">
+      <div className="px-4 pt-4 pb-16 space-y-4 rounded-xl">
         {/* Titel + meta */}
         <div>
           <p className="text-xs text-gray-400 tracking-wide py-2">
@@ -204,7 +204,7 @@ export default function RecipeDetail() {
             )}
 
             {recipe.category && (
-              <span className="px-3 py-1 border border-gray-300 rounded-md capitalize">
+              <span className="px-3 py-1 border border-gray-300 rounded-lg capitalize">
                 {recipe.category}
               </span>
             )}
@@ -217,7 +217,7 @@ export default function RecipeDetail() {
           <ul className="space-y-3">
             {recipe.ingredients?.map((item: string, index: number) => (
               <li key={index} className="flex items-start gap-3">
-                <span className="mt-2.5 h-1.5 w-1.5 rounded-full bg-gray-400 shrink-0" />
+                <span className="mt-2.5 h-1.5 w-1.5 rounded-xl bg-gray-400 shrink-0" />
                 <span>{item}</span>
               </li>
             ))}

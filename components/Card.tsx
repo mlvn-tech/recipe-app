@@ -3,16 +3,21 @@ import { ReactNode } from "react";
 type CardProps = {
   children: ReactNode;
   className?: string;
+  overflow?: boolean;
 };
 
-export default function Card({ children, className = "" }: CardProps) {
+export default function Card({
+  children,
+  className = "",
+  overflow = false,
+}: CardProps) {
   return (
     <div
       className={`
         bg-white
-        rounded-md
+        rounded-xl
         shadow-sm
-        p-6
+        ${overflow ? "overflow-hidden p-0" : "p-6"}
         ${className}
       `}
     >
