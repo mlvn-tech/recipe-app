@@ -98,7 +98,7 @@ export default function RecipeDetail() {
   );
 
   return (
-    <main className="min-h-screen bg-[var(--color-bg)]">
+    <main className="min-h-screen bg-[var(--color-bg)] pb-24">
       {/* Header */}
       <Header
         title={headerTitle}
@@ -148,9 +148,12 @@ export default function RecipeDetail() {
           >
             <div className="overflow-hidden">
               <div className="px-6 pb-6 pt-2">
-                <ul className="list-disc pl-5 space-y-2">
+                <ul className="space-y-3">
                   {recipe.ingredients?.map((item: string, index: number) => (
-                    <li key={index}>{item}</li>
+                    <li key={index} className="flex items-start gap-3">
+                      <span className="mt-2.5 h-1.5 w-1.5 rounded-full bg-gray-400 shrink-0" />
+                      <span>{item}</span>
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -211,9 +214,12 @@ export default function RecipeDetail() {
         {/* Ingrediënten kaart */}
         <Card>
           <h2 className="font-semibold mb-4 text-lg">Ingrediënten</h2>
-          <ul className="list-disc pl-5 space-y-2">
+          <ul className="space-y-3">
             {recipe.ingredients?.map((item: string, index: number) => (
-              <li key={index}>{item}</li>
+              <li key={index} className="flex items-start gap-3">
+                <span className="mt-2.5 h-1.5 w-1.5 rounded-full bg-gray-400 shrink-0" />
+                <span>{item}</span>
+              </li>
             ))}
           </ul>
 
@@ -223,13 +229,16 @@ export default function RecipeDetail() {
         {/* Bereiding kaart */}
         <Card>
           <h2 className="font-semibold mb-4 text-lg">Bereiding</h2>
-          <ol className="list-decimal pl-5">
+          <ol className="space-y-0">
             {recipe.steps?.map((step: string, index: number) => (
               <li
                 key={index}
-                className="py-4 border-b border-gray-100 last:border-none"
+                className="flex gap-1 py-4 border-b border-gray-100 last:border-none"
               >
-                {step}
+                <span className="text-gray-400 font-semibold min-w-[24px]">
+                  {index + 1}.
+                </span>
+                <span>{step}</span>
               </li>
             ))}
           </ol>

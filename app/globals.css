@@ -7,8 +7,8 @@
 
 @theme {
   --color-bg: #F8F8F8;
-  --color-brand: #28ada0;
-  --color-accent: #EFA30A;
+  --color-brand: #EFA30A;
+  --color-accent: #28ada0;
   --color-danger: #ef4444;
 }
 
@@ -72,5 +72,11 @@ select {
 
 @keyframes fade-in {
   from { opacity: 0; }
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }
 

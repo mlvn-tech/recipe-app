@@ -158,7 +158,7 @@ export default function NewRecipe() {
     <>
       <Header title="Nieuw recept" />
 
-      <main className="min-h-screen bg-[var(--color-bg)] pt-20 pb-32">
+      <main className="min-h-screen bg-[var(--color-bg)] pt-20">
         <div className="px-4 max-w-4xl mx-auto space-y-4">
           {/* 🖼 Afbeelding */}
           <div className="bg-white rounded-md p-5 shadow-sm">

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { ViewTransitions } from "next-view-transitions";
+import AppShell from "@/components/AppShell";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,6 +14,12 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: "Recepten",
@@ -46,7 +53,7 @@ export default function RootLayout({
     text-[#171717]
   `}
         >
-          {children}
+          <AppShell>{children}</AppShell>
           <Toaster position="bottom-center" richColors />
         </body>
       </html>

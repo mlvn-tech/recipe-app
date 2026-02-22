@@ -72,7 +72,11 @@ export default function EditRecipe() {
       if (data) {
         setTitle(data.title || "");
         setIngredients((data.ingredients || []).join("\n"));
-        setSteps((data.steps || []).join("\n"));
+        setSteps(
+          (data.steps || [])
+            .map((step: string, index: number) => `${index + 1}. ${step}`)
+            .join("\n"),
+        );
         setCategory(data.category || "");
         setCookingTime(data.cooking_time);
         setNotes(data.notes || "");

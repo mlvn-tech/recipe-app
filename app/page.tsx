@@ -112,7 +112,7 @@ export default function Home() {
       </div>
 
       {/* 📦 Page Content */}
-      <main className="min-h-dvh bg-[var(--color-bg)] pt-20">
+      <main className="min-h-dvh bg-[var(--color-bg)] pt-20 pb-24">
         {/* 🏷️ Filters */}
         <div className="pt-4 pb-4">
           <div className="flex gap-3 overflow-x-auto px-4 max-w-4xl mx-auto no-scrollbar">
@@ -285,7 +285,7 @@ export default function Home() {
         </div>
       </main>
 
-      {/* ➕ Floating Button */}
+      {/* ➕ Floating Button
       <Link
         href="/new"
         className="
@@ -303,7 +303,7 @@ export default function Home() {
         "
       >
         <Icon icon={PlusIcon} size={24} className="text-white" />
-      </Link>
+      </Link> */}
     </>
   );
 }
