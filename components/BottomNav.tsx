@@ -59,7 +59,7 @@ export default function BottomNav() {
                 onClick={() => router.push(item.href)}
                 className="
                   flex items-center justify-center
-                  bg-[var(--color-brand)]
+                  bg-[var(--color-accent)]
                   rounded-md
                   w-8 h-8
                   active:scale-95
