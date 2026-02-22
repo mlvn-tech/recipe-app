@@ -43,11 +43,11 @@ export default function BottomNav() {
         fixed bottom-0 left-0 w-full
         backdrop-blur-xl bg-white/70
         border-t border-gray-200
-        z-40
+        z-50
         pb-safe
       "
     >
-      <div className="max-w-4xl mx-auto flex justify-around py-4">
+      <div className="max-w-4xl mx-auto flex justify-around py-3">
         {items.map((item) => {
           const isActive = pathname === item.href;
           const IconComponent = isActive ? item.iconActive : item.icon;
@@ -59,8 +59,8 @@ export default function BottomNav() {
                 onClick={() => router.push(item.href)}
                 className="
                   flex items-center justify-center
-                  bg-[var(--color-accent)]
-                  rounded-md
+                  bg-[var(--color-accent)]/80
+                  rounded-lg
                   w-8 h-8
                   active:scale-95
                   transition

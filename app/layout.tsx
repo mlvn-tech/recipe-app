@@ -54,7 +54,14 @@ export default function RootLayout({
   `}
         >
           <AppShell>{children}</AppShell>
-          <Toaster position="bottom-center" richColors />
+          <Toaster
+            richColors
+            toastOptions={{
+              style: {
+                zIndex: 30,
+              },
+            }}
+          />
         </body>
       </html>
     </ViewTransitions>

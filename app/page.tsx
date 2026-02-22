@@ -72,9 +72,9 @@ export default function Home() {
 
   return (
     <>
-      {/* 🔝 Fixed Header */}
-      <div className="fixed top-0 left-0 w-full bg-[var(--color-brand)] z-50">
-        <div className="max-w-4xl mx-auto px-4 py-4 h-full flex items-center">
+      {/* 🔝 Search Header */}
+      <div className="fixed top-0 left-0 w-full bg-[var(--color-brand)] z-50 shadow-[0_1px_6px_rgba(0,0,0,0.05)]">
+        <div className="max-w-4xl mx-auto px-4 h-16 flex items-center">
           <div className="relative group w-full">
             <input
               type="text"
@@ -82,19 +82,19 @@ export default function Home() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="
-                w-full
-                rounded-full
-                bg-white/90
-                py-2
-                pl-4
-                pr-10
-                text-base
-                text-gray-800
-                placeholder:text-gray-400
-                focus:outline-none
-                focus:bg-white
-                transition
-              "
+          w-full
+          rounded-full
+          bg-white/90
+          py-2
+          pl-4
+          pr-10
+          text-base
+          text-gray-800
+          placeholder:text-gray-400
+          focus:outline-none
+          focus:bg-white
+          transition
+        "
             />
 
             <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -102,10 +102,10 @@ export default function Home() {
                 icon={MagnifyingGlassIcon}
                 size={18}
                 className="
-                  text-gray-400
-                  transition-colors duration-200
-                  group-focus-within:text-[var(--color-accent)]
-                "
+            text-gray-400
+            transition-colors duration-200
+            group-focus-within:text-[var(--color-accent)]
+          "
               />
             </div>
           </div>
@@ -113,7 +113,7 @@ export default function Home() {
       </div>
 
       {/* 📦 Page Content */}
-      <main className="min-h-dvh bg-[var(--color-bg)] pt-20 pb-24">
+      <main className="min-h-dvh bg-[var(--color-bg)] pt-16 pb-24">
         {/* 🏷️ Filters */}
         <div className="pt-4 pb-4">
           <div className="flex gap-3 overflow-x-auto px-4 max-w-4xl mx-auto no-scrollbar">
@@ -159,22 +159,26 @@ export default function Home() {
             {/* 💀 Skeleton */}
             <div
               className={`
-    transition-all duration-300 ease-out
-    ${loading ? "opacity-100 translate-y-0 relative" : "opacity-0 -translate-y-2 pointer-events-none hidden"}
-  `}
+                transition-all duration-300 ease-out
+                ${
+                  loading
+                    ? "opacity-100 translate-y-0 relative"
+                    : "opacity-0 -translate-y-2 pointer-events-none hidden"
+                }
+              `}
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[...Array(4)].map((_, i) => (
                   <div
                     key={i}
                     className="
-            bg-white
-            rounded-xl
-            overflow-hidden
-            p-4
-            animate-pulse
-            shadow-[0_2px_8px_rgba(0,0,0,0.04)]
-          "
+                      bg-white
+                      rounded-xl
+                      overflow-hidden
+                      p-4
+                      animate-pulse
+                      shadow-[0_2px_8px_rgba(0,0,0,0.04)]
+                    "
                   >
                     <div className="h-40 bg-gray-200 rounded-xl mb-4" />
                     <div className="h-4 bg-gray-200 rounded w-2/3 mb-3" />
@@ -188,9 +192,13 @@ export default function Home() {
           {/* 🍽️ Echte content */}
           <div
             className={`
-      transition-all duration-300 ease-out
-      ${!loading ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"}
-    `}
+              transition-all duration-300 ease-out
+              ${
+                !loading
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-2 pointer-events-none"
+              }
+            `}
           >
             {filteredRecipes.length === 0 ? (
               <Card className="text-center">

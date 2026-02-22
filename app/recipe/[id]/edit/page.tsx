@@ -133,6 +133,7 @@ export default function EditRecipe() {
       const { data } = supabase.storage
         .from("recipe-images")
         .getPublicUrl(fileName);
+
       imageUrl = data.publicUrl;
     }
 
@@ -170,13 +171,13 @@ export default function EditRecipe() {
     <button
       onClick={handleUpdate}
       className={`
-        bg-[var(--color-accent)]
-        border border-[var(--color-accent)]
+        bg-[var(--color-accent)]/80
+        border border-[var(--color-accent)]/80
         text-white
-        py-3
-        rounded-xl
+        py-4
+        rounded-2xl
         shadow-lg
-        text-sm
+        text-md
         font-semibold
         active:scale-95
         transition
@@ -194,6 +195,7 @@ export default function EditRecipe() {
   return (
     <>
       <Header title="Recept bewerken" onBack={() => router.back()} />
+
       <main className="min-h-screen bg-[var(--color-bg)] pt-20 pb-16">
         <div className="px-4 max-w-4xl mx-auto space-y-4">
           {/* Afbeelding */}
@@ -239,6 +241,8 @@ export default function EditRecipe() {
               }}
             />
           </Card>
+
+          {/* Rest van je pagina blijft exact hetzelfde */}
 
           {/* Titel */}
           <Card className="p-5">
@@ -427,13 +431,12 @@ export default function EditRecipe() {
               className="
                 w-full
                 border-2 border-red-300
-                text-red-600
-                py-3
-                rounded-xl
-                text-sm
+                bg-red-50
+                text-red-500
+                py-4
+                rounded-2xl
+                text-md
                 font-semibold
-                transition
-                hover:bg-red-50
               "
             >
               Verwijderen
