@@ -175,7 +175,7 @@ export default function EditRecipe() {
         border border-[var(--color-accent)]/80
         text-white
         py-4
-        rounded-2xl
+        rounded-full
         shadow-lg
         text-md
         font-semibold
@@ -434,7 +434,7 @@ export default function EditRecipe() {
                 bg-red-50
                 text-red-500
                 py-4
-                rounded-2xl
+                rounded-full
                 text-md
                 font-semibold
               "

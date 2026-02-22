@@ -283,7 +283,7 @@ export default function NewRecipe() {
       <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-50">
         <button
           onClick={handleSubmit}
-          className="bg-[var(--color-accent)]/80 text-white px-8 py-3 rounded-2xl shadow-lg text-md font-semibold active:scale-95 transition"
+          className="bg-[var(--color-accent)]/80 text-white px-8 py-3 rounded-full shadow-lg text-md font-semibold active:scale-95 transition"
         >
           Opslaan
         </button>
