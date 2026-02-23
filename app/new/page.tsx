@@ -31,12 +31,12 @@ export default function NewRecipe() {
 
   const handleSubmit = async () => {
     if (
-      !title ||
-      !ingredients ||
-      !steps ||
-      !category ||
-      !cookingTime ||
-      !servings
+      title.trim() === "" ||
+      ingredients.trim() === "" ||
+      steps.trim() === "" ||
+      category.trim() === "" ||
+      cookingTime === null ||
+      servings === null
     ) {
       toast.error("Oeps, het recept is niet compleet");
       return;
@@ -66,7 +66,7 @@ export default function NewRecipe() {
 
     const cleanedIngredients = ingredients
       .split("\n")
-      .map((item) => item.trim())
+      .map((line) => line.trim())
       .filter(Boolean);
 
     const cleanedSteps = steps
@@ -91,10 +91,14 @@ export default function NewRecipe() {
       .select()
       .single();
 
-    if (!error && data) {
-      toast.success("Recept aangemaakt");
-      router.replace(`/recipe/${data.id}`);
+    if (error) {
+      console.error(error);
+      toast.error("Er ging iets mis bij opslaan");
+      return;
     }
+
+    toast.success("Recept aangemaakt");
+    router.replace(`/recipe/${data.id}`);
   };
 
   useEffect(() => {
@@ -111,41 +115,6 @@ export default function NewRecipe() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ✅ Veilige dirty-check zonder extra state
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      const isDirty =
-        title ||
-        ingredients ||
-        steps ||
-        category ||
-        cookingTime ||
-        servings ||
-        notes ||
-        imageFile;
-
-      if (!isDirty) return;
-
-      e.preventDefault();
-      e.returnValue = "";
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [
-    title,
-    ingredients,
-    steps,
-    category,
-    cookingTime,
-    servings,
-    notes,
-    imageFile,
-  ]);
-
   return (
     <>
       <Header title="Nieuw recept" onBack={() => router.back()} />
@@ -157,7 +126,6 @@ export default function NewRecipe() {
             <label className="text-sm text-gray-500 block mb-3">
               Afbeelding <span className="text-gray-400">(optioneel)</span>
             </label>
-
             <div
               onClick={() => fileInputRef.current?.click()}
               className="relative h-56 rounded-xl overflow-hidden cursor-pointer group"
@@ -182,7 +150,6 @@ export default function NewRecipe() {
                 </div>
               )}
             </div>
-
             <input
               ref={fileInputRef}
               type="file"
@@ -205,12 +172,13 @@ export default function NewRecipe() {
             </label>
             <input
               value={title}
+              maxLength={80}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 focus:outline-none focus:border-gray-300"
             />
           </Card>
 
-          {/* Meta */}
+          {/* Meta + Categorie */}
           <Card className="p-5 space-y-4">
             <div>
               <label className="text-sm text-gray-500 block mb-2">
@@ -238,6 +206,43 @@ export default function NewRecipe() {
                 }
                 className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 focus:outline-none focus:border-gray-300"
               />
+            </div>
+
+            <div ref={categoryRef} className="relative">
+              <label className="text-sm text-gray-500 block mb-2">
+                Categorie <span className="text-red-500">*</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => setCategoryOpen(!categoryOpen)}
+                className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 flex justify-between items-center"
+              >
+                <span className={category ? "" : "text-gray-400"}>
+                  {category || "Selecteer categorie"}
+                </span>
+                <Icon
+                  icon={ChevronDownIcon}
+                  size={20}
+                  className={`transition-transform ${categoryOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {categoryOpen && (
+                <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-xl shadow-lg z-50">
+                  {categories.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => {
+                        setCategory(cat);
+                        setCategoryOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-3 hover:bg-gray-50"
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </Card>
 
@@ -279,11 +284,10 @@ export default function NewRecipe() {
         </div>
       </main>
 
-      {/* Floating Save */}
       <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-50">
         <button
           onClick={handleSubmit}
-          className="bg-[var(--color-accent)]/80 text-white px-8 py-3 rounded-full shadow-lg text-md font-semibold active:scale-95 transition"
+          className="bg-[var(--color-accent)] text-white px-8 py-3 rounded-full shadow-lg font-semibold active:scale-95 transition"
         >
           Opslaan
         </button>

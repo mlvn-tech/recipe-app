@@ -27,14 +27,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Hide horizontal scrollbar */
-.no-scrollbar::-webkit-scrollbar {
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
   display: none;
 }
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+
 
 /* Verwijder native select arrow */
 select {
@@ -80,3 +81,7 @@ select {
   }
 }
 
+.floating-blur {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}

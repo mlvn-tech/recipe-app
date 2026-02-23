@@ -99,7 +99,6 @@ export default function RecipeDetail() {
 
   return (
     <>
-      {/* Header */}
       <Header
         title={headerTitle}
         onBack={() => router.replace("/")}
@@ -152,7 +151,7 @@ export default function RecipeDetail() {
                   <ul className="space-y-3">
                     {recipe.ingredients?.map((item: string, index: number) => (
                       <li key={index} className="flex items-start gap-3">
-                        <span className="mt-2.5 h-1.5 w-1.5 rounded-full bg-gray-400 shrink-0" />
+                        <span className="mt-2.5 h-1.5 w-1.5 rounded-xl bg-gray-400 shrink-0" />
                         <span>{item}</span>
                       </li>
                     ))}
@@ -176,7 +175,6 @@ export default function RecipeDetail() {
 
         {/* Content */}
         <div className="px-4 pt-4 pb-16 space-y-4 rounded-xl">
-          {/* Titel + meta */}
           <div>
             <p className="text-xs text-gray-400 tracking-wide py-2">
               Toegevoegd op {formattedDate}
@@ -245,7 +243,6 @@ export default function RecipeDetail() {
             </ol>
           </Card>
 
-          {/* Notities kaart */}
           {recipe.notes && (
             <Card>
               <h2 className="font-semibold mb-4 text-lg">Notities</h2>
