@@ -10,12 +10,13 @@ import {
   XMarkIcon,
   ChevronDownIcon,
   CheckIcon,
+  ShoppingBagIcon,
 } from "@heroicons/react/24/outline";
 import Icon from "@/components/icons";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ShoppingBagIcon } from "@heroicons/react/24/outline";
+import SearchInput from "@/components/SearchInput";
 
 type ShoppingItem = {
   name: string;
@@ -329,12 +330,12 @@ export default function WeekPage() {
               "w-15 h-15 justify-center",
             )}
           >
-            <Icon icon={ShoppingBagIcon} size={20} className="text-gray-500" />
+            <Icon icon={ShoppingBagIcon} size={24} className="text-gray-500" />
           </button>
 
           {/* Notificatie bubbel */}
           {shoppingCount > 0 && (
-            <div className="absolute -top-1 -right-1 h-6 w-6 bg-[var(--color-accent)] rounded-full flex items-center justify-center">
+            <div className="absolute -top-1 -right-1 h-6 w-6 bg-[var(--color-brand)] rounded-full flex items-center justify-center">
               <span className="text-white text-[12px] font-bold">
                 {shoppingCount}
               </span>
@@ -447,12 +448,10 @@ export default function WeekPage() {
           </div>
 
           <div className="px-6 mb-6 shrink-0">
-            <input
-              type="text"
-              placeholder="Zoek recept"
+            <SearchInput
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="px-5 w-full border border-gray-200 rounded-full p-3 bg-gray-50 focus:outline-none focus:border-gray-300"
+              onChange={setSearch}
+              placeholder="Zoek recept..."
             />
           </div>
 

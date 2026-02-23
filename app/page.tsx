@@ -13,6 +13,7 @@ import {
 import Icon from "@/components/icons";
 import Link from "next/link";
 import Card from "@/components/Card";
+import SearchInput from "@/components/SearchInput";
 
 export default function Home() {
   const [recipes, setRecipes] = useState<any[]>([]);
@@ -78,44 +79,20 @@ export default function Home() {
       <div className="fixed top-0 left-0 w-full bg-[var(--color-brand)] z-50 shadow-[0_1px_6px_rgba(0,0,0,0.05)]">
         <div className="max-w-4xl mx-auto px-4 h-20 flex items-center">
           <div className="relative group w-full">
-            <input
-              type="text"
-              placeholder="Wat gaan we eten?"
+            <SearchInput
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="
-          w-full
-          rounded-full
-          bg-white/90
-          py-3
-          pl-4
-          pr-10
-          text-base
-          text-gray-800
-          placeholder:text-gray-400
-          focus:outline-none
-          focus:bg-white
-          transition
-        "
+              onChange={setSearch}
+              placeholder="Wat gaan we eten?"
             />
-
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <Icon
-                icon={MagnifyingGlassIcon}
-                size={18}
-                className="
-            text-gray-400
-            transition-colors duration-200
-            group-focus-within:text-[var(--color-accent)]
-          "
-              />
-            </div>
           </div>
         </div>
       </div>
 
       {/* 📦 Page Content */}
-      <main className="min-h-dvh bg-[var(--color-bg)] pt-20 pb-24">
+      <main
+        className="min-h-dvh bg-[var(--color-bg)] pt-20 pb-24"
+        style={{ overflowAnchor: "none" }}
+      >
         {/* 🏷️ Filters */}
         <div className="pt-4 pb-4">
           <div className="flex gap-3 overflow-x-auto px-4 max-w-4xl mx-auto no-scrollbar">

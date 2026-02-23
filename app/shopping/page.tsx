@@ -39,7 +39,6 @@ function ShoppingPageContent() {
   const [loading, setLoading] = useState(true);
   const [loadingWeek, setLoadingWeek] = useState(false);
   const [newName, setNewName] = useState("");
-  const [newAmount, setNewAmount] = useState("");
   const [justChecked, setJustChecked] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -114,14 +113,13 @@ function ShoppingPageContent() {
 
     const { data, error } = await supabase
       .from("shopping_list")
-      .insert([{ name: newName.trim(), amount: newAmount.trim() || null }])
+      .insert([{ name: newName.trim(), amount: null }])
       .select()
       .single();
 
     if (!error && data) {
       setItems((prev) => [data, ...prev]);
       setNewName("");
-      setNewAmount("");
     }
   };
 
@@ -153,19 +151,6 @@ function ShoppingPageContent() {
         .from("shopping_list")
         .update({ checked: false })
         .eq("id", item.id);
-    }
-  };
-
-  const updateAmount = async (item: ShoppingItem, amount: string) => {
-    const { error } = await supabase
-      .from("shopping_list")
-      .update({ amount })
-      .eq("id", item.id);
-
-    if (!error) {
-      setItems((prev) =>
-        prev.map((i) => (i.id === item.id ? { ...i, amount } : i)),
-      );
     }
   };
 
@@ -243,28 +228,10 @@ function ShoppingPageContent() {
           )}
 
           <Card className="p-5">
-            <div className="flex gap-2 items-center">
-              <input
-                type="text"
-                placeholder="Voeg item toe..."
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addItem()}
-                className={styles.input.default}
-              />
-              <button
-                onClick={addItem}
-                className="text-gray-400 hover:text-gray-600 transition shrink-0"
-              >
-                <Icon icon={PlusIcon} size={22} />
-              </button>
-            </div>
-          </Card>
-
-          {items.length > 0 && (
-            <Card className="p-5">
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-sm text-gray-800 font-semibold">Te kopen</p>
+            {/* Header met toevoeg-rij */}
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm font-semibold text-gray-800">Te kopen</p>
+              {items.length > 0 && (
                 <button
                   onClick={() => {
                     if (
@@ -279,43 +246,122 @@ function ShoppingPageContent() {
                 >
                   Verwijder alles
                 </button>
-              </div>
+              )}
+            </div>
 
-              <ul className="space-y-3">
-                {visibleUnchecked.map((item) => {
-                  const isJustChecked = justChecked.has(item.id);
-                  return (
+            {/* Toevoeg-rij bovenaan de lijst */}
+            <li className="flex items-center gap-2 pb-3 mb-3 border-b border-gray-100 list-none">
+              <button
+                onClick={addItem}
+                className="h-5 w-5 shrink-0 flex items-center justify-center"
+              >
+                <Icon
+                  icon={PlusIcon}
+                  size={16}
+                  className="text-gray-400 hover:text-gray-500 transition"
+                />
+              </button>
+              <input
+                type="text"
+                placeholder="Voeg item toe..."
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && addItem()}
+                onBlur={() => addItem()}
+                inputMode="text"
+                enterKeyHint="done"
+                className="flex-1 text-sm bg-transparent focus:outline-none placeholder:text-gray-400 min-w-0"
+              />
+            </li>
+
+            {/* Boodschappen lijst */}
+            <ul className="space-y-3">
+              {visibleUnchecked.map((item) => {
+                const isJustChecked = justChecked.has(item.id);
+                return (
+                  <li key={item.id} className="flex items-center gap-2">
+                    <button
+                      onClick={() => toggleChecked(item)}
+                      className={`h-5 w-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-200 ${
+                        isJustChecked
+                          ? "border-[var(--color-accent)] bg-[var(--color-accent)]"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      {isJustChecked && (
+                        <Icon
+                          icon={CheckIcon}
+                          size={12}
+                          className="text-white"
+                        />
+                      )}
+                    </button>
+
+                    <textarea
+                      value={item.name}
+                      onChange={(e) => updateName(item, e.target.value)}
+                      rows={1}
+                      className={`flex-1 text-sm bg-transparent border-b border-transparent focus:outline-none transition-all duration-200 resize-none overflow-hidden min-w-0 ${
+                        isJustChecked ? "text-gray-400 line-through" : ""
+                      }`}
+                      onInput={(e) => {
+                        const el = e.target as HTMLTextAreaElement;
+                        el.style.height = "auto";
+                        el.style.height = el.scrollHeight + "px";
+                      }}
+                    />
+
+                    <button
+                      onClick={() => deleteItem(item.id)}
+                      className="text-gray-300 hover:text-red-400 transition shrink-0"
+                    >
+                      <Icon icon={TrashIcon} size={16} />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+
+            {/* Afgevinkte items */}
+            {checkedItems.length > 0 && (
+              <>
+                <div className="flex items-center justify-between mt-6 mb-3 pt-6 border-t border-gray-100">
+                  <p className="text-sm text-gray-400 font-semibold">
+                    Afgevinkte boodschappen
+                  </p>
+                  <button
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Weet je zeker dat je alle afgevinkte boodschappen wilt verwijderen?",
+                        )
+                      ) {
+                        clearChecked();
+                      }
+                    }}
+                    className="text-xs text-red-400 hover:text-red-500 transition"
+                  >
+                    Verwijder alles
+                  </button>
+                </div>
+
+                <ul className="space-y-3">
+                  {checkedItems.map((item) => (
                     <li key={item.id} className="flex items-center gap-2">
                       <button
                         onClick={() => toggleChecked(item)}
-                        className={`h-5 w-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-200 ${
-                          isJustChecked
-                            ? "border-[var(--color-accent)] bg-[var(--color-accent)]"
-                            : "border-gray-300"
-                        }`}
+                        className="h-5 w-5 rounded-md border-2 border-[var(--color-accent)] bg-[var(--color-accent)] flex items-center justify-center shrink-0 transition"
                       >
-                        {isJustChecked && (
-                          <Icon
-                            icon={CheckIcon}
-                            size={12}
-                            className="text-white"
-                          />
-                        )}
+                        <Icon
+                          icon={CheckIcon}
+                          size={12}
+                          className="text-white"
+                        />
                       </button>
 
-                      <textarea
-                        value={item.name}
-                        onChange={(e) => updateName(item, e.target.value)}
-                        rows={1}
-                        className={`flex-1 text-sm bg-transparent border-b border-transparent focus:outline-none transition-all duration-200 resize-none overflow-hidden min-w-0 ${
-                          isJustChecked ? "text-gray-400 line-through" : ""
-                        }`}
-                        onInput={(e) => {
-                          const el = e.target as HTMLTextAreaElement;
-                          el.style.height = "auto";
-                          el.style.height = el.scrollHeight + "px";
-                        }}
-                      />
+                      <span className="flex-1 text-sm text-gray-400 line-through">
+                        {item.name}
+                      </span>
 
                       <button
                         onClick={() => deleteItem(item.id)}
@@ -324,64 +370,11 @@ function ShoppingPageContent() {
                         <Icon icon={TrashIcon} size={16} />
                       </button>
                     </li>
-                  );
-                })}
-              </ul>
-
-              {checkedItems.length > 0 && (
-                <>
-                  <div className="flex items-center justify-between mt-6 mb-3 pt-6 border-t border-gray-100">
-                    <p className="text-sm text-gray-400 font-semibold">
-                      Afgevinkte boodschappen
-                    </p>
-                    <button
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            "Weet je zeker dat je alle afgevinkte boodschappen wilt verwijderen?",
-                          )
-                        ) {
-                          clearChecked();
-                        }
-                      }}
-                      className="text-xs text-red-400 hover:text-red-500 transition"
-                    >
-                      Verwijder alles
-                    </button>
-                  </div>
-
-                  <ul className="space-y-3">
-                    {checkedItems.map((item) => (
-                      <li key={item.id} className="flex items-center gap-2">
-                        <button
-                          onClick={() => toggleChecked(item)}
-                          className="h-5 w-5 rounded-md border-2 border-[var(--color-accent)] bg-[var(--color-accent)] flex items-center justify-center shrink-0 transition"
-                        >
-                          <Icon
-                            icon={CheckIcon}
-                            size={12}
-                            className="text-white"
-                          />
-                        </button>
-
-                        <span className="flex-1 text-sm text-gray-400 line-through">
-                          {item.amount ? `${item.amount} ` : ""}
-                          {item.name}
-                        </span>
-
-                        <button
-                          onClick={() => deleteItem(item.id)}
-                          className="text-gray-300 hover:text-red-400 transition shrink-0"
-                        >
-                          <Icon icon={TrashIcon} size={16} />
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              )}
-            </Card>
-          )}
+                  ))}
+                </ul>
+              </>
+            )}
+          </Card>
         </div>
       </main>
     </>
