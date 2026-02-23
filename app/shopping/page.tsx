@@ -264,7 +264,7 @@ function ShoppingPageContent() {
           {items.length > 0 && (
             <Card className="p-5">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-semibold text-lg">Te kopen</h2>
+                <p className="text-sm text-gray-800 font-semibold">Te kopen</p>
                 <button
                   onClick={() => {
                     if (
