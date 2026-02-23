@@ -43,7 +43,7 @@ export default function RootLayout({
 }) {
   return (
     <ViewTransitions>
-      <html lang="en">
+      <html lang="en" className="h-full">
         <body
           className={`
     ${geistSans.variable} 
@@ -51,6 +51,7 @@ export default function RootLayout({
     antialiased 
     bg-[var(--color-bg)]
     text-[#171717]
+    h-full
   `}
         >
           <AppShell>{children}</AppShell>

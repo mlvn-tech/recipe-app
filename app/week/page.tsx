@@ -303,14 +303,18 @@ export default function WeekPage() {
         </div>
       </main>
       {/* Floating knoppen boven bottom nav */}
-      <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2">
+      <div
+        className="fixed left-1/2 -translate-x-1/2 z-40 flex items-center gap-2"
+        style={{
+          bottom: "calc(5rem + env(safe-area-inset-bottom))",
+        }}
+      >
         {/* Week selector */}
         <button
           onClick={() => setIsWeekPickerOpen(true)}
           className="   floating-blur
                         flex items-center gap-2
                         bg-white/70
-                        
                         shadow-[0_8px_30px_rgba(0,0,0,0.12)]
                         px-5 py-3
                         rounded-full
@@ -360,7 +364,7 @@ export default function WeekPage() {
       >
         <div
           onClick={closeWeekPicker}
-          className={`absolute inset-0 bg-black/30 transition-opacity ${
+          className={`fixed inset-0 bg-black/30 transition-opacity ${
             isWeekPickerOpen && !isWeekPickerClosing
               ? "opacity-100"
               : "opacity-0"
@@ -368,7 +372,7 @@ export default function WeekPage() {
         />
 
         <div
-          className={`absolute bottom-0 left-0 w-full bg-white rounded-t-3xl transition-transform duration-300 ${
+          className={`fixed bottom-0 left-0 w-full bg-white rounded-t-3xl transition-transform duration-300 ${
             isWeekPickerOpen && !isWeekPickerClosing
               ? "translate-y-0"
               : "translate-y-full"
@@ -382,7 +386,12 @@ export default function WeekPage() {
             <div className="w-5" />
           </div>
 
-          <div className="px-6 pb-20 space-y-3 pt-4">
+          <div
+            className="px-6 space-y-3 pt-4"
+            style={{
+              paddingBottom: "calc(5rem + env(safe-area-inset-bottom))",
+            }}
+          >
             {weekOptions.map((option) => {
               const start = new Date();
               start.setDate(start.getDate() + option.offset * 7);
@@ -440,7 +449,7 @@ export default function WeekPage() {
         />
 
         <div
-          className={`absolute bottom-0 left-0 w-full bg-white rounded-t-3xl h-[85vh] flex flex-col transition-transform duration-300 ${
+          className={`fixed bottom-0 left-0 w-full bg-white rounded-t-3xl transition-transform duration-300 max-h-[75vh] flex flex-col ${
             activeDay !== null && !isClosing
               ? "translate-y-0"
               : "translate-y-full"
@@ -484,7 +493,12 @@ export default function WeekPage() {
             })}
           </div>
 
-          <div className="flex-1 overflow-y-auto px-6 pb-28 space-y-2 min-h-[200px]">
+          <div
+            className="flex-1 overflow-y-auto px-6 space-y-2 min-h-[200px]"
+            style={{
+              paddingBottom: "calc(7rem + env(safe-area-inset-bottom))",
+            }}
+          >
             {filteredRecipes.length === 0 ? (
               <div className="text-sm text-gray-400 py-6 text-center">
                 Geen recepten gevonden.
