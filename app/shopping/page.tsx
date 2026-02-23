@@ -63,8 +63,9 @@ function SwipeableItem({
   };
 
   const progress = Math.min(Math.abs(offsetX) / threshold, 1);
-  const pillWidth = Math.round(progress * 56);
-  const pillOpacity = progress;
+  // Pil groeit mee zonder max — blijft groeien zolang je swiped
+  const pillWidth = Math.max(0, Math.abs(offsetX) - 10);
+  const pillOpacity = Math.min(progress * 2, 1);
 
   return (
     <div className="relative flex items-center">
@@ -307,7 +308,7 @@ function ShoppingPageContent() {
             </button>
           )}
 
-          <Card className="p-5">
+          <Card className="p-5 overflow-hidden">
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm font-semibold text-gray-800">Te kopen</p>
               {items.length > 0 && (
@@ -360,7 +361,7 @@ function ShoppingPageContent() {
                 return (
                   <li key={item.id}>
                     <SwipeableItem onDelete={() => deleteItem(item.id)}>
-                      <div className="flex items-center gap-3 py-1">
+                      <div className="relative flex items-center gap-3 py-1">
                         <button
                           onClick={() => toggleChecked(item)}
                           className={`h-5 w-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-200 ${
