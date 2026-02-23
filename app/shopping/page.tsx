@@ -22,6 +22,43 @@ type ShoppingItem = {
   checked: boolean;
 };
 
+function AnimatedItem({
+  children,
+  visible,
+}: {
+  children: React.ReactNode;
+  visible: boolean;
+}) {
+  const [height, setHeight] = useState<number | "auto">("auto");
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!visible && ref.current) {
+      const h = ref.current.offsetHeight;
+      setHeight(h);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setHeight(0);
+        });
+      });
+    }
+  }, [visible]);
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        height: height === "auto" ? "auto" : height,
+        overflow: "hidden",
+        opacity: visible ? 1 : 0,
+        transition: "height 0.3s ease, opacity 0.25s ease",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 function SwipeableItem({
   children,
   onDelete,
@@ -34,7 +71,6 @@ function SwipeableItem({
   const startX = useRef(0);
   const threshold = 80;
 
-  // Elastische formule — voelt natuurlijker aan
   const rubberband = (x: number, limit: number) => {
     const abs = Math.abs(x);
     const elastic = limit * (1 - Math.exp(-abs / limit));
@@ -63,13 +99,11 @@ function SwipeableItem({
   };
 
   const progress = Math.min(Math.abs(offsetX) / threshold, 1);
-  // Pil groeit mee zonder max — blijft groeien zolang je swiped
   const pillWidth = Math.max(0, Math.abs(offsetX) - 10);
   const pillOpacity = Math.min(progress * 2, 1);
 
   return (
     <div className="relative flex items-center">
-      {/* Rode pil rechts */}
       <div
         className="absolute right-0 flex items-center justify-center bg-red-500 rounded-full"
         style={{
@@ -84,7 +118,6 @@ function SwipeableItem({
         )}
       </div>
 
-      {/* Item schuift naar links — overflow-hidden alleen hier */}
       <div
         className="relative w-full bg-white overflow-hidden"
         onTouchStart={onTouchStart}
@@ -121,6 +154,7 @@ function ShoppingPageContent() {
   const [loadingWeek, setLoadingWeek] = useState(false);
   const [newName, setNewName] = useState("");
   const [justChecked, setJustChecked] = useState<Set<string>>(new Set());
+  const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     document.querySelectorAll("textarea").forEach((el) => {
@@ -243,14 +277,21 @@ function ShoppingPageContent() {
   };
 
   const deleteItem = async (id: string) => {
-    const { error } = await supabase
-      .from("shopping_list")
-      .delete()
-      .eq("id", id);
-
-    if (!error) {
-      setItems((prev) => prev.filter((i) => i.id !== id));
-    }
+    setRemovingIds((prev) => new Set(prev).add(id));
+    setTimeout(async () => {
+      const { error } = await supabase
+        .from("shopping_list")
+        .delete()
+        .eq("id", id);
+      if (!error) {
+        setItems((prev) => prev.filter((i) => i.id !== id));
+        setRemovingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+      }
+    }, 350);
   };
 
   const clearChecked = async () => {
@@ -355,46 +396,51 @@ function ShoppingPageContent() {
             </li>
 
             {/* Boodschappen lijst */}
-            <ul className="space-y-4">
+            <ul>
               {visibleUnchecked.map((item) => {
                 const isJustChecked = justChecked.has(item.id);
                 return (
-                  <li key={item.id}>
-                    <SwipeableItem onDelete={() => deleteItem(item.id)}>
-                      <div className="relative flex items-center gap-3 py-1">
-                        <button
-                          onClick={() => toggleChecked(item)}
-                          className={`h-5 w-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-200 ${
-                            isJustChecked
-                              ? "border-[var(--color-accent)] bg-[var(--color-accent)]"
-                              : "border-gray-300"
-                          }`}
-                        >
-                          {isJustChecked && (
-                            <Icon
-                              icon={CheckIcon}
-                              size={12}
-                              className="text-white"
-                            />
-                          )}
-                        </button>
+                  <AnimatedItem
+                    key={item.id}
+                    visible={!removingIds.has(item.id)}
+                  >
+                    <li className="pb-4">
+                      <SwipeableItem onDelete={() => deleteItem(item.id)}>
+                        <div className="relative flex items-center gap-3 py-1">
+                          <button
+                            onClick={() => toggleChecked(item)}
+                            className={`h-5 w-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-200 ${
+                              isJustChecked
+                                ? "border-[var(--color-accent)] bg-[var(--color-accent)]"
+                                : "border-gray-300"
+                            }`}
+                          >
+                            {isJustChecked && (
+                              <Icon
+                                icon={CheckIcon}
+                                size={12}
+                                className="text-white"
+                              />
+                            )}
+                          </button>
 
-                        <textarea
-                          value={item.name}
-                          onChange={(e) => updateName(item, e.target.value)}
-                          rows={1}
-                          className={`flex-1 text-sm bg-transparent border-b border-transparent focus:outline-none transition-all duration-200 resize-none overflow-hidden min-w-0 ${
-                            isJustChecked ? "text-gray-400 line-through" : ""
-                          }`}
-                          onInput={(e) => {
-                            const el = e.target as HTMLTextAreaElement;
-                            el.style.height = "auto";
-                            el.style.height = el.scrollHeight + "px";
-                          }}
-                        />
-                      </div>
-                    </SwipeableItem>
-                  </li>
+                          <textarea
+                            value={item.name}
+                            onChange={(e) => updateName(item, e.target.value)}
+                            rows={1}
+                            className={`flex-1 text-sm bg-transparent border-b border-transparent focus:outline-none transition-all duration-200 resize-none overflow-hidden min-w-0 ${
+                              isJustChecked ? "text-gray-400 line-through" : ""
+                            }`}
+                            onInput={(e) => {
+                              const el = e.target as HTMLTextAreaElement;
+                              el.style.height = "auto";
+                              el.style.height = el.scrollHeight + "px";
+                            }}
+                          />
+                        </div>
+                      </SwipeableItem>
+                    </li>
+                  </AnimatedItem>
                 );
               })}
             </ul>
@@ -402,7 +448,7 @@ function ShoppingPageContent() {
             {/* Afgevinkte items */}
             {checkedItems.length > 0 && (
               <>
-                <div className="flex items-center justify-between mt-6 mb-4 pt-6 border-t border-gray-100">
+                <div className="flex items-center justify-between mt-2 mb-4 pt-6 border-t border-gray-100">
                   <p className="text-sm text-gray-400 font-semibold">
                     Afgevinkte boodschappen
                   </p>
@@ -422,28 +468,33 @@ function ShoppingPageContent() {
                   </button>
                 </div>
 
-                <ul className="space-y-4">
+                <ul>
                   {checkedItems.map((item) => (
-                    <li key={item.id}>
-                      <SwipeableItem onDelete={() => deleteItem(item.id)}>
-                        <div className="flex items-center gap-3 py-1">
-                          <button
-                            onClick={() => toggleChecked(item)}
-                            className="h-5 w-5 rounded-md border-2 border-[var(--color-accent)] bg-[var(--color-accent)] flex items-center justify-center shrink-0 transition"
-                          >
-                            <Icon
-                              icon={CheckIcon}
-                              size={12}
-                              className="text-white"
-                            />
-                          </button>
+                    <AnimatedItem
+                      key={item.id}
+                      visible={!removingIds.has(item.id)}
+                    >
+                      <li className="pb-4">
+                        <SwipeableItem onDelete={() => deleteItem(item.id)}>
+                          <div className="flex items-center gap-3 py-1">
+                            <button
+                              onClick={() => toggleChecked(item)}
+                              className="h-5 w-5 rounded-md border-2 border-[var(--color-accent)] bg-[var(--color-accent)] flex items-center justify-center shrink-0 transition"
+                            >
+                              <Icon
+                                icon={CheckIcon}
+                                size={12}
+                                className="text-white"
+                              />
+                            </button>
 
-                          <span className="flex-1 text-sm text-gray-400 line-through">
-                            {item.name}
-                          </span>
-                        </div>
-                      </SwipeableItem>
-                    </li>
+                            <span className="flex-1 text-sm text-gray-400 line-through">
+                              {item.name}
+                            </span>
+                          </div>
+                        </SwipeableItem>
+                      </li>
+                    </AnimatedItem>
                   ))}
                 </ul>
               </>
