@@ -29,16 +29,19 @@ export default function SearchInput({
           text-sm
           text-gray-800
           placeholder:text-gray-400
-          focus:outline-none
-          focus:bg-white
+          border
+          border-gray-100
+          focus:border
+          focus:border-gray-100 focus:outline-none
+          focus:bg-gray-50
           transition
         "
       />
-      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
         <Icon
           icon={MagnifyingGlassIcon}
           size={24}
-          className="text-gray-400 transition-colors duration-200 group-focus-within:text-[var(--color-accent)]"
+          className="text-gray-400 transition-colors duration-200 group-focus-within:text-gray-500"
         />
       </div>
     </div>

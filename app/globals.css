@@ -7,7 +7,10 @@
 
 @theme {
   --color-bg: #F8F8F8;
-  --color-brand: #EFA30A;
+  /* Terracota */
+  --color-brand: #C4785A;
+  /* Turquoise
+  --color-brand: #EFA30A; */
   --color-accent: #28ada0;
   --color-danger: #ef4444;
 }
