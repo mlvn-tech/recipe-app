@@ -53,19 +53,30 @@ function SwipeableItem({
     }
   };
 
-  const showDelete = offsetX < -20;
+  // Pil groeit mee van 0 tot volledige grootte
+  const progress = Math.min(Math.abs(offsetX) / threshold, 1);
+  const pillWidth = Math.round(progress * 56);
+  const pillOpacity = progress;
 
   return (
-    <div className="relative rounded-xl overflow-hidden">
-      {/* Rode achtergrond — alleen zichtbaar tijdens swipe */}
-      {showDelete && (
-        <div className="absolute inset-0 bg-red-500 rounded-xl flex items-center justify-end pr-4">
-          <Icon icon={TrashIcon} size={18} className="text-white" />
-        </div>
-      )}
-
-      {/* Item */}
+    <div className="relative flex items-center">
+      {/* Rode pil rechts */}
       <div
+        className="absolute right-0 flex items-center justify-center bg-red-500 rounded-full overflow-hidden"
+        style={{
+          width: pillWidth,
+          height: 36,
+          opacity: pillOpacity,
+        }}
+      >
+        {progress > 0.5 && (
+          <Icon icon={TrashIcon} size={16} className="text-white shrink-0" />
+        )}
+      </div>
+
+      {/* Item schuift naar links */}
+      <div
+        className="relative w-full bg-white"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
