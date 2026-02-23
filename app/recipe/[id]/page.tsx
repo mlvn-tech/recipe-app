@@ -10,11 +10,11 @@ import {
   PencilSquareIcon,
   ChevronDownIcon,
   ClockIcon,
-  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Icon from "@/components/icons";
 import Header from "@/components/Header";
 import Card from "@/components/Card";
+import SwipeableSheet from "@/components/SwipeableSheet";
 
 export default function RecipeDetail() {
   const params = useParams();
@@ -58,24 +58,19 @@ export default function RecipeDetail() {
           setHeaderTitle(recipe.title);
         }
       },
-      {
-        threshold: 0,
-        rootMargin: "-70px 0px 0px 0px",
-      },
+      { threshold: 0, rootMargin: "-70px 0px 0px 0px" },
     );
 
     observer.observe(titleRef.current);
     return () => observer.disconnect();
   }, [recipe]);
 
-  // Floating knop verschijnt zodra ingrediëntenkaart uit beeld scrollt
   useEffect(() => {
     const handleScroll = () => {
       if (!ingredientsEndRef.current) return;
       const rect = ingredientsEndRef.current.getBoundingClientRect();
-      const headerHeight = 64;
 
-      if (rect.bottom <= headerHeight) {
+      if (rect.bottom <= 64) {
         setShowFloating(true);
       } else {
         setShowFloating(false);
@@ -93,7 +88,11 @@ export default function RecipeDetail() {
 
   const formattedDate = new Date(recipe.created_at).toLocaleDateString(
     "nl-NL",
-    { day: "numeric", month: "long", year: "numeric" },
+    {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    },
   );
 
   return (
@@ -109,7 +108,6 @@ export default function RecipeDetail() {
       />
 
       <main className="min-h-screen bg-[var(--color-bg)] pt-16 pb-24">
-        {/* Hero image */}
         {recipe.image_url && (
           <div className="w-full h-72">
             <img
@@ -120,13 +118,11 @@ export default function RecipeDetail() {
           </div>
         )}
 
-        {/* Content */}
         <div className="px-4 pt-4 pb-16 space-y-4 rounded-xl">
           <div>
             <p className="text-xs text-gray-400 tracking-wide py-2">
               Toegevoegd op {formattedDate}
             </p>
-
             <h1 ref={titleRef} className="text-3xl font-bold">
               {recipe.title}
             </h1>
@@ -138,7 +134,6 @@ export default function RecipeDetail() {
                   <span>{recipe.cooking_time} min</span>
                 </div>
               )}
-
               {recipe.servings && (
                 <div className="flex items-center gap-1">
                   <Icon icon={UserIcon} size={18} className="text-gray-500" />
@@ -148,7 +143,6 @@ export default function RecipeDetail() {
                   </span>
                 </div>
               )}
-
               {recipe.category && (
                 <span className="px-3 py-1 border border-gray-300 rounded-lg capitalize">
                   {recipe.category}
@@ -157,7 +151,6 @@ export default function RecipeDetail() {
             </div>
           </div>
 
-          {/* Ingrediënten kaart */}
           <Card>
             <h2 className="font-semibold mb-4 text-lg">Ingrediënten</h2>
             <ul className="space-y-3">
@@ -171,7 +164,6 @@ export default function RecipeDetail() {
             <div ref={ingredientsEndRef} className="h-1" />
           </Card>
 
-          {/* Bereiding kaart */}
           <Card>
             <h2 className="font-semibold mb-4 text-lg">Bereiding</h2>
             <ol className="space-y-0">
@@ -198,31 +190,15 @@ export default function RecipeDetail() {
         </div>
       </main>
 
-      {/* Transparante overlay om paneel te sluiten */}
-      {ingredientsOpen && showFloating && (
-        <div
-          className="fixed inset-0 z-20"
-          onClick={() => setIngredientsOpen(false)}
-        />
-      )}
-
-      {/* Ingrediënten paneel */}
-      <div
-        className={`fixed left-0 w-full bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.1)] transition-transform duration-300 ease-in-out z-30 ${
-          ingredientsOpen && showFloating ? "translate-y-0" : "translate-y-full"
-        }`}
-        style={{ bottom: 0, paddingBottom: "env(safe-area-inset-bottom)" }}
+      {/* Ingrediënten sheet via SwipeableSheet component */}
+      <SwipeableSheet
+        open={ingredientsOpen && showFloating}
+        onClose={() => setIngredientsOpen(false)}
+        title="Ingrediënten"
+        overlay={false}
       >
-        <div className="flex items-center justify-between px-6 pt-5 pb-3 mb-4">
-          <button onClick={() => setIngredientsOpen(false)}>
-            <Icon icon={XMarkIcon} size={20} className="text-gray-400" />
-          </button>
-          <h3 className="font-semibold">Ingrediënten</h3>
-          <div className="w-5" />
-        </div>
-
         <div
-          className="px-8 overflow-y-auto max-h-80"
+          className="px-8 overflow-y-auto max-h-100"
           style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom))" }}
         >
           <ul className="space-y-3">
@@ -234,7 +210,7 @@ export default function RecipeDetail() {
             ))}
           </ul>
         </div>
-      </div>
+      </SwipeableSheet>
 
       {/* Floating pill knop */}
       <div
@@ -253,9 +229,7 @@ export default function RecipeDetail() {
           <Icon
             icon={ChevronDownIcon}
             size={16}
-            className={`text-gray-400 transition-transform duration-300 ${
-              ingredientsOpen ? "rotate-180" : ""
-            }`}
+            className={`text-gray-400 transition-transform duration-300 ${ingredientsOpen ? "rotate-180" : ""}`}
           />
         </button>
       </div>
