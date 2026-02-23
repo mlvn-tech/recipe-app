@@ -34,6 +34,13 @@ function SwipeableItem({
   const startX = useRef(0);
   const threshold = 80;
 
+  // Elastische formule — voelt natuurlijker aan
+  const rubberband = (x: number, limit: number) => {
+    const abs = Math.abs(x);
+    const elastic = limit * (1 - Math.exp(-abs / limit));
+    return -elastic;
+  };
+
   const onTouchStart = (e: React.TouchEvent) => {
     startX.current = e.touches[0].clientX;
     setSwiping(true);
@@ -41,32 +48,34 @@ function SwipeableItem({
 
   const onTouchMove = (e: React.TouchEvent) => {
     const diff = e.touches[0].clientX - startX.current;
-    if (diff < 0) setOffsetX(Math.max(diff, -threshold - 20));
+    if (diff < 0) {
+      setOffsetX(rubberband(diff, threshold));
+    }
   };
 
   const onTouchEnd = () => {
     setSwiping(false);
-    if (offsetX < -threshold) {
+    if (offsetX < -threshold * 0.7) {
       onDelete();
     } else {
       setOffsetX(0);
     }
   };
 
-  // Pil groeit mee van 0 tot volledige grootte
   const progress = Math.min(Math.abs(offsetX) / threshold, 1);
   const pillWidth = Math.round(progress * 56);
   const pillOpacity = progress;
 
   return (
-    <div className="relative flex items-center">
+    <div className="relative flex items-center overflow-hidden">
       {/* Rode pil rechts */}
       <div
-        className="absolute right-0 flex items-center justify-center bg-red-500 rounded-full overflow-hidden"
+        className="absolute right-0 flex items-center justify-center bg-red-500 rounded-full"
         style={{
           width: pillWidth,
           height: 36,
           opacity: pillOpacity,
+          transition: swiping ? "none" : "width 0.3s ease, opacity 0.3s ease",
         }}
       >
         {progress > 0.5 && (
@@ -82,7 +91,9 @@ function SwipeableItem({
         onTouchEnd={onTouchEnd}
         style={{
           transform: `translateX(${offsetX}px)`,
-          transition: swiping ? "none" : "transform 0.3s ease",
+          transition: swiping
+            ? "none"
+            : "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
         }}
       >
         {children}
