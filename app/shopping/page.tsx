@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import Header from "@/components/Header";
 import Card from "@/components/Card";
@@ -21,6 +21,14 @@ type ShoppingItem = {
 };
 
 export default function ShoppingPage() {
+  return (
+    <Suspense fallback={<p className="p-8">Laden...</p>}>
+      <ShoppingPageContent />
+    </Suspense>
+  );
+}
+
+function ShoppingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const weekStart = searchParams.get("week");
@@ -30,7 +38,7 @@ export default function ShoppingPage() {
   const [loadingWeek, setLoadingWeek] = useState(false);
   const [newName, setNewName] = useState("");
   const [newAmount, setNewAmount] = useState("");
-  const [justChecked, setJustChecked] = useState<Set<string>>(new Set()); // 👈 nieuw
+  const [justChecked, setJustChecked] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     document.querySelectorAll("textarea").forEach((el) => {
@@ -117,7 +125,6 @@ export default function ShoppingPage() {
 
   const toggleChecked = async (item: ShoppingItem) => {
     if (!item.checked) {
-      // 👇 Eerst vinkje tonen, dan na 800ms verplaatsen
       setJustChecked((prev) => new Set(prev).add(item.id));
       setItems((prev) =>
         prev.map((i) => (i.id === item.id ? { ...i, checked: true } : i)),
@@ -136,7 +143,6 @@ export default function ShoppingPage() {
         });
       }, 800);
     } else {
-      // 👇 Uitvinken gaat direct
       setItems((prev) =>
         prev.map((i) => (i.id === item.id ? { ...i, checked: false } : i)),
       );
@@ -160,6 +166,7 @@ export default function ShoppingPage() {
       );
     }
   };
+
   const updateName = async (item: ShoppingItem, name: string) => {
     setItems((prev) =>
       prev.map((i) => (i.id === item.id ? { ...i, name } : i)),
@@ -193,7 +200,6 @@ export default function ShoppingPage() {
     }
   };
 
-  // 👇 Items die net aangevinkt zijn blijven nog even in de bovenste lijst
   const visibleUnchecked = items.filter(
     (i) => !i.checked || justChecked.has(i.id),
   );
@@ -231,7 +237,7 @@ export default function ShoppingPage() {
                 placeholder="Hoev."
                 value={newAmount}
                 onChange={(e) => setNewAmount(e.target.value)}
-                className="w-16 border border-gray-200 rounded-xl p-3 bg-gray-50 focus:outline-none focus:border-gray-300 text-sm shrink-0"
+                className="w-16 border border-gray-200 rounded-xl p-3 bg-gray-50 text-sm shrink-0"
               />
               <input
                 type="text"
@@ -239,7 +245,7 @@ export default function ShoppingPage() {
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addItem()}
-                className="flex-1 border border-gray-200 rounded-xl p-3 bg-gray-50 focus:outline-none focus:border-gray-300 text-sm"
+                className="flex-1 border border-gray-200 rounded-xl p-3 bg-gray-50 text-sm"
               />
               <button
                 onClick={addItem}
@@ -257,7 +263,6 @@ export default function ShoppingPage() {
                   const isJustChecked = justChecked.has(item.id);
                   return (
                     <li key={item.id} className="flex items-center gap-2">
-                      {/* 👇 Toont vinkje als justChecked, anders leeg */}
                       <button
                         onClick={() => toggleChecked(item)}
                         className={`h-5 w-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-200 ${
@@ -280,14 +285,14 @@ export default function ShoppingPage() {
                         value={item.amount || ""}
                         onChange={(e) => updateAmount(item, e.target.value)}
                         placeholder="–"
-                        className="w-12 text-sm text-gray-400 bg-transparent focus:outline-none border-b border-transparent focus:border-gray-300 shrink-0 text-center"
+                        className="w-12 text-sm text-gray-400 bg-transparent border-b border-transparent focus:border-gray-300 shrink-0 text-center"
                       />
 
                       <textarea
                         value={item.name}
                         onChange={(e) => updateName(item, e.target.value)}
                         rows={1}
-                        className={`flex-1 text-sm bg-transparent focus:outline-none border-b border-transparent focus:border-gray-300 transition-all duration-200 resize-none overflow-hidden min-w-0 ${
+                        className={`flex-1 text-sm bg-transparent border-b border-transparent focus:border-gray-300 transition-all duration-200 resize-none overflow-hidden min-w-0 ${
                           isJustChecked ? "text-gray-400 line-through" : ""
                         }`}
                         onInput={(e) => {
@@ -307,63 +312,6 @@ export default function ShoppingPage() {
                   );
                 })}
               </ul>
-
-              {checkedItems.length > 0 && (
-                <>
-                  <div className="flex items-center justify-between mt-6 mb-3">
-                    <p className="text-sm text-gray-400 font-medium">
-                      In het mandje
-                    </p>
-                    <button
-                      onClick={clearChecked}
-                      className="text-xs text-red-400 hover:text-red-500 transition"
-                    >
-                      Verwijder afgevinkte
-                    </button>
-                  </div>
-
-                  <ul className="space-y-3">
-                    {checkedItems.map((item) => (
-                      <li key={item.id} className="flex items-center gap-2">
-                        <button
-                          onClick={() => toggleChecked(item)}
-                          className="h-5 w-5 rounded-md border-2 border-[var(--color-accent)] bg-[var(--color-accent)] flex items-center justify-center shrink-0 transition"
-                        >
-                          <Icon
-                            icon={CheckIcon}
-                            size={12}
-                            className="text-white"
-                          />
-                        </button>
-
-                        <span className="flex-1 text-sm text-gray-400 line-through">
-                          {item.amount ? `${item.amount} ` : ""}
-                          {item.name}
-                        </span>
-
-                        <button
-                          onClick={() => deleteItem(item.id)}
-                          className="text-gray-300 hover:text-red-400 transition shrink-0"
-                        >
-                          <Icon icon={TrashIcon} size={16} />
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              )}
-            </Card>
-          )}
-
-          {items.length === 0 && (
-            <Card className="p-8 text-center">
-              <p className="text-gray-400 text-sm">
-                Je boodschappenlijst is leeg.
-              </p>
-              <p className="text-gray-300 text-xs mt-1">
-                Laad ingrediënten vanuit de weekplanner of voeg items handmatig
-                toe.
-              </p>
             </Card>
           )}
         </div>
