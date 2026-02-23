@@ -238,7 +238,7 @@ export default function WeekPage() {
     <>
       <Header title="Weekplanner" />
 
-      <main className="min-h-screen bg-[var(--color-bg)] pt-20 pb-36">
+      <main className="min-h-screen bg-[var(--color-bg)] pt-16 pb-36">
         <div className="px-4 max-w-4xl mx-auto space-y-4">
           {weekData.map((day, index) => (
             <Card key={index} className="p-5 space-y-4">
@@ -364,7 +364,7 @@ export default function WeekPage() {
       >
         <div
           onClick={closeWeekPicker}
-          className={`fixed inset-0 bg-black/30 transition-opacity ${
+          className={`fixed inset-0 bg-black/50 transition-opacity ${
             isWeekPickerOpen && !isWeekPickerClosing
               ? "opacity-100"
               : "opacity-0"
@@ -382,7 +382,7 @@ export default function WeekPage() {
             <button onClick={closeWeekPicker}>
               <Icon icon={XMarkIcon} size={20} className="text-gray-400" />
             </button>
-            <h3 className="font-semibold text-md">Bekijk periode</h3>
+            <h3 className="font-semibold">Bekijk periode</h3>
             <div className="w-5" />
           </div>
 
@@ -437,25 +437,27 @@ export default function WeekPage() {
           </div>
         </div>
       </div>
+
       {/* Recept picker sheet */}
       <div
         className={`fixed inset-0 z-50 transition ${activeDay !== null ? "visible" : "invisible"}`}
       >
         <div
           onClick={closeRecipeSheet}
-          className={`absolute inset-0 bg-black/30 transition-opacity ${
+          className={`fixed inset-0 bg-black/50 transition-opacity ${
             activeDay !== null && !isClosing ? "opacity-100" : "opacity-0"
           }`}
         />
 
         <div
-          className={`fixed bottom-0 left-0 w-full bg-white rounded-t-3xl transition-transform duration-300 max-h-[75vh] flex flex-col ${
+          className={`fixed bottom-0 left-0 w-full bg-white rounded-t-3xl transition-transform duration-300 flex flex-col ${
             activeDay !== null && !isClosing
               ? "translate-y-0"
               : "translate-y-full"
           }`}
+          style={{ height: "70vh" }}
         >
-          <div className="p-6 pb-4">
+          <div className="p-6 pb-4 shrink-0">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold text-lg">Kies een recept</h3>
               <button onClick={closeRecipeSheet}>
@@ -464,7 +466,7 @@ export default function WeekPage() {
             </div>
           </div>
 
-          <div className="px-6 mb-4">
+          <div className="px-6 mb-4 shrink-0">
             <input
               type="text"
               placeholder="Zoek recept..."
@@ -474,7 +476,7 @@ export default function WeekPage() {
             />
           </div>
 
-          <div className="px-6 flex gap-3 overflow-x-auto mb-4 no-scrollbar">
+          <div className="px-6 flex gap-3 overflow-x-auto mb-4 no-scrollbar shrink-0">
             {categories.map((cat) => {
               const isActive = activeCategory === cat;
               return (
@@ -494,9 +496,9 @@ export default function WeekPage() {
           </div>
 
           <div
-            className="flex-1 overflow-y-auto px-6 space-y-2 min-h-[200px]"
+            className="flex-1 overflow-y-auto px-6 space-y-2"
             style={{
-              paddingBottom: "calc(7rem + env(safe-area-inset-bottom))",
+              paddingBottom: "calc(2rem + env(safe-area-inset-bottom))",
             }}
           >
             {filteredRecipes.length === 0 ? (
