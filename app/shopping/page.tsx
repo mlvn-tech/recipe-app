@@ -108,7 +108,9 @@ function SwipeableItem({
         className="absolute right-0 flex items-center justify-center bg-red-500 rounded-full"
         style={{
           width: pillWidth,
-          height: 36,
+          height: 32,
+          top: "50%",
+          transform: "translateY(-50%)",
           opacity: pillOpacity,
           transition: swiping ? "none" : "width 0.3s ease, opacity 0.3s ease",
         }}
@@ -349,7 +351,7 @@ function ShoppingPageContent() {
             </button>
           )}
 
-          <Card className="p-5 overflow-hidden">
+          <Card className="p-5">
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm font-semibold text-gray-800">Te kopen</p>
               {items.length > 0 && (
