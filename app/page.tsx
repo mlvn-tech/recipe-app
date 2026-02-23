@@ -1,4 +1,6 @@
 "use client";
+import { styles } from "@/lib/styles";
+import clsx from "clsx";
 
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
@@ -74,7 +76,7 @@ export default function Home() {
     <>
       {/* 🔝 Search Header */}
       <div className="fixed top-0 left-0 w-full bg-[var(--color-brand)] z-50 shadow-[0_1px_6px_rgba(0,0,0,0.05)]">
-        <div className="max-w-4xl mx-auto px-4 h-16 flex items-center">
+        <div className="max-w-4xl mx-auto px-4 h-20 flex items-center">
           <div className="relative group w-full">
             <input
               type="text"
@@ -85,7 +87,7 @@ export default function Home() {
           w-full
           rounded-full
           bg-white/90
-          py-2
+          py-3
           pl-4
           pr-10
           text-base
@@ -113,7 +115,7 @@ export default function Home() {
       </div>
 
       {/* 📦 Page Content */}
-      <main className="min-h-dvh bg-[var(--color-bg)] pt-16 pb-24">
+      <main className="min-h-dvh bg-[var(--color-bg)] pt-20 pb-24">
         {/* 🏷️ Filters */}
         <div className="pt-4 pb-4">
           <div className="flex gap-3 overflow-x-auto px-4 max-w-4xl mx-auto no-scrollbar">

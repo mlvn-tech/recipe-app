@@ -1,5 +1,6 @@
 "use client";
-
+import { styles } from "@/lib/styles";
+import clsx from "clsx";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "../../../../lib/supabase";
 import { useParams, useRouter } from "next/navigation";
@@ -170,19 +171,7 @@ export default function EditRecipe() {
   const SaveButton = ({ fullWidth = false }: { fullWidth?: boolean }) => (
     <button
       onClick={handleUpdate}
-      className={`
-        bg-[var(--color-accent)]/80
-        border border-[var(--color-accent)]/80
-        text-white
-        py-4
-        rounded-full
-        shadow-lg
-        text-md
-        font-semibold
-        active:scale-95
-        transition
-        ${fullWidth ? "w-full" : "px-8"}
-      `}
+      className={`${styles.button.save} ${fullWidth ? "w-full" : "px-8"}`}
     >
       Opslaan
     </button>
@@ -251,13 +240,7 @@ export default function EditRecipe() {
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="
-                w-full border border-gray-200 rounded-xl p-3
-                bg-gray-50 text-[color:var(--color-text)]
-                placeholder:text-gray-400
-                focus:outline-none focus:border-gray-300 focus:bg-gray-50
-                transition-colors
-              "
+              className={styles.input.default}
             />
           </Card>
 
@@ -275,12 +258,7 @@ export default function EditRecipe() {
                 onChange={(e) =>
                   setServings(e.target.value ? Number(e.target.value) : null)
                 }
-                className="
-                  w-full border border-gray-200 rounded-xl p-3
-                  bg-gray-50 text-[color:var(--color-text)]
-                  focus:outline-none focus:border-gray-300 focus:bg-gray-50
-                  transition-colors
-                "
+                className={styles.input.default}
               />
             </div>
 
@@ -296,12 +274,7 @@ export default function EditRecipe() {
                 onChange={(e) =>
                   setCookingTime(e.target.value ? Number(e.target.value) : null)
                 }
-                className="
-                  w-full border border-gray-200 rounded-xl p-3
-                  bg-gray-50 text-[color:var(--color-text)]
-                  focus:outline-none focus:border-gray-300 focus:bg-gray-50
-                  transition-colors
-                "
+                className={styles.input.default}
               />
             </div>
 
@@ -374,12 +347,7 @@ export default function EditRecipe() {
             <textarea
               value={ingredients}
               onChange={(e) => setIngredients(e.target.value)}
-              className="
-                w-full border border-gray-200 rounded-xl p-3
-                bg-gray-50 focus:outline-none
-                focus:border-gray-300 focus:bg-gray-50
-                transition-colors min-h-[280px]
-              "
+              className={`${styles.input.default} min-h-[280px]`}
             />
           </Card>
 
@@ -391,12 +359,7 @@ export default function EditRecipe() {
             <textarea
               value={steps}
               onChange={(e) => setSteps(e.target.value)}
-              className="
-                w-full border border-gray-200 rounded-xl p-3
-                bg-gray-50 focus:outline-none
-                focus:border-gray-300 focus:bg-gray-50
-                transition-colors min-h-[280px]
-              "
+              className={`${styles.input.default} min-h-[280px]`}
             />
           </Card>
 
@@ -406,12 +369,7 @@ export default function EditRecipe() {
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="
-                w-full border border-gray-200 rounded-xl p-3
-                bg-gray-50 focus:outline-none
-                focus:border-gray-300 focus:bg-gray-50
-                transition-colors min-h-30
-              "
+              className={`${styles.input.default} min-h-[30px]`}
             />
           </Card>
 
@@ -426,19 +384,7 @@ export default function EditRecipe() {
               <SaveButton fullWidth />
             </div>
 
-            <button
-              onClick={handleDelete}
-              className="
-                w-full
-                border-2 border-red-300
-                bg-red-50
-                text-red-500
-                py-4
-                rounded-full
-                text-md
-                font-semibold
-              "
-            >
+            <button onClick={handleDelete} className={styles.button.delete}>
               Verwijderen
             </button>
           </div>

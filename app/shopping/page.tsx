@@ -1,4 +1,6 @@
 "use client";
+import { styles } from "@/lib/styles";
+import clsx from "clsx";
 
 import { Suspense, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -232,20 +234,21 @@ function ShoppingPageContent() {
 
           <Card className="p-5">
             <div className="flex gap-2 items-center">
-              <input
+              {/* <input
                 type="text"
                 placeholder="Hoev."
                 value={newAmount}
                 onChange={(e) => setNewAmount(e.target.value)}
-                className="w-16 border border-gray-200 rounded-xl p-3 bg-gray-50 text-sm shrink-0"
-              />
+                className={`${styles.input.default} max-w-[60px]`}
+              /> */}
+
               <input
                 type="text"
                 placeholder="Voeg item toe..."
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addItem()}
-                className="flex-1 border border-gray-200 rounded-xl p-3 bg-gray-50 text-sm"
+                className={styles.input.default}
               />
               <button
                 onClick={addItem}
@@ -280,19 +283,19 @@ function ShoppingPageContent() {
                         )}
                       </button>
 
-                      <input
+                      {/* <input
                         type="text"
                         value={item.amount || ""}
                         onChange={(e) => updateAmount(item, e.target.value)}
-                        placeholder="–"
-                        className="w-12 text-sm text-gray-400 bg-transparent border-b border-transparent focus:border-gray-300 shrink-0 text-center"
-                      />
+                        placeholder="0"
+                        className="w-12 text-sm text-gray-400 bg-transparent border-b border-transparent focus:outline-none shrink-0 text-center mt-0.5"
+                      /> */}
 
                       <textarea
                         value={item.name}
                         onChange={(e) => updateName(item, e.target.value)}
                         rows={1}
-                        className={`flex-1 text-sm bg-transparent border-b border-transparent focus:border-gray-300 transition-all duration-200 resize-none overflow-hidden min-w-0 ${
+                        className={`flex-1 text-sm items-center bg-transparent border-b border-transparent focus:outline-none transition-all duration-200 resize-none overflow-hidden min-w-0 ${
                           isJustChecked ? "text-gray-400 line-through" : ""
                         }`}
                         onInput={(e) => {
@@ -312,6 +315,52 @@ function ShoppingPageContent() {
                   );
                 })}
               </ul>
+
+              {/* 👇 Afgevinkte items onderaan */}
+              {checkedItems.length > 0 && (
+                <>
+                  <div className="flex items-center justify-between mt-6 mb-3 pt-6 border-t border-gray-100">
+                    <p className="text-sm text-gray-400 font-semibold">
+                      Afgevinkte boodschappen{" "}
+                    </p>
+                    <button
+                      onClick={clearChecked}
+                      className="text-xs text-red-400 hover:text-red-500 transition"
+                    >
+                      Verwijder alle
+                    </button>
+                  </div>
+
+                  <ul className="space-y-3">
+                    {checkedItems.map((item) => (
+                      <li key={item.id} className="flex items-center gap-2">
+                        <button
+                          onClick={() => toggleChecked(item)}
+                          className="h-5 w-5 rounded-md border-2 border-[var(--color-accent)] bg-[var(--color-accent)] flex items-center justify-center shrink-0 transition"
+                        >
+                          <Icon
+                            icon={CheckIcon}
+                            size={12}
+                            className="text-white"
+                          />
+                        </button>
+
+                        <span className="flex-1 text-sm text-gray-400 line-through">
+                          {item.amount ? `${item.amount} ` : ""}
+                          {item.name}
+                        </span>
+
+                        <button
+                          onClick={() => deleteItem(item.id)}
+                          className="text-gray-300 hover:text-red-400 transition shrink-0"
+                        >
+                          <Icon icon={TrashIcon} size={16} />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
             </Card>
           )}
         </div>

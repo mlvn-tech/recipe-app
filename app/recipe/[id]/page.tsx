@@ -1,4 +1,6 @@
 "use client";
+import { styles } from "@/lib/styles";
+import clsx from "clsx";
 
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "../../../lib/supabase";
@@ -8,6 +10,7 @@ import {
   PencilSquareIcon,
   ChevronDownIcon,
   ClockIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Icon from "@/components/icons";
 import Header from "@/components/Header";
@@ -22,14 +25,13 @@ export default function RecipeDetail() {
 
   const [recipe, setRecipe] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showSticky, setShowSticky] = useState(false);
+  const [showFloating, setShowFloating] = useState(false);
   const [ingredientsOpen, setIngredientsOpen] = useState(false);
   const [headerTitle, setHeaderTitle] = useState("Recept");
 
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const ingredientsEndRef = useRef<HTMLDivElement | null>(null);
 
-  // Recept ophalen
   useEffect(() => {
     const fetchRecipe = async () => {
       const { data } = await supabase
@@ -45,7 +47,6 @@ export default function RecipeDetail() {
     if (id) fetchRecipe();
   }, [id]);
 
-  // Header titel verandert bij scroll
   useEffect(() => {
     if (!titleRef.current || !recipe) return;
 
@@ -67,25 +68,23 @@ export default function RecipeDetail() {
     return () => observer.disconnect();
   }, [recipe]);
 
-  // Sticky ingrediënten NA ingrediëntenkaart
+  // Floating knop verschijnt zodra ingrediëntenkaart uit beeld scrollt
   useEffect(() => {
     const handleScroll = () => {
       if (!ingredientsEndRef.current) return;
-
       const rect = ingredientsEndRef.current.getBoundingClientRect();
       const headerHeight = 64;
 
       if (rect.bottom <= headerHeight) {
-        setShowSticky(true);
+        setShowFloating(true);
       } else {
-        setShowSticky(false);
+        setShowFloating(false);
         setIngredientsOpen(false);
       }
     };
 
     window.addEventListener("scroll", handleScroll);
     handleScroll();
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, [recipe]);
 
@@ -110,58 +109,6 @@ export default function RecipeDetail() {
       />
 
       <main className="min-h-screen bg-[var(--color-bg)] pt-16 pb-24">
-        {/* Sticky ingrediënten */}
-        <div
-          className={`
-            fixed top-[64px] left-0 w-full z-40 px-4
-            transition-all duration-300 ease-in-out
-            ${
-              showSticky
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 -translate-y-3 pointer-events-none"
-            }
-          `}
-        >
-          <div className="bg-white/70 backdrop-blur-lg rounded-b-xl border border-white/40 shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
-            <button
-              onClick={() => setIngredientsOpen(!ingredientsOpen)}
-              className="w-full px-4 py-3 flex justify-between font-semibold"
-            >
-              Ingrediënten
-              <Icon
-                icon={ChevronDownIcon}
-                className={`text-[var(--color-accent)] transition-transform duration-300 ${
-                  ingredientsOpen ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-
-            <div
-              className={`
-                grid transition-all duration-300 ease-in-out
-                ${
-                  ingredientsOpen
-                    ? "grid-rows-[1fr] opacity-100"
-                    : "grid-rows-[0fr] opacity-0"
-                }
-              `}
-            >
-              <div className="overflow-hidden">
-                <div className="px-6 pb-6 pt-2">
-                  <ul className="space-y-3">
-                    {recipe.ingredients?.map((item: string, index: number) => (
-                      <li key={index} className="flex items-start gap-3">
-                        <span className="mt-2.5 h-1.5 w-1.5 rounded-xl bg-gray-400 shrink-0" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Hero image */}
         {recipe.image_url && (
           <div className="w-full h-72">
@@ -221,7 +168,6 @@ export default function RecipeDetail() {
                 </li>
               ))}
             </ul>
-
             <div ref={ingredientsEndRef} className="h-1" />
           </Card>
 
@@ -251,6 +197,68 @@ export default function RecipeDetail() {
           )}
         </div>
       </main>
+
+      {/* Transparante overlay om paneel te sluiten */}
+      {ingredientsOpen && showFloating && (
+        <div
+          className="fixed inset-0 z-20"
+          onClick={() => setIngredientsOpen(false)}
+        />
+      )}
+
+      {/* Ingrediënten paneel */}
+      <div
+        className={`fixed left-0 w-full bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.1)] transition-transform duration-300 ease-in-out z-30 ${
+          ingredientsOpen && showFloating ? "translate-y-0" : "translate-y-full"
+        }`}
+        style={{ bottom: 0, paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        <div className="flex items-center justify-between px-6 pt-5 pb-3 mb-4">
+          <button onClick={() => setIngredientsOpen(false)}>
+            <Icon icon={XMarkIcon} size={20} className="text-gray-400" />
+          </button>
+          <h3 className="font-semibold">Ingrediënten</h3>
+          <div className="w-5" />
+        </div>
+
+        <div
+          className="px-8 overflow-y-auto max-h-80"
+          style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom))" }}
+        >
+          <ul className="space-y-3">
+            {recipe?.ingredients?.map((item: string, index: number) => (
+              <li key={index} className="flex items-start gap-3 text-sm">
+                <span className="mt-2 h-1 w-1 rounded-full bg-gray-400 shrink-0" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      {/* Floating pill knop */}
+      <div
+        className={`fixed left-1/2 -translate-x-1/2 z-40 transition-all duration-300 ${
+          showFloating && !ingredientsOpen
+            ? "opacity-100"
+            : "opacity-0 pointer-events-none"
+        }`}
+        style={{ bottom: "calc(5rem + env(safe-area-inset-bottom))" }}
+      >
+        <button
+          onClick={() => setIngredientsOpen(!ingredientsOpen)}
+          className={clsx(styles.button.floatingFrosted, "px-5 py-3")}
+        >
+          Ingrediënten
+          <Icon
+            icon={ChevronDownIcon}
+            size={16}
+            className={`text-gray-400 transition-transform duration-300 ${
+              ingredientsOpen ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+      </div>
     </>
   );
 }

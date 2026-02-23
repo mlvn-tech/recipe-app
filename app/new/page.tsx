@@ -1,4 +1,6 @@
 "use client";
+import { styles } from "@/lib/styles";
+import clsx from "clsx";
 
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
@@ -174,7 +176,7 @@ export default function NewRecipe() {
               value={title}
               maxLength={80}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 focus:outline-none focus:border-gray-300"
+              className={styles.input.default}
             />
           </Card>
 
@@ -190,7 +192,7 @@ export default function NewRecipe() {
                 onChange={(e) =>
                   setServings(e.target.value ? Number(e.target.value) : null)
                 }
-                className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 focus:outline-none focus:border-gray-300"
+                className={styles.input.default}
               />
             </div>
 
@@ -204,7 +206,7 @@ export default function NewRecipe() {
                 onChange={(e) =>
                   setCookingTime(e.target.value ? Number(e.target.value) : null)
                 }
-                className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 focus:outline-none focus:border-gray-300"
+                className={styles.input.default}
               />
             </div>
 
@@ -254,7 +256,7 @@ export default function NewRecipe() {
             <textarea
               value={ingredients}
               onChange={(e) => setIngredients(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 min-h-[280px] focus:outline-none focus:border-gray-300"
+              className={`${styles.input.default} min-h-[280px]`}
             />
           </Card>
 
@@ -266,7 +268,7 @@ export default function NewRecipe() {
             <textarea
               value={steps}
               onChange={(e) => setSteps(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 min-h-[280px] focus:outline-none focus:border-gray-300"
+              className={`${styles.input.default} min-h-[280px]`}
             />
           </Card>
 
@@ -278,17 +280,14 @@ export default function NewRecipe() {
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 focus:outline-none focus:border-gray-300"
+              className={`${styles.input.default} min-h-[30px]`}
             />
           </Card>
         </div>
       </main>
 
       <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-50">
-        <button
-          onClick={handleSubmit}
-          className="bg-[var(--color-accent)] text-white px-8 py-3 rounded-full shadow-lg font-semibold active:scale-95 transition"
-        >
+        <button onClick={handleSubmit} className={styles.button.save}>
           Opslaan
         </button>
       </div>

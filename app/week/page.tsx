@@ -1,4 +1,6 @@
 "use client";
+import { styles } from "@/lib/styles";
+import clsx from "clsx";
 
 import { useMemo, useState, useEffect } from "react";
 import Header from "@/components/Header";
@@ -238,7 +240,7 @@ export default function WeekPage() {
     <>
       <Header title="Weekplanner" />
 
-      <main className="min-h-screen bg-[var(--color-bg)] pt-16 pb-36">
+      <main className="min-h-screen bg-[var(--color-bg)] pt-20 pb-36">
         <div className="px-4 max-w-4xl mx-auto space-y-4">
           {weekData.map((day, index) => (
             <Card key={index} className="p-5 space-y-4">
@@ -312,45 +314,28 @@ export default function WeekPage() {
         {/* Week selector */}
         <button
           onClick={() => setIsWeekPickerOpen(true)}
-          className="   floating-blur
-                        flex items-center gap-2
-                        bg-white/70
-                        shadow-[0_8px_30px_rgba(0,0,0,0.12)]
-                        px-5 py-3
-                        rounded-full
-                        text-sm font-semibold text-gray-500
-                        whitespace-nowrap
-                        active:scale-95
-                        transition
-                    "
+          className={clsx(styles.button.floatingFrosted, "px-6 py-5")}
         >
           {weekLabel}
-          <Icon icon={ChevronDownIcon} size={16} className="text-gray-400" />
+          <Icon icon={ChevronDownIcon} size={20} className="text-gray-400" />
         </button>
 
         {/* Boodschappenlijst knop */}
         <div className="relative">
           <button
             onClick={() => router.push(`/shopping?week=${weekStartDate}`)}
-            className=" floating-blur
-                        flex items-center justify-center
-                        bg-white/50
-                        backdrop-blur-xl
-                        border border-white/40
-                        shadow-[0_8px_30px_rgba(0,0,0,0.12)]
-                        w-11 h-11
-                        rounded-full
-                        active:scale-95
-                        transition
-                    "
+            className={clsx(
+              styles.button.floatingFrosted,
+              "w-15 h-15 justify-center",
+            )}
           >
-            <Icon icon={ShoppingBagIcon} size={18} className="text-gray-500" />
+            <Icon icon={ShoppingBagIcon} size={20} className="text-gray-500" />
           </button>
 
           {/* Notificatie bubbel */}
           {shoppingCount > 0 && (
-            <div className="absolute -top-1 -right-1 h-4 w-4 bg-[var(--color-accent)] rounded-full flex items-center justify-center">
-              <span className="text-white text-[10px] font-bold">
+            <div className="absolute -top-1 -right-1 h-6 w-6 bg-[var(--color-accent)] rounded-full flex items-center justify-center">
+              <span className="text-white text-[12px] font-bold">
                 {shoppingCount}
               </span>
             </div>
@@ -360,16 +345,13 @@ export default function WeekPage() {
 
       {/* Week picker sheet */}
       <div
-        className={`fixed inset-0 z-50 transition ${isWeekPickerOpen ? "visible" : "invisible"}`}
+        className={`fixed inset-0 z-50 transition-opacity ${
+          isWeekPickerOpen && !isWeekPickerClosing
+            ? "opacity-100 visible"
+            : "opacity-0 invisible"
+        } bg-black/50`}
       >
-        <div
-          onClick={closeWeekPicker}
-          className={`fixed inset-0 bg-black/50 transition-opacity ${
-            isWeekPickerOpen && !isWeekPickerClosing
-              ? "opacity-100"
-              : "opacity-0"
-          }`}
-        />
+        <div onClick={closeWeekPicker} className="absolute inset-0" />
 
         <div
           className={`fixed bottom-0 left-0 w-full bg-white rounded-t-3xl transition-transform duration-300 ${
@@ -440,14 +422,13 @@ export default function WeekPage() {
 
       {/* Recept picker sheet */}
       <div
-        className={`fixed inset-0 z-50 transition ${activeDay !== null ? "visible" : "invisible"}`}
+        className={`fixed inset-0 z-50 transition-opacity ${
+          activeDay !== null && !isClosing
+            ? "opacity-100 visible"
+            : "opacity-0 invisible"
+        } bg-black/50`}
       >
-        <div
-          onClick={closeRecipeSheet}
-          className={`fixed inset-0 bg-black/50 transition-opacity ${
-            activeDay !== null && !isClosing ? "opacity-100" : "opacity-0"
-          }`}
-        />
+        <div onClick={closeRecipeSheet} className="absolute inset-0" />
 
         <div
           className={`fixed bottom-0 left-0 w-full bg-white rounded-t-3xl transition-transform duration-300 flex flex-col ${
@@ -455,30 +436,36 @@ export default function WeekPage() {
               ? "translate-y-0"
               : "translate-y-full"
           }`}
-          style={{ height: "70vh" }}
+          style={{ height: "65vh" }}
         >
-          <div className="p-6 pb-4 shrink-0">
-            <div className="flex justify-between items-center">
-              <h3 className="font-semibold text-lg">Kies een recept</h3>
-              <button onClick={closeRecipeSheet}>
-                <Icon icon={XMarkIcon} />
-              </button>
-            </div>
+          <div className="flex items-center justify-between px-6 pt-6 pb-2 mb-4">
+            <button onClick={closeRecipeSheet}>
+              <Icon icon={XMarkIcon} size={20} className="text-gray-400" />
+            </button>
+            <h3 className="font-semibold">Kies een recept</h3>
+            <div className="w-5" />
           </div>
 
-          <div className="px-6 mb-4 shrink-0">
+          <div className="px-6 mb-6 shrink-0">
             <input
               type="text"
-              placeholder="Zoek recept..."
+              placeholder="Zoek recept"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full border border-gray-200 rounded-full p-3 bg-gray-50 focus:outline-none focus:border-gray-300"
+              className="px-5 w-full border border-gray-200 rounded-full p-3 bg-gray-50 focus:outline-none focus:border-gray-300"
             />
           </div>
 
           <div className="px-6 flex gap-3 overflow-x-auto mb-4 no-scrollbar shrink-0">
             {categories.map((cat) => {
               const isActive = activeCategory === cat;
+              const count =
+                cat === "Alles"
+                  ? recipes.length
+                  : recipes.filter(
+                      (r) => r.category?.toLowerCase() === cat.toLowerCase(),
+                    ).length;
+
               return (
                 <button
                   key={cat}
@@ -489,7 +476,13 @@ export default function WeekPage() {
                       : "bg-white border-gray-200 text-gray-600"
                   }`}
                 >
-                  {cat}
+                  <span>{cat}</span>
+
+                  {cat !== "Alles" && count > 0 && (
+                    <span className="text-gray-400 font-normal ml-2">
+                      {count}
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -498,7 +491,7 @@ export default function WeekPage() {
           <div
             className="flex-1 overflow-y-auto px-6 space-y-2"
             style={{
-              paddingBottom: "calc(2rem + env(safe-area-inset-bottom))",
+              paddingBottom: "calc(5rem + env(safe-area-inset-bottom))",
             }}
           >
             {filteredRecipes.length === 0 ? (
