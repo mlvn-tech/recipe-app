@@ -247,7 +247,7 @@ export default function RecipeDetail() {
       >
         <button
           onClick={() => setIngredientsOpen(!ingredientsOpen)}
-          className={clsx(styles.button.floatingFrosted, "px-5 py-3")}
+          className={clsx(styles.button.floatingFrosted, "px-6 py-5")}
         >
           Ingrediënten
           <Icon
