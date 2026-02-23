@@ -108,7 +108,7 @@ function SwipeableItem({
         className="absolute right-0 flex items-center justify-center bg-red-500 rounded-full"
         style={{
           width: pillWidth,
-          height: 32,
+          height: 28,
           top: "50%",
           transform: "translateY(-50%)",
           opacity: pillOpacity,
