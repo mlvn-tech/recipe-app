@@ -173,7 +173,6 @@ function ShoppingPageContent() {
     setItems((prev) =>
       prev.map((i) => (i.id === item.id ? { ...i, name } : i)),
     );
-
     await supabase.from("shopping_list").update({ name }).eq("id", item.id);
   };
 
@@ -199,6 +198,17 @@ function ShoppingPageContent() {
 
     if (!error) {
       setItems((prev) => prev.filter((i) => !i.checked));
+    }
+  };
+
+  const clearAll = async () => {
+    const { error } = await supabase
+      .from("shopping_list")
+      .delete()
+      .neq("id", "00000000-0000-0000-0000-000000000000");
+
+    if (!error) {
+      setItems([]);
     }
   };
 
@@ -234,14 +244,6 @@ function ShoppingPageContent() {
 
           <Card className="p-5">
             <div className="flex gap-2 items-center">
-              {/* <input
-                type="text"
-                placeholder="Hoev."
-                value={newAmount}
-                onChange={(e) => setNewAmount(e.target.value)}
-                className={`${styles.input.default} max-w-[60px]`}
-              /> */}
-
               <input
                 type="text"
                 placeholder="Voeg item toe..."
@@ -261,6 +263,24 @@ function ShoppingPageContent() {
 
           {items.length > 0 && (
             <Card className="p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-semibold text-lg">Te kopen</h2>
+                <button
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        "Weet je zeker dat je alle boodschappen wilt verwijderen?",
+                      )
+                    ) {
+                      clearAll();
+                    }
+                  }}
+                  className="text-xs text-red-400 hover:text-red-500 transition"
+                >
+                  Verwijder alles
+                </button>
+              </div>
+
               <ul className="space-y-3">
                 {visibleUnchecked.map((item) => {
                   const isJustChecked = justChecked.has(item.id);
@@ -283,19 +303,11 @@ function ShoppingPageContent() {
                         )}
                       </button>
 
-                      {/* <input
-                        type="text"
-                        value={item.amount || ""}
-                        onChange={(e) => updateAmount(item, e.target.value)}
-                        placeholder="0"
-                        className="w-12 text-sm text-gray-400 bg-transparent border-b border-transparent focus:outline-none shrink-0 text-center mt-0.5"
-                      /> */}
-
                       <textarea
                         value={item.name}
                         onChange={(e) => updateName(item, e.target.value)}
                         rows={1}
-                        className={`flex-1 text-sm items-center bg-transparent border-b border-transparent focus:outline-none transition-all duration-200 resize-none overflow-hidden min-w-0 ${
+                        className={`flex-1 text-sm bg-transparent border-b border-transparent focus:outline-none transition-all duration-200 resize-none overflow-hidden min-w-0 ${
                           isJustChecked ? "text-gray-400 line-through" : ""
                         }`}
                         onInput={(e) => {
@@ -316,18 +328,25 @@ function ShoppingPageContent() {
                 })}
               </ul>
 
-              {/* 👇 Afgevinkte items onderaan */}
               {checkedItems.length > 0 && (
                 <>
                   <div className="flex items-center justify-between mt-6 mb-3 pt-6 border-t border-gray-100">
                     <p className="text-sm text-gray-400 font-semibold">
-                      Afgevinkte boodschappen{" "}
+                      Afgevinkte boodschappen
                     </p>
                     <button
-                      onClick={clearChecked}
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            "Weet je zeker dat je alle afgevinkte boodschappen wilt verwijderen?",
+                          )
+                        ) {
+                          clearChecked();
+                        }
+                      }}
                       className="text-xs text-red-400 hover:text-red-500 transition"
                     >
-                      Verwijder alle
+                      Verwijder alles
                     </button>
                   </div>
 
