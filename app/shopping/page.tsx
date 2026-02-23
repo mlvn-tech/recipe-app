@@ -67,7 +67,7 @@ function SwipeableItem({
   const pillOpacity = progress;
 
   return (
-    <div className="relative flex items-center overflow-hidden">
+    <div className="relative flex items-center">
       {/* Rode pil rechts */}
       <div
         className="absolute right-0 flex items-center justify-center bg-red-500 rounded-full"
@@ -83,9 +83,9 @@ function SwipeableItem({
         )}
       </div>
 
-      {/* Item schuift naar links */}
+      {/* Item schuift naar links — overflow-hidden alleen hier */}
       <div
-        className="relative w-full bg-white"
+        className="relative w-full bg-white overflow-hidden"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
