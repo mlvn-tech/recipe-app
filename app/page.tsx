@@ -221,12 +221,6 @@ export default function Home() {
             </div>
           )}
 
-          {/* 🍽️ Empty state */}
-          {recipes !== null && filteredRecipes.length === 0 && (
-            <Card>
-              <EmptyRecipesState category={activeCategory} />
-            </Card>
-          )}
           <Card className="mb-4 p-4">
             <button
               onClick={() => setIsIngredientSheetOpen(true)}
@@ -245,6 +239,14 @@ export default function Home() {
               </span>
             </button>
           </Card>
+
+          {/* 🍽️ Empty state */}
+          {recipes !== null && filteredRecipes.length === 0 && (
+            <Card>
+              <EmptyRecipesState category={activeCategory} />
+            </Card>
+          )}
+
           {/* 🍽️ Grid */}
           {recipes !== null && filteredRecipes.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -296,7 +298,7 @@ export default function Home() {
                           </div>
                         )}
                         {recipe.category && (
-                          <div className="inline-block px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-xl">
+                          <div className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-lg">
                             {recipe.category}
                           </div>
                         )}

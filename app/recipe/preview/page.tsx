@@ -200,7 +200,7 @@ export default function PreviewPage() {
               </div>
 
               {preview.category && (
-                <div className="px-3 py-1 bg-gray-100 rounded-full text-xs">
+                <div className="px-3 py-1 border border-gray-300 rounded-lg capitalize">
                   {preview.category}
                 </div>
               )}
