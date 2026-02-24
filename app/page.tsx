@@ -3,21 +3,114 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
-import { ClockIcon, UserIcon } from "@heroicons/react/24/outline";
+import {
+  ClockIcon,
+  UserIcon,
+  ArrowPathIcon,
+  ChevronDownIcon,
+} from "@heroicons/react/24/outline";
 import Icon from "@/components/icons";
 import Link from "next/link";
 import Card from "@/components/Card";
 import SearchInput from "@/components/SearchInput";
 import EmptyRecipesState from "@/components/EmptyRecipesState";
 import { useUI } from "@/components/UIContext";
+import SwipeableSheet from "@/components/SwipeableSheet";
+import { styles } from "@/lib/styles";
+import clsx from "clsx";
 
 export default function Home() {
   const [recipes, setRecipes] = useState<any[] | null>(null);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("Alles");
   const router = useRouter();
-
   const { setHighlightCreate } = useUI();
+  const [generating, setGenerating] = useState(false);
+
+  const [isIngredientSheetOpen, setIsIngredientSheetOpen] = useState(false);
+  const [ingredientInput, setIngredientInput] = useState("");
+
+  const [selectedServings, setSelectedServings] = useState(2);
+  const [selectedCategory, setSelectedCategory] = useState("Diner");
+
+  const [showText, setShowText] = useState(true);
+
+  useEffect(() => {
+    if (generating) {
+      setShowText(false);
+    } else {
+      const timer = setTimeout(() => {
+        setShowText(true);
+      }, 300); // gelijk aan je transition duration
+      return () => clearTimeout(timer);
+    }
+  }, [generating]);
+
+  const handleGenerate = async () => {
+    console.log("HANDLE GENERATE START");
+
+    if (!ingredientInput.trim()) {
+      console.log("GEEN INGREDIENTEN");
+      return;
+    }
+
+    try {
+      setGenerating(true);
+
+      const ingredientArray = ingredientInput
+        .split(",")
+        .map((i) => i.trim())
+        .filter(Boolean);
+
+      const res = await fetch("/api/generate-recipe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ingredients: ingredientArray,
+          servings: selectedServings,
+          category: selectedCategory,
+        }),
+      });
+
+      const text = await res.text();
+      console.log("RAW RESPONSE:", text);
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error("JSON PARSE ERROR");
+        return;
+      }
+
+      console.log("API RESPONSE:", data);
+
+      if (!data.error) {
+        console.log("GA NAAR PREVIEW");
+        localStorage.setItem("ai_preview", JSON.stringify(data));
+        router.push("/recipe/preview");
+      } else {
+        console.log("DATA ERROR");
+      }
+    } catch (err) {
+      console.error("Generate error:", err);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  // useEffect(() => {
+  //   if (!generating) {
+  //     setDotCount(0);
+  //     return;
+  //   }
+
+  //   const interval = setInterval(() => {
+  //     setDotCount((prev) => (prev + 1) % 4);
+  //   }, 400);
+
+  //   return () => clearInterval(interval);
+  // }, [generating]);
 
   // 🔥 Fetch recepten
   useEffect(() => {
@@ -134,7 +227,24 @@ export default function Home() {
               <EmptyRecipesState category={activeCategory} />
             </Card>
           )}
-
+          <Card className="mb-4 p-4">
+            <button
+              onClick={() => setIsIngredientSheetOpen(true)}
+              className="w-full text-left flex items-center justify-between"
+            >
+              <div>
+                <p className="text-sm font-semibold text-gray-800">
+                  Kook iets lekkers
+                </p>
+                <p className="text-xs text-gray-500">
+                  met wat je nog in huis hebt
+                </p>
+              </div>
+              <span className="text-[var(--color-accent)] text-sm font-medium">
+                Start
+              </span>
+            </button>
+          </Card>
           {/* 🍽️ Grid */}
           {recipes !== null && filteredRecipes.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -185,6 +295,11 @@ export default function Home() {
                             </span>
                           </div>
                         )}
+                        {recipe.category && (
+                          <div className="inline-block px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-xl">
+                            {recipe.category}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </Card>
@@ -194,6 +309,114 @@ export default function Home() {
           )}
         </div>
       </main>
+      <SwipeableSheet
+        open={isIngredientSheetOpen}
+        onClose={() => setIsIngredientSheetOpen(false)}
+        title="Wat heb je nog in huis?"
+        height="70vh"
+        // className="max-h-[460px]"
+      >
+        <div className="px-6 flex flex-col gap-4">
+          <textarea
+            value={ingredientInput}
+            onChange={(e) => setIngredientInput(e.target.value)}
+            placeholder="Bijv: paprika, ui, zoete aardappel, rijst"
+            rows={3}
+            disabled={generating}
+            className={clsx(
+              styles.input.default,
+              "transition-all duration-200",
+              generating && "opacity-60 bg-gray-50 cursor-not-allowed",
+            )}
+          />
+          <div className="mt-4">
+            <label className="block text-sm font-medium mb-2">Aantal</label>
+
+            <div className="flex items-center gap-2">
+              <div className="relative w-16">
+                <select
+                  value={selectedServings}
+                  onChange={(e) => setSelectedServings(Number(e.target.value))}
+                  className="
+          appearance-none
+          w-full
+          bg-gray-50
+          border border-gray-200
+          rounded-full
+          px-3 py-2
+          text-sm
+          text-center
+          focus:outline-none
+          focus:border-[var(--color-accent)]
+          cursor-pointer
+        "
+                >
+                  {[1, 2, 3, 4, 5, 6].map((num) => (
+                    <option key={num} value={num}>
+                      {num}
+                    </option>
+                  ))}
+                </select>
+
+                <ChevronDownIcon className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              </div>
+
+              <span className="text-sm text-gray-600">
+                {selectedServings === 1 ? "persoon" : "personen"}
+              </span>
+            </div>
+          </div>
+          <div className="mt-4">
+            <label className="block text-sm font-medium mb-2">Categorie</label>
+
+            <div className="relative w-full">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="
+        appearance-none
+        w-full
+        bg-gray-50
+        border border-gray-200
+        rounded-full
+        px-4 py-3
+        text-sm
+        focus:outline-none
+        focus:border-[var(--color-accent)]
+        cursor-pointer
+      "
+              >
+                {["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"].map(
+                  (cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ),
+                )}
+              </select>
+            </div>
+          </div>
+          <button
+            onClick={handleGenerate}
+            disabled={generating}
+            className={clsx(
+              styles.button.primary,
+              "h-[58px] relative flex items-center justify-center mx-auto overflow-hidden transition-all duration-300",
+              generating ? "bg-gray-200 w-8" : "w-full",
+            )}
+          >
+            {/* Tekst */}
+            {showText && !generating && (
+              <span className="absolute">Genereer recept</span>
+            )}
+
+            {/* Spinner */}
+            {generating && (
+              <ArrowPathIcon className="w-6 h-6 animate-spin absolute text-gray-600" />
+            )}
+          </button>
+        </div>
+      </SwipeableSheet>
     </>
   );
 }

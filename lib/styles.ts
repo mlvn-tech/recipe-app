@@ -1,7 +1,7 @@
 export const styles = {
   button: {
-    primary: "bg-[var(--color-accent)] text-white px-8 py-3 rounded-full font-semibold active:scale-95 transition",
-    secondary: "bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-xl text-sm active:scale-95 transition",
+    primary: "bg-[var(--color-accent)] text-white px-8 py-4 rounded-full font-semibold active:scale-95 transition",
+    secondary: "bg-white border border-gray-200 text-gray-600 px-8 py-4 rounded-xl text-sm active:scale-95 transition",
     ghost: "text-gray-400 hover:text-gray-600 transition",
     danger: "text-gray-300 hover:text-red-400 transition",
     floating: "bg-white border border-gray-200 shadow-md rounded-full active:scale-95 transition",

@@ -45,7 +45,7 @@ export default function BottomNav() {
         fixed bottom-0 left-0 w-full
         backdrop-blur-xl bg-white/70
         border-t border-gray-200
-        z-50
+        z-120
         pb-safe
       "
     >

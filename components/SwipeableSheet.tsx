@@ -43,11 +43,11 @@ export default function SwipeableSheet({
   return (
     <>
       {open && overlay && (
-        <div className="fixed inset-0 z-40 bg-black/50" onClick={onClose} />
+        <div className="fixed inset-0 z-110 bg-black/50" onClick={onClose} />
       )}
 
       <div
-        className={`fixed left-0 w-full bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.1)] z-50 flex flex-col ${
+        className={`fixed left-0 w-full bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.1)] z-110 flex flex-col ${
           !dragging ? "transition-transform duration-300 ease-in-out" : ""
         } ${className ?? ""}`}
         style={{
@@ -63,16 +63,16 @@ export default function SwipeableSheet({
           onTouchMove={onDragMove}
           onTouchEnd={onDragEnd}
         >
-          <div className="flex justify-center pt-3 pb-1">
+          <div className="flex justify-center pt-3">
             <div className="w-10 h-1 bg-gray-200 rounded-full" />
           </div>
-          <div className="flex items-center justify-center px-6 pt-3 pb-3">
+          <div className="flex items-center justify-center px-6 pt-8 pb-5">
             <h3 className="font-semibold">{title}</h3>
           </div>
         </div>
 
         {/* Content */}
-        {children}
+        <div className="flex-1 overflow-y-auto">{children}</div>
       </div>
     </>
   );
