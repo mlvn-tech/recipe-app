@@ -65,16 +65,12 @@ export default function BottomNav() {
                 onClick={() => router.push(item.href)}
                 className={`
                   flex items-center justify-center
-                  bg-[var(--color-accent)]/90
+                  bg-[var(--color-accent)]/80
                   rounded-lg
                   w-8 h-8
                   active:scale-95
-                  transition-all duration-300
-                  ${
-                    highlightCreate
-                      ? "scale-110 shadow-lg shadow-[var(--color-accent)]/40"
-                      : ""
-                  }
+                  transition-transform
+                  ${highlightCreate ? "animate-pulse-cta" : ""}
                 `}
               >
                 <Icon icon={PlusIcon} size={24} className="text-white" />

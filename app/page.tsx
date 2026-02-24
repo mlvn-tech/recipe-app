@@ -26,6 +26,9 @@ export default function Home() {
   const router = useRouter();
   const [showContent, setShowContent] = useState(false);
 
+  // ✅ UI context netjes bovenin
+  const { setHighlightCreate } = useUI();
+
   useEffect(() => {
     const fetchRecipes = async () => {
       setLoading(true);
@@ -42,7 +45,7 @@ export default function Home() {
     fetchRecipes();
   }, []);
 
-  // 👇 Zorgt voor subtiele fade-in na loading
+  // Fade-in na loading
   useEffect(() => {
     if (!loading) {
       const timeout = setTimeout(() => {
@@ -65,32 +68,11 @@ export default function Home() {
     ).length;
   };
 
+  // ✅ Filter is nu puur
   const filteredRecipes = recipes.filter((recipe) => {
     const matchesSearch = recipe.title
       .toLowerCase()
       .includes(search.toLowerCase());
-
-    const { setHighlightCreate } = useUI();
-
-    useEffect(() => {
-      if (filteredRecipes.length === 0) {
-        setHighlightCreate(true);
-
-        const timer = setTimeout(() => {
-          setHighlightCreate(false);
-        }, 2000);
-
-        return () => clearTimeout(timer);
-      }
-    }, [filteredRecipes.length]);
-
-    useEffect(() => {
-      if (filteredRecipes.length === 0) {
-        setHighlightCreate(true);
-      } else {
-        setHighlightCreate(false);
-      }
-    }, [filteredRecipes.length]);
 
     const matchesCategory =
       activeCategory === "Alles" ||
@@ -98,6 +80,19 @@ export default function Home() {
 
     return matchesSearch && matchesCategory;
   });
+
+  // ✅ Highlight logic correct geplaatst
+  useEffect(() => {
+    if (!loading && filteredRecipes.length === 0) {
+      setHighlightCreate(true);
+
+      const timer = setTimeout(() => {
+        setHighlightCreate(false);
+      }, 5400);
+
+      return () => clearTimeout(timer);
+    }
+  }, [activeCategory, search, loading]);
 
   return (
     <>

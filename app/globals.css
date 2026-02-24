@@ -92,3 +92,22 @@ select {
 input, textarea, select {
   font-size: 16px;
 }
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(40, 173, 160, 0.35);
+  }
+  40% {
+    box-shadow: 0 0 0 12px rgba(40, 173, 160, 0);
+  }
+  60% {
+    box-shadow: 0 0 0 0 rgba(40, 173, 160, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(40, 173, 160, 0);
+  }
+}
+
+.animate-pulse-cta {
+  animation: pulse-ring 1.8s ease-out 3;
+}
