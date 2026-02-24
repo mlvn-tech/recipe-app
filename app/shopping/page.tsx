@@ -228,9 +228,14 @@ function ShoppingPageContent() {
   const addItem = async () => {
     if (!newName.trim()) return;
 
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const userId = session?.user?.id;
+
     const { data, error } = await supabase
       .from("shopping_list")
-      .insert([{ name: newName.trim(), amount: null }])
+      .insert([{ name: newName.trim(), amount: null, user_id: userId }])
       .select()
       .single();
 

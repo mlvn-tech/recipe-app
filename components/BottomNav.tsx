@@ -49,7 +49,10 @@ export default function BottomNav() {
     >
       <div className="max-w-4xl mx-auto flex justify-around py-3">
         {items.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive =
+            pathname === item.href ||
+            (item.href === "/week" && pathname.startsWith("/shopping"));
+
           const IconComponent = isActive ? item.iconActive : item.icon;
 
           if (item.href === "/new") {

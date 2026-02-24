@@ -183,7 +183,9 @@ export default function RecipeDetail() {
 
           {recipe.notes && (
             <Card>
-              <h2 className="font-semibold mb-4 text-lg">Notities</h2>
+              <h2 className="font-semibold mb-4 text-lg min-h-[30px]">
+                Notities
+              </h2>
               <p className="whitespace-pre-line">{recipe.notes}</p>
             </Card>
           )}

@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { ViewTransitions } from "next-view-transitions";
 import AppShell from "@/components/AppShell";
+import AuthProvider from "@/components/AuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,7 +25,6 @@ export const viewport = {
 export const metadata: Metadata = {
   title: "Recepten",
   description: "Mijn recepten app",
-
   icons: {
     icon: [
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
@@ -32,7 +32,6 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }],
   },
-
   themeColor: "#000000",
 };
 
@@ -45,24 +44,12 @@ export default function RootLayout({
     <ViewTransitions>
       <html lang="en" className="h-full">
         <body
-          className={`
-    ${geistSans.variable} 
-    ${geistMono.variable} 
-    antialiased 
-    bg-[var(--color-bg)]
-    text-[#171717]
-    h-full
-  `}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[var(--color-bg)] text-[#171717] h-full`}
         >
-          <AppShell>{children}</AppShell>
-          <Toaster
-            richColors
-            toastOptions={{
-              style: {
-                zIndex: 30,
-              },
-            }}
-          />
+          <AuthProvider>
+            <AppShell>{children}</AppShell>
+          </AuthProvider>
+          <Toaster richColors toastOptions={{ style: { zIndex: 30 } }} />
         </body>
       </html>
     </ViewTransitions>
