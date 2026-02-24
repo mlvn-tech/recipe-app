@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import { ViewTransitions } from "next-view-transitions";
 import AppShell from "@/components/AppShell";
 import AuthProvider from "@/components/AuthProvider";
+import { UIProvider } from "@/components/UIContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,7 +48,9 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[var(--color-bg)] text-[#171717] h-full`}
         >
           <AuthProvider>
-            <AppShell>{children}</AppShell>
+            <UIProvider>
+              <AppShell>{children}</AppShell>
+            </UIProvider>
           </AuthProvider>
           <Toaster richColors toastOptions={{ style: { zIndex: 30 } }} />
         </body>

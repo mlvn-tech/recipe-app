@@ -11,10 +11,12 @@ import {
   CalendarDaysIcon as CalendarDaysIconSolid,
 } from "@heroicons/react/24/solid";
 import Icon from "@/components/icons";
+import { useUI } from "./UIContext";
 
 export default function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const { highlightCreate } = useUI(); // 👈 hier toevoegen
 
   const items = [
     {
@@ -55,19 +57,25 @@ export default function BottomNav() {
 
           const IconComponent = isActive ? item.iconActive : item.icon;
 
+          // 🎯 Speciale styling voor + knop
           if (item.href === "/new") {
             return (
               <button
                 key={item.href}
                 onClick={() => router.push(item.href)}
-                className="
+                className={`
                   flex items-center justify-center
-                  bg-[var(--color-accent)]/80
+                  bg-[var(--color-accent)]/90
                   rounded-lg
                   w-8 h-8
                   active:scale-95
-                  transition
-                "
+                  transition-all duration-300
+                  ${
+                    highlightCreate
+                      ? "scale-110 shadow-lg shadow-[var(--color-accent)]/40"
+                      : ""
+                  }
+                `}
               >
                 <Icon icon={PlusIcon} size={24} className="text-white" />
               </button>
@@ -82,7 +90,7 @@ export default function BottomNav() {
             >
               <Icon
                 icon={IconComponent}
-                size={32}
+                size={28}
                 className={`${
                   isActive ? "text-gray-500" : "text-gray-400"
                 } transition-colors`}
@@ -94,4 +102,3 @@ export default function BottomNav() {
     </div>
   );
 }
-4;

@@ -1,5 +1,6 @@
 "use client";
-import { useEffect } from "react";
+
+import { useEffect, useState } from "react";
 import { ensureAnonymousSession } from "@/lib/auth";
 
 export default function AuthProvider({
@@ -7,9 +8,18 @@ export default function AuthProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const [ready, setReady] = useState(false);
+
   useEffect(() => {
-    ensureAnonymousSession();
+    const init = async () => {
+      await ensureAnonymousSession();
+      setReady(true);
+    };
+
+    init();
   }, []);
+
+  if (!ready) return null;
 
   return <>{children}</>;
 }

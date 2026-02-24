@@ -2,6 +2,7 @@
 import { styles } from "@/lib/styles";
 import clsx from "clsx";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import {
@@ -14,12 +15,15 @@ import Icon from "@/components/icons";
 import Link from "next/link";
 import Card from "@/components/Card";
 import SearchInput from "@/components/SearchInput";
+import EmptyRecipesState from "@/components/EmptyRecipesState";
+import { useUI } from "@/components/UIContext";
 
 export default function Home() {
   const [recipes, setRecipes] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("Alles");
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
   const [showContent, setShowContent] = useState(false);
 
   useEffect(() => {
@@ -65,6 +69,28 @@ export default function Home() {
     const matchesSearch = recipe.title
       .toLowerCase()
       .includes(search.toLowerCase());
+
+    const { setHighlightCreate } = useUI();
+
+    useEffect(() => {
+      if (filteredRecipes.length === 0) {
+        setHighlightCreate(true);
+
+        const timer = setTimeout(() => {
+          setHighlightCreate(false);
+        }, 2000);
+
+        return () => clearTimeout(timer);
+      }
+    }, [filteredRecipes.length]);
+
+    useEffect(() => {
+      if (filteredRecipes.length === 0) {
+        setHighlightCreate(true);
+      } else {
+        setHighlightCreate(false);
+      }
+    }, [filteredRecipes.length]);
 
     const matchesCategory =
       activeCategory === "Alles" ||
@@ -180,17 +206,8 @@ export default function Home() {
             `}
           >
             {filteredRecipes.length === 0 ? (
-              <Card className="text-center">
-                <p className="text-gray-600 mb-3">
-                  Hier staan nog geen recepten
-                </p>
-                {activeCategory !== "Alles" && (
-                  <p className="text-sm text-gray-400">
-                    Maak snel je eerste{" "}
-                    <span className="font-medium">{activeCategory}</span> recept
-                    aan!
-                  </p>
-                )}
+              <Card>
+                <EmptyRecipesState category={activeCategory} />
               </Card>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
