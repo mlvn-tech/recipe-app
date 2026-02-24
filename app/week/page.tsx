@@ -30,6 +30,13 @@ export default function WeekPage() {
   const [weekOffset, setWeekOffset] = useState(0);
   const [isWeekPickerOpen, setIsWeekPickerOpen] = useState(false);
 
+  const getUserId = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    return session?.user?.id;
+  };
+
   const weekOptions = [
     { label: "Deze week", offset: 0 },
     { label: "Volgende week", offset: 1 },
@@ -173,45 +180,70 @@ export default function WeekPage() {
 
   const toggleRecipeForDay = async (recipe: any) => {
     if (activeDay === null) return;
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const userId = session?.user?.id;
+    if (!userId) return;
+
     const exists = weekPlan[activeDay].some((r) => r.id === recipe.id);
 
     if (exists) {
-      await supabase
+      const { error } = await supabase
         .from("week_plans")
         .delete()
         .eq("week_start", weekStartDate)
         .eq("day_index", activeDay)
-        .eq("recipe_id", recipe.id);
-      setWeekPlan((prev) => ({
-        ...prev,
-        [activeDay]: prev[activeDay].filter((r) => r.id !== recipe.id),
-      }));
+        .eq("recipe_id", recipe.id)
+        .eq("user_id", userId);
+
+      if (!error) {
+        setWeekPlan((prev) => ({
+          ...prev,
+          [activeDay]: prev[activeDay].filter((r) => r.id !== recipe.id),
+        }));
+      }
     } else {
-      await supabase.from("week_plans").insert({
+      const { error } = await supabase.from("week_plans").insert({
         week_start: weekStartDate,
         day_index: activeDay,
         recipe_id: recipe.id,
+        user_id: userId,
       });
-      setWeekPlan((prev) => ({
-        ...prev,
-        [activeDay]: [...prev[activeDay], recipe],
-      }));
+
+      if (!error) {
+        setWeekPlan((prev) => ({
+          ...prev,
+          [activeDay]: [...prev[activeDay], recipe],
+        }));
+      }
     }
   };
-
   const removeFromDay = async (dayIndex: number, recipeId: string) => {
-    await supabase
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const userId = session?.user?.id;
+    if (!userId) return;
+
+    const { error } = await supabase
       .from("week_plans")
       .delete()
       .eq("week_start", weekStartDate)
       .eq("day_index", dayIndex)
-      .eq("recipe_id", recipeId);
-    setWeekPlan((prev) => ({
-      ...prev,
-      [dayIndex]: prev[dayIndex].filter((r) => r.id !== recipeId),
-    }));
-  };
+      .eq("recipe_id", recipeId)
+      .eq("user_id", userId);
 
+    if (!error) {
+      setWeekPlan((prev) => ({
+        ...prev,
+        [dayIndex]: prev[dayIndex].filter((r) => r.id !== recipeId),
+      }));
+    }
+  };
   return (
     <>
       <Header title="Weekplanner" />

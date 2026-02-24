@@ -181,19 +181,29 @@ function ShoppingPageContent() {
 
   const loadFromWeek = async () => {
     if (!weekStart) return;
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const userId = session?.user?.id;
+    if (!userId) return;
+
     setLoadingWeek(true);
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("week_plans")
       .select("recipes(*)")
-      .eq("week_start", weekStart);
+      .eq("week_start", weekStart)
+      .eq("user_id", userId);
 
-    if (!data) {
+    if (error || !data) {
       setLoadingWeek(false);
       return;
     }
 
     const allIngredients: string[] = [];
+
     data.forEach((item: any) => {
       if (item.recipes?.ingredients) {
         allIngredients.push(...item.recipes.ingredients);
@@ -203,22 +213,29 @@ function ShoppingPageContent() {
     const unique = [
       ...new Set(allIngredients.map((i) => i.trim().toLowerCase())),
     ];
+
     const existingNames = items.map((i) => i.name.toLowerCase());
+
     const toInsert = unique
       .filter((name) => !existingNames.includes(name))
-      .map((name) => ({ name, amount: null, checked: false }));
+      .map((name) => ({
+        name,
+        amount: null,
+        checked: false,
+        user_id: userId,
+      }));
 
     if (toInsert.length === 0) {
       setLoadingWeek(false);
       return;
     }
 
-    const { data: inserted, error } = await supabase
+    const { data: inserted, error: insertError } = await supabase
       .from("shopping_list")
       .insert(toInsert)
       .select();
 
-    if (!error && inserted) {
+    if (!insertError && inserted) {
       setItems((prev) => [...inserted, ...prev]);
     }
 
@@ -231,11 +248,20 @@ function ShoppingPageContent() {
     const {
       data: { session },
     } = await supabase.auth.getSession();
+
     const userId = session?.user?.id;
+    if (!userId) return;
 
     const { data, error } = await supabase
       .from("shopping_list")
-      .insert([{ name: newName.trim(), amount: null, user_id: userId }])
+      .insert([
+        {
+          name: newName.trim(),
+          amount: null,
+          checked: false,
+          user_id: userId,
+        },
+      ])
       .select()
       .single();
 
