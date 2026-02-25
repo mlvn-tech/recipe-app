@@ -263,7 +263,10 @@ export default function PreviewPage() {
         </div>
       </main>
       {savingOverlay && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+        <div
+          style={{ height: "100dvh" }}
+          className="fixed left-0 top-0 z-[9999] flex items-center justify-center"
+        >
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300" />
 

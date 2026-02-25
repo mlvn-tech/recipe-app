@@ -108,7 +108,7 @@ export default function RecipeDetail() {
         }
       />
 
-      <main className="min-h-screen bg-[var(--color-bg)] pt-16 pb-24">
+      <main className="min-h-dvh bg-[var(--color-bg)] pt-16 pb-24">
         {recipe.image_url && (
           <div className="w-full h-72">
             <img

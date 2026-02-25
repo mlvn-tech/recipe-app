@@ -45,11 +45,15 @@ export default function SwipeableSheet({
   return (
     <>
       {open && overlay && (
-        <div className="fixed inset-0 z-110 bg-black/50" onClick={onClose} />
+        <div
+          onClick={onClose}
+          className="fixed left-0 top-0 w-screen bg-black/70 z-[100]"
+          style={{ height: "100dvh" }}
+        />
       )}
 
       <div
-        className={`fixed left-0 w-full bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.1)] z-110 flex flex-col 
+        className={`fixed left-0 w-full bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.1)] z-[110] flex flex-col 
         } ${className ?? ""}`}
         style={{
           bottom: 0,

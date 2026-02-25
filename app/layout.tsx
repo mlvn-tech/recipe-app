@@ -6,6 +6,7 @@ import { ViewTransitions } from "next-view-transitions";
 import AppShell from "@/components/AppShell";
 import AuthProvider from "@/components/AuthProvider";
 import { UIProvider } from "@/components/UIContext";
+import { OverlayProvider } from "@/components/GlobalOverlay";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,7 +50,9 @@ export default function RootLayout({
         >
           <AuthProvider>
             <UIProvider>
-              <AppShell>{children}</AppShell>
+              <OverlayProvider>
+                <AppShell>{children}</AppShell>
+              </OverlayProvider>
             </UIProvider>
           </AuthProvider>
           <Toaster richColors toastOptions={{ style: { zIndex: 30 } }} />
