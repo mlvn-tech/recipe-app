@@ -60,10 +60,9 @@ export default function Home() {
         .map((i) => i.trim())
         .filter(Boolean);
 
-      const res = await fetch("/api/generate-recipe", {
+      const res = await fetch("/api/genrate-recipe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        console.log("CATEGORY SENT:", selectedCategory);
         body: JSON.stringify({
           ingredients: ingredientArray,
           servings: selectedServings,
