@@ -48,10 +48,12 @@ export default function SwipeableSheet({
       {open && overlay && (
         <div
           onClick={onClose}
-          className="fixed left-0 w-screen z-[100] bg-black/70"
+          className="fixed z-[100] bg-black/70"
           style={{
-            top: "-100px",
-            height: "calc(100dvh + 100px)",
+            top: "-200px",
+            left: "-20px",
+            right: "-20px",
+            bottom: "-200px",
           }}
         />
       )}

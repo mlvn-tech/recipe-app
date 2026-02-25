@@ -284,7 +284,9 @@ export default function Home() {
       >
         <div
           className="px-6 flex flex-col gap-4"
-          style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom))" }}
+          style={{
+            paddingBottom: "calc(6rem + env(safe-area-inset-bottom))",
+          }}
         >
           <textarea
             value={ingredientInput}
