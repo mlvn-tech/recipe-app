@@ -1,7 +1,7 @@
 "use client";
 
 import Header from "@/components/Header";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import {
@@ -12,6 +12,7 @@ import {
 import Icon from "@/components/icons";
 import Card from "@/components/Card";
 import { styles } from "@/lib/styles";
+import { formatTitle } from "@/lib/utils";
 
 export default function PreviewPage() {
   const router = useRouter();
@@ -188,7 +189,7 @@ export default function PreviewPage() {
 
           {/* Titel + meta */}
           <div className="space-y-2">
-            <h1 className="text-2xl font-semibold">{preview.title}</h1>
+            <h1 className="text-3xl font-bold">{formatTitle(preview.title)}</h1>
 
             <div className="flex items-center gap-4 text-sm text-gray-600">
               <div className="flex items-center gap-1">
@@ -274,7 +275,7 @@ export default function PreviewPage() {
               <p className="text-base font-semibold text-gray-900">
                 Je recept wordt opgeslagen
               </p>
-              <p className="text-sm text-gray-500">Een momentje geduld...</p>
+              <p className="text-sm text-gray-500">Een momentje geduld</p>
             </div>
           </div>
         </div>

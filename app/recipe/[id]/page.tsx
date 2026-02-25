@@ -15,6 +15,7 @@ import Icon from "@/components/icons";
 import Header from "@/components/Header";
 import Card from "@/components/Card";
 import SwipeableSheet from "@/components/SwipeableSheet";
+import { formatTitle } from "@/lib/utils";
 
 export default function RecipeDetail() {
   const params = useParams();
@@ -124,7 +125,7 @@ export default function RecipeDetail() {
               Toegevoegd op {formattedDate}
             </p>
             <h1 ref={titleRef} className="text-3xl font-bold">
-              {recipe.title}
+              {formatTitle(recipe.title)}
             </h1>
 
             <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-600">

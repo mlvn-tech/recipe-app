@@ -127,6 +127,7 @@ Geef het antwoord uitsluitend terug als geldige JSON in dit formaat:
     }
 
     parsed.cooking_time = Number(parsed.cooking_time) || 30;
+    parsed.cooking_time = Math.ceil(parsed.cooking_time / 5) * 5;
     parsed.servings = Number(parsed.servings) || servings;
     parsed.category = category ?? "Diner";
 

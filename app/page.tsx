@@ -19,6 +19,7 @@ import { useUI } from "@/components/UIContext";
 import SwipeableSheet from "@/components/SwipeableSheet";
 import { styles } from "@/lib/styles";
 import clsx from "clsx";
+import { formatTitle } from "@/lib/utils";
 
 export default function Home() {
   const [recipes, setRecipes] = useState<any[] | null>(null);
@@ -60,7 +61,7 @@ export default function Home() {
         .map((i) => i.trim())
         .filter(Boolean);
 
-      const res = await fetch("/api/genrate-recipe", {
+      const res = await fetch("/api/generate-recipe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -69,6 +70,7 @@ export default function Home() {
           category: selectedCategory,
         }),
       });
+      ``;
 
       const text = await res.text();
       let data;
@@ -238,7 +240,7 @@ export default function Home() {
                       </p>
 
                       <h2 className="text-xl font-semibold leading-tight">
-                        {recipe.title}
+                        {formatTitle(recipe.title)}
                       </h2>
 
                       <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
