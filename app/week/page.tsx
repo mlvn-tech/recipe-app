@@ -399,7 +399,8 @@ export default function WeekPage() {
         open={activeDay !== null}
         onClose={() => setActiveDay(null)}
         title="Kies een recept"
-        height="65vh"
+        height="65dvh"
+        overflowVisible={false}
       >
         <div className="px-6 mb-4 shrink-0">
           <SearchInput
@@ -440,7 +441,7 @@ export default function WeekPage() {
         </div>
 
         <div
-          className="flex-1 overflow-y-auto px-6 space-y-2"
+          className="px-6 space-y-2"
           style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom))" }}
         >
           {filteredRecipes.length === 0 ? (

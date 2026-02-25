@@ -44,25 +44,26 @@ export default function SwipeableSheet({
 
   return (
     <>
+      {/* 🔥 Fullscreen overlay (PWA-proof) */}
       {open && overlay && (
         <div
           onClick={onClose}
-          className="fixed left-0 top-0 w-screen bg-black/70 z-[100]"
-          style={{ height: "100dvh" }}
+          className="fixed top-0 left-0 w-screen z-[100] bg-black/70"
+          style={{
+            height: "100dvh",
+          }}
         />
       )}
 
+      {/* 🔥 Sheet */}
       <div
-        className={`fixed left-0 w-full bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.1)] z-[110] flex flex-col 
-        } ${className ?? ""}`}
+        className={`fixed left-0 w-full bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.1)] z-[110] flex flex-col ${className ?? ""}`}
         style={{
           bottom: 0,
           height: height === "auto" ? undefined : height,
-          maxHeight: height === "auto" ? "90vh" : undefined,
+          maxHeight: height === "auto" ? "90dvh" : undefined,
           transform: open ? `translateY(${dragY}px)` : "translateY(100%)",
-          transition: dragging
-            ? "none"
-            : "transform 0.3s ease-in-out, height 0.3s ease-in-out",
+          transition: dragging ? "none" : "transform 0.3s ease-in-out",
         }}
       >
         {/* Swipeable header */}
@@ -80,9 +81,13 @@ export default function SwipeableSheet({
           </div>
         </div>
 
-        {/* Content */}
+        {/* 🔥 Content */}
         <div
-          className={`flex-1 ${overflowVisible ? "overflow-visible" : "overflow-y-auto"}`}
+          className={`flex-1 ${
+            overflowVisible
+              ? "overflow-visible"
+              : "overflow-hidden overscroll-contain"
+          }`}
         >
           {children}
         </div>

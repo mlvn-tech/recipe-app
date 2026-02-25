@@ -199,9 +199,10 @@ export default function RecipeDetail() {
         onClose={() => setIngredientsOpen(false)}
         title="Ingrediënten"
         overlay={false}
+        overflowVisible={false}
       >
         <div
-          className="px-8 overflow-y-auto max-h-100"
+          className="px-8"
           style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom))" }}
         >
           <ul className="space-y-3">
@@ -222,7 +223,7 @@ export default function RecipeDetail() {
             ? "opacity-100"
             : "opacity-0 pointer-events-none"
         }`}
-        style={{ bottom: "calc(5rem + env(safe-area-inset-bottom))" }}
+        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
       >
         <button
           onClick={() => setIngredientsOpen(!ingredientsOpen)}

@@ -279,8 +279,8 @@ export default function Home() {
         open={isIngredientSheetOpen}
         onClose={() => setIsIngredientSheetOpen(false)}
         title="Wat heb je nog in huis?"
-        height={categoryOpen || servingsOpen ? "75vh" : "55vh"}
-        overflowVisible={categoryOpen || servingsOpen}
+        height={categoryOpen || servingsOpen ? "70dvh" : "50dvh"}
+        overflowVisible
       >
         <div className="px-6 flex flex-col gap-4">
           <textarea
