@@ -279,7 +279,7 @@ export default function Home() {
         open={isIngredientSheetOpen}
         onClose={() => setIsIngredientSheetOpen(false)}
         title="Wat heb je nog in huis?"
-        height={categoryOpen || servingsOpen ? "70dvh" : "50dvh"}
+        height={categoryOpen || servingsOpen ? "70dvh" : "70dvh"}
         overflowVisible
       >
         <div
