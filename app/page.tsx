@@ -161,7 +161,7 @@ export default function Home() {
         </div>
       </div>
 
-      <main className="min-h-dvh bg-[var(--color-bg)] pt-20 pb-24">
+      <main className="min-h-dvh bg-[var(--color-bg)] pt-20 pb-[calc(5rem+env(safe-area-inset-bottom))]">
         {/* Filters */}
         <div className="pt-4 pb-4">
           <div className="flex gap-3 overflow-x-auto px-4 max-w-4xl mx-auto no-scrollbar">
