@@ -29,6 +29,29 @@ Voor ${servings} ${servings === 1 ? "persoon" : "personen"}.
 Categorie: ${category ?? "Diner"}.
 
 ${
+  category === "Ontbijt"
+    ? `
+BELANGRIJK VOOR ONTBIJT:
+- Het recept moet geschikt zijn als ontbijt.
+- Het mag hartig, zoet of licht zijn.
+- Vermijd zware dinerachtige bereidingen.
+- Denk aan omelet, toast, bowl, pannenkoek, of ontbijt-skillet
+`
+    : ""
+}
+
+${
+  category === "Dessert"
+    ? `
+BELANGRIJK VOOR dessert:
+- Het moet zoet zijn
+- Geschikt als nagerecht
+- Geen hartige smaakprofielen
+`
+    : ""
+}
+
+${
   variation
     ? `
 BELANGRIJK:
@@ -44,7 +67,7 @@ REGELS:
 - Gebruik voornamelijk deze ingrediënten
 - Voel je niet verplicht alle opgegeven ingrediënten te gebruiken als deze niet samengaan
 - Je mag basisproducten toevoegen (olie, zout, peper, kruiden)
-- Het recept moet passen binnen de categorie: ${category}
+- Het recept moet passen binnen de categorie: ${category ?? "Diner"}.
 - Geen exotische ingrediënten toevoegen
 - Maximaal 8 ingrediënten totaal
 - Maximaal 10 duidelijke stappen
@@ -58,8 +81,8 @@ Geef het antwoord uitsluitend terug als geldige JSON in dit formaat:
   "ingredients": ["string"],
   "steps": ["string"],
   "cooking_time": number,
-  "servings": number
-  "category": "Diner"
+  "servings": number,
+  "category": "string"
 }`;
 
     const response = await fetch(

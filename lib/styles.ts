@@ -15,7 +15,48 @@ export const styles = {
     default: "w-full border border-gray-200 rounded-xl p-3 bg-gray-50 focus:outline-none focus:border-gray-300 text-sm",
     inline: "bg-transparent border-b border-transparent focus:border-gray-300 focus:outline-none text-sm",
   },
+
+  dropdown: {
+  trigger: `
+    w-full
+    bg-gray-50
+    border border-gray-200
+    rounded-xl
+    px-4 py-3
+    text-sm
+    flex items-center justify-between
+    cursor-pointer
+    focus:outline-none
+    focus:border-gray-300
+    transition
+  `,
+  item: `
+    w-full
+    text-left
+    px-4
+    py-3
+    text-sm
+    hover:bg-gray-50
+    transition
+  `,
+  container: `
+    absolute
+    left-0
+    right-0
+    top-full
+    mt-2
+    bg-white
+    rounded-xl
+    shadow-lg
+    z-50
+    overflow-hidden
+    transition-all
+    duration-200
+    ease-out
+    origin-top
+  `,
+  containerOpen: `max-h-96 opacity-100`,
+  containerClosed: `max-h-0 opacity-0 pointer-events-none shadow-none mt-0`,
+}
+
 } as const;
-
-
-

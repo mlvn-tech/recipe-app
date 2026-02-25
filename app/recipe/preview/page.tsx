@@ -19,6 +19,7 @@ export default function PreviewPage() {
   const [preview, setPreview] = useState<any | null>(null);
   const [saving, setSaving] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
+  const [savingOverlay, setSavingOverlay] = useState(false);
 
   const [attempt, setAttempt] = useState(1);
   const maxAttempts = 3;
@@ -48,6 +49,7 @@ export default function PreviewPage() {
 
     try {
       setSaving(true);
+      setSavingOverlay(true); // 👈 overlay aan
 
       const {
         data: { session },
@@ -89,7 +91,6 @@ export default function PreviewPage() {
       });
 
       const imageData = await imageRes.json();
-      console.log("IMAGE RESPONSE:", imageData);
 
       if (imageData?.imageBase64) {
         const fileName = `${data.id}.png`;
@@ -125,11 +126,15 @@ export default function PreviewPage() {
 
       localStorage.removeItem("ai_preview");
 
+      // 👇 kleine visuele delay voor premium gevoel
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       router.push(`/recipe/${data.id}`);
     } catch (err) {
       console.error(err);
     } finally {
       setSaving(false);
+      setSavingOverlay(false); // 👈 overlay uit
     }
   };
 
@@ -256,6 +261,24 @@ export default function PreviewPage() {
           </div>
         </div>
       </main>
+      {savingOverlay && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300" />
+
+          {/* Modal Card */}
+          <div className="relative bg-white rounded-xl px-8 py-8 shadow-xl flex flex-col items-center gap-6 animate-fade-in">
+            <ArrowPathIcon className="w-6 h-6 animate-spin text-[var(--color-accent)]" />
+
+            <div className="text-center space-y-2">
+              <p className="text-base font-semibold text-gray-900">
+                Je recept wordt opgeslagen
+              </p>
+              <p className="text-sm text-gray-500">Een momentje geduld...</p>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

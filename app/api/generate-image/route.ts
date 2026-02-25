@@ -13,6 +13,9 @@ export async function POST(req: Request) {
       );
     }
 
+const { ingredients, servings, category, variation } = await req.json();
+console.log("CATEGORY RECEIVED:", category);
+
     const prompt = `
 Realistic food photography of ${title}.
 Natural light.
@@ -21,6 +24,13 @@ Minimal background.
 Appetizing.
 High detail.
 No text.
+Do NOT add any extra vegetables or ingredients.
+Do NOT include broccoli, zucchini, carrots, or other vegetables unless explicitly listed.
+The dish must visually contain only the listed ingredients.
+No extra garnish.
+No side dishes.
+No additional toppings.
+Professional food photography.
 `;
 
     const response = await fetch(

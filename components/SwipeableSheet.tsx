@@ -9,6 +9,7 @@ type Props = {
   height?: string;
   className?: string;
   overlay?: boolean;
+  overflowVisible?: boolean;
 };
 
 export default function SwipeableSheet({
@@ -18,6 +19,7 @@ export default function SwipeableSheet({
   children,
   height,
   className,
+  overflowVisible = false,
   overlay = true,
 }: Props) {
   const [dragY, setDragY] = useState(0);
@@ -47,13 +49,16 @@ export default function SwipeableSheet({
       )}
 
       <div
-        className={`fixed left-0 w-full bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.1)] z-110 flex flex-col ${
-          !dragging ? "transition-transform duration-300 ease-in-out" : ""
+        className={`fixed left-0 w-full bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.1)] z-110 flex flex-col 
         } ${className ?? ""}`}
         style={{
           bottom: 0,
-          height: height,
+          height: height === "auto" ? undefined : height,
+          maxHeight: height === "auto" ? "90vh" : undefined,
           transform: open ? `translateY(${dragY}px)` : "translateY(100%)",
+          transition: dragging
+            ? "none"
+            : "transform 0.3s ease-in-out, height 0.3s ease-in-out",
         }}
       >
         {/* Swipeable header */}
@@ -72,7 +77,11 @@ export default function SwipeableSheet({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto">{children}</div>
+        <div
+          className={`flex-1 ${overflowVisible ? "overflow-visible" : "overflow-y-auto"}`}
+        >
+          {children}
+        </div>
       </div>
     </>
   );
