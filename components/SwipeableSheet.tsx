@@ -63,10 +63,12 @@ export default function SwipeableSheet({
         className={`fixed left-0 w-full bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.1)] z-[110] flex flex-col ${className ?? ""}`}
         style={{
           bottom: 0,
-          height: height === "auto" ? undefined : height,
-          maxHeight: height === "auto" ? "90dvh" : undefined,
+          height: height ?? "auto",
+          maxHeight: "90dvh",
           transform: open ? `translateY(${dragY}px)` : "translateY(100%)",
-          transition: dragging ? "none" : "transform 0.3s ease-in-out",
+          transition: dragging
+            ? "none"
+            : "transform 0.3s ease-in-out, height 0.3s ease-in-out",
         }}
       >
         {/* Swipeable header */}
