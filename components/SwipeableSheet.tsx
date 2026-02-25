@@ -48,9 +48,10 @@ export default function SwipeableSheet({
       {open && overlay && (
         <div
           onClick={onClose}
-          className="fixed top-0 left-0 w-screen z-[100] bg-black/70"
+          className="fixed left-0 w-screen z-[100] bg-black/70"
           style={{
-            height: "100dvh",
+            top: "-100px",
+            height: "calc(100dvh + 100px)",
           }}
         />
       )}
@@ -83,10 +84,10 @@ export default function SwipeableSheet({
 
         {/* 🔥 Content */}
         <div
-          className={`flex-1 ${
+          className={`flex-1 flex flex-col ${
             overflowVisible
               ? "overflow-visible"
-              : "overflow-hidden overscroll-contain"
+              : "overflow-y-auto overscroll-contain"
           }`}
         >
           {children}

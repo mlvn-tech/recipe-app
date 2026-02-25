@@ -282,7 +282,10 @@ export default function Home() {
         height={categoryOpen || servingsOpen ? "70dvh" : "50dvh"}
         overflowVisible
       >
-        <div className="px-6 flex flex-col gap-4">
+        <div
+          className="px-6 flex flex-col gap-4"
+          style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom))" }}
+        >
           <textarea
             value={ingredientInput}
             onChange={(e) => setIngredientInput(e.target.value)}
