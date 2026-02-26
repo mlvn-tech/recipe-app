@@ -31,6 +31,8 @@ export default function EditRecipe() {
 
   const [categoryOpen, setCategoryOpen] = useState(false);
   const categoryRef = useRef<HTMLDivElement>(null);
+  const [selectedServings, setSelectedServings] = useState(2);
+  const [selectedCategory, setSelectedCategory] = useState("Diner");
 
   const categories = ["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"];
 
@@ -248,22 +250,6 @@ export default function EditRecipe() {
           <Card className="p-5 space-y-4">
             <div>
               <label className="text-sm text-gray-500 block mb-2">
-                Aantal personen
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={servings ?? ""}
-                onChange={(e) =>
-                  setServings(e.target.value ? Number(e.target.value) : null)
-                }
-                className={styles.input.default}
-              />
-            </div>
-
-            <div>
-              <label className="text-sm text-gray-500 block mb-2">
                 Kooktijd (minuten)
               </label>
               <input
@@ -279,61 +265,65 @@ export default function EditRecipe() {
             </div>
 
             {/* Dropdown */}
-            <div ref={categoryRef} className="relative">
-              <label className="text-sm text-gray-500 block mb-2">
-                Categorie
-              </label>
-              <button
-                type="button"
-                onClick={() => setCategoryOpen(!categoryOpen)}
-                className="
-                  w-full border border-gray-200 rounded-xl p-3
-                  bg-gray-50 flex justify-between items-center
-                  focus:outline-none
-                "
-              >
-                <span className={category ? "" : "text-gray-400"}>
-                  {category
-                    ? category.charAt(0).toUpperCase() +
-                      category.slice(1).toLowerCase()
-                    : "Selecteer categorie"}
-                </span>
-                <Icon
-                  icon={ChevronDownIcon}
-                  size={20}
-                  className={`text-gray-500 transition-transform duration-200 ${categoryOpen ? "rotate-180" : ""}`}
-                />
-              </button>
+            {/* Aantal + Categorie naast elkaar */}
+            <div className="flex gap-4 mt-4">
+              {/* Aantal */}
+              <div className="flex flex-col gap-2 w-16">
+                <label className="block text-sm font-medium">Aantal</label>
 
-              <div
-                className={`
-                  absolute left-0 right-0 top-full mt-2
-                  bg-white rounded-xl shadow-lg overflow-hidden z-50
-                  transition-all duration-200 ease-out origin-top
-                  ${
-                    categoryOpen
-                      ? "opacity-100 translate-y-0 scale-y-100"
-                      : "opacity-0 -translate-y-2 scale-y-95 pointer-events-none"
-                  }
-                `}
-              >
-                <div className="py-2">
-                  {categories.map((cat, index) => (
-                    <div key={cat}>
-                      <button
-                        onClick={() => {
-                          setCategory(cat);
-                          setCategoryOpen(false);
-                        }}
-                        className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors"
-                      >
-                        {cat}
-                      </button>
-                      {index !== categories.length - 1 && (
-                        <div className="mx-4 border-b border-gray-100" />
-                      )}
-                    </div>
-                  ))}
+                <div className="relative">
+                  <select
+                    value={selectedServings}
+                    onChange={(e) =>
+                      setSelectedServings(Number(e.target.value))
+                    }
+                    className={clsx(
+                      styles.dropdown.trigger,
+                      "appearance-none cursor-pointer text-center",
+                    )}
+                  >
+                    {[1, 2, 3, 4, 5, 6].map((num) => (
+                      <option key={num} value={num}>
+                        {num}
+                      </option>
+                    ))}
+                  </select>
+
+                  <Icon
+                    icon={ChevronDownIcon}
+                    size={20}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                  />
+                </div>
+              </div>
+
+              {/* Categorie */}
+              <div className="flex flex-col gap-2 flex-1">
+                <label className="block text-sm font-medium">Categorie</label>
+
+                <div className="relative">
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className={clsx(
+                      styles.dropdown.trigger,
+                      "appearance-none cursor-pointer",
+                    )}
+                  >
+                    {["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"].map(
+                      (cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ),
+                    )}
+                  </select>
+
+                  <Icon
+                    icon={ChevronDownIcon}
+                    size={20}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                  />
                 </div>
               </div>
             </div>
