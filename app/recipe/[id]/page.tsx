@@ -152,6 +152,13 @@ export default function RecipeDetail() {
             </div>
           </div>
 
+          <button
+            onClick={() => router.push(`/recipe/${recipe.id}/cook`)}
+            className={`${styles.button.primary} w-full`}
+          >
+            Start met koken
+          </button>
+
           <Card>
             <h2 className="font-semibold mb-4 text-lg">Ingrediënten</h2>
             <ul className="space-y-3">

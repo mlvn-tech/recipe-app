@@ -208,7 +208,7 @@ export default function NewRecipe() {
             <div className="flex gap-4 mt-4">
               {/* Aantal */}
               <div className="flex flex-col gap-2 w-16">
-                <label className="block text-sm font-medium">Aantal</label>
+                <label className="block text-sm font-medium">Porties</label>
 
                 <div className="relative">
                   <select
