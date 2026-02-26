@@ -223,7 +223,7 @@ export default function RecipeDetail() {
             ? "opacity-100"
             : "opacity-0 pointer-events-none"
         }`}
-        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
+        style={{ bottom: "calc(5rem + env(safe-area-inset-bottom))" }}
       >
         <button
           onClick={() => setIngredientsOpen(!ingredientsOpen)}

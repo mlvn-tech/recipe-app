@@ -283,7 +283,7 @@ export default function Home() {
         overflowVisible
       >
         <div
-          className="px-6 flex flex-col gap-4"
+          className="px-6 space-y-3 pt-2"
           style={{
             paddingBottom: "calc(6rem + env(safe-area-inset-bottom))",
           }}
@@ -402,7 +402,7 @@ export default function Home() {
             disabled={generating}
             className={clsx(
               styles.button.primary,
-              "h-[58px] relative flex items-center justify-center mx-auto overflow-hidden transition-all duration-300",
+              "h-[58px] relative flex items-center justify-center mx-auto transition-all duration-300",
               generating ? "w-[58px] !px-0 bg-gray-200" : "w-full",
             )}
           >

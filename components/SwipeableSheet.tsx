@@ -48,13 +48,7 @@ export default function SwipeableSheet({
       {open && overlay && (
         <div
           onClick={onClose}
-          className="fixed inset-0 z-[100] bg-black/70"
-          style={{
-            top: "-200px",
-            left: "-20px",
-            right: "-20px",
-            bottom: "-200px",
-          }}
+          className="min-h-dvh fixed inset-0 z-[100] bg-black/70"
         />
       )}
 
