@@ -21,6 +21,29 @@ export default function CookMode() {
   const [ingredientsOpen, setIngredientsOpen] = useState(false);
 
   useEffect(() => {
+    let wakeLock: any = null;
+
+    const requestWakeLock = async () => {
+      try {
+        if ("wakeLock" in navigator) {
+          wakeLock = await (navigator as any).wakeLock.request("screen");
+        }
+      } catch (err) {
+        console.log("Wake lock niet ondersteund:", err);
+      }
+    };
+
+    requestWakeLock();
+
+    return () => {
+      if (wakeLock) {
+        wakeLock.release();
+        wakeLock = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     const fetchRecipe = async () => {
       const { data } = await supabase
         .from("recipes")
