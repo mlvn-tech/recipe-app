@@ -320,16 +320,14 @@ export default function Home() {
                   <Icon
                     icon={ChevronDownIcon}
                     size={20}
-                    className={`transition-transform duration-200 ${
-                      servingsOpen ? "rotate-180" : ""
-                    }`}
+                    className={`transition-transform duration-200 ${servingsOpen ? "rotate-180" : ""}`}
                   />
                 </button>
 
                 <div
                   className={clsx(
                     styles.dropdown.container,
-                    "absolute left-0 right-0 bottom-full mb-2 transition-all duration-200 ease-out",
+                    "transition-all duration-200 ease-out",
                     servingsOpen
                       ? "opacity-100"
                       : "opacity-0 pointer-events-none shadow-none",
@@ -368,16 +366,14 @@ export default function Home() {
                   <Icon
                     icon={ChevronDownIcon}
                     size={20}
-                    className={`transition-transform duration-200 ${
-                      categoryOpen ? "rotate-180" : ""
-                    }`}
+                    className={`transition-transform duration-200 ${categoryOpen ? "rotate-180" : ""}`}
                   />
                 </button>
 
                 <div
                   className={clsx(
                     styles.dropdown.container,
-                    "absolute left-0 right-0 bottom-full mb-2 transition-all duration-200 ease-out",
+                    "transition-all duration-200 ease-out",
                     categoryOpen
                       ? "opacity-100"
                       : "opacity-0 pointer-events-none shadow-none",
