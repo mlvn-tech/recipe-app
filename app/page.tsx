@@ -161,7 +161,7 @@ export default function Home() {
         </div>
       </div>
 
-      <main className="min-h-dvh bg-[var(--color-bg)] pt-20 pb-20">
+      <main className="min-h-dvh bg-[var(--color-bg)] pt-20 pb-24">
         {/* Filters */}
         <div className="pt-4 pb-4">
           <div className="flex gap-3 overflow-x-auto px-4 max-w-4xl mx-auto no-scrollbar">
@@ -335,48 +335,30 @@ export default function Home() {
             {/* Categorie */}
             <div className="flex flex-col gap-2 flex-1">
               <label className="block text-sm font-medium">Categorie</label>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCategoryOpen((prev) => !prev);
-                    setServingsOpen(false);
-                  }}
-                  className={styles.dropdown.trigger}
-                >
-                  <span>{selectedCategory}</span>
-                  <Icon
-                    icon={ChevronDownIcon}
-                    size={20}
-                    className={`transition-transform duration-200 ${categoryOpen ? "rotate-180" : ""}`}
-                  />
-                </button>
 
-                <div
+              <div className="relative">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
                   className={clsx(
-                    styles.dropdown.container,
-                    "transition-all duration-200 ease-out",
-                    categoryOpen
-                      ? "opacity-100"
-                      : "opacity-0 pointer-events-none shadow-none",
+                    styles.dropdown.trigger,
+                    "appearance-none cursor-pointer",
                   )}
                 >
                   {["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"].map(
                     (cat) => (
-                      <button
-                        key={cat}
-                        type="button"
-                        onClick={() => {
-                          setSelectedCategory(cat);
-                          setCategoryOpen(false);
-                        }}
-                        className={styles.dropdown.item}
-                      >
+                      <option key={cat} value={cat}>
                         {cat}
-                      </button>
+                      </option>
                     ),
                   )}
-                </div>
+                </select>
+
+                <Icon
+                  icon={ChevronDownIcon}
+                  size={20}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                />
               </div>
             </div>
           </div>
