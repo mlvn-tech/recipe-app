@@ -349,6 +349,8 @@ export default function WeekPage() {
         open={isWeekPickerOpen}
         onClose={() => setIsWeekPickerOpen(false)}
         title="Bekijk periode"
+        height="auto"
+        maxHeight="90dvh"
       >
         <div
           className="px-6 space-y-3 pt-2"
@@ -399,7 +401,8 @@ export default function WeekPage() {
         open={activeDay !== null}
         onClose={() => setActiveDay(null)}
         title="Kies een recept"
-        height="65dvh"
+        height="auto"
+        maxHeight="70dvh"
       >
         <div className="px-6 mb-4 shrink-0">
           <SearchInput

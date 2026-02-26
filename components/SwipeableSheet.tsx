@@ -7,6 +7,7 @@ type Props = {
   title: string;
   children: React.ReactNode;
   height?: string;
+  maxHeight?: string;
   className?: string;
   overlay?: boolean;
   overflowVisible?: boolean;
@@ -18,6 +19,7 @@ export default function SwipeableSheet({
   title,
   children,
   height,
+  maxHeight,
   className,
   overflowVisible = false,
   overlay = true,
@@ -57,8 +59,8 @@ export default function SwipeableSheet({
         className={`fixed left-0 w-full bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.1)] z-[110] flex flex-col ${className ?? ""}`}
         style={{
           bottom: 0,
+          maxHeight: maxHeight ?? "90dvh",
           height: height ?? "auto",
-          maxHeight: "90dvh",
           transform: open ? `translateY(${dragY}px)` : "translateY(100%)",
           transition: dragging
             ? "none"

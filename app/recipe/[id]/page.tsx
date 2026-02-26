@@ -198,12 +198,16 @@ export default function RecipeDetail() {
         open={ingredientsOpen && showFloating}
         onClose={() => setIngredientsOpen(false)}
         title="Ingrediënten"
-        overlay={false}
+        height="auto"
+        maxHeight="60dvh"
         overflowVisible={false}
+        overlay={false}
       >
         <div
-          className="px-8"
-          style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom))" }}
+          className="px-8 max-h-[65dvh]"
+          style={{
+            paddingBottom: "calc(5rem + env(safe-area-inset-bottom))",
+          }}
         >
           <ul className="space-y-3">
             {recipe?.ingredients?.map((item: string, index: number) => (
