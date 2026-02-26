@@ -154,14 +154,14 @@ export default function Home() {
 
           <button
             onClick={() => setIsIngredientSheetOpen(true)}
-            className="p-3 rounded-full bg-gray-100 border border-gray-100 flex items-center justify-center active:scale-95 transition"
+            className="text-gray-500 p-3 rounded-full bg-gray-100 border border-gray-100 flex items-center justify-center active:scale-95 transition"
           >
             <Icon icon={BeakerIcon} size={20} />
           </button>
         </div>
       </div>
 
-      <main className="min-h-dvh bg-[var(--color-bg)] pt-20 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+      <main className="min-h-dvh bg-[var(--color-bg)] pt-20 pb-20">
         {/* Filters */}
         <div className="pt-4 pb-4">
           <div className="flex gap-3 overflow-x-auto px-4 max-w-4xl mx-auto no-scrollbar">
@@ -307,46 +307,28 @@ export default function Home() {
             {/* Aantal */}
             <div className="flex flex-col gap-2 w-16">
               <label className="block text-sm font-medium">Aantal</label>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setServingsOpen((prev) => !prev);
-                    setCategoryOpen(false);
-                  }}
-                  className={styles.dropdown.trigger}
-                >
-                  <span className="w-full text-center">{selectedServings}</span>
-                  <Icon
-                    icon={ChevronDownIcon}
-                    size={20}
-                    className={`transition-transform duration-200 ${servingsOpen ? "rotate-180" : ""}`}
-                  />
-                </button>
 
-                <div
+              <div className="relative">
+                <select
+                  value={selectedServings}
+                  onChange={(e) => setSelectedServings(Number(e.target.value))}
                   className={clsx(
-                    styles.dropdown.container,
-                    "transition-all duration-200 ease-out",
-                    servingsOpen
-                      ? "opacity-100"
-                      : "opacity-0 pointer-events-none shadow-none",
+                    styles.dropdown.trigger,
+                    "appearance-none cursor-pointer text-center",
                   )}
                 >
                   {[1, 2, 3, 4, 5, 6].map((num) => (
-                    <button
-                      key={num}
-                      type="button"
-                      onClick={() => {
-                        setSelectedServings(num);
-                        setServingsOpen(false);
-                      }}
-                      className={styles.dropdown.item}
-                    >
+                    <option key={num} value={num}>
                       {num}
-                    </button>
+                    </option>
                   ))}
-                </div>
+                </select>
+
+                <Icon
+                  icon={ChevronDownIcon}
+                  size={20}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                />
               </div>
             </div>
 
