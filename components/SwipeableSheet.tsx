@@ -48,10 +48,7 @@ export default function SwipeableSheet({
     <>
       {/* 🔥 Fullscreen overlay (PWA-proof) */}
       {open && overlay && (
-        <div
-          onClick={onClose}
-          className="min-h-dvh fixed inset-0 z-[100] bg-black/70"
-        />
+        <div onClick={onClose} className="fixed inset-0 z-[100] bg-black/70" />
       )}
 
       {/* 🔥 Sheet */}
