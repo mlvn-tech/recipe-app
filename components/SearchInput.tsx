@@ -14,6 +14,13 @@ export default function SearchInput({
 }: Props) {
   return (
     <div className="relative group w-full">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+        <Icon
+          icon={MagnifyingGlassIcon}
+          size={22}
+          className="text-gray-400 transition-colors duration-200 group-focus-within:text-gray-500"
+        />
+      </div>
       <input
         type="text"
         placeholder={placeholder}
@@ -24,8 +31,7 @@ export default function SearchInput({
           rounded-full
           bg-gray-100
           p-3
-          pl-5
-          pr-10
+          pl-12
           text-sm
           text-gray-800
           placeholder:text-gray-400
@@ -37,13 +43,6 @@ export default function SearchInput({
           transition
         "
       />
-      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-        <Icon
-          icon={MagnifyingGlassIcon}
-          size={24}
-          className="text-gray-400 transition-colors duration-200 group-focus-within:text-gray-500"
-        />
-      </div>
     </div>
   );
 }

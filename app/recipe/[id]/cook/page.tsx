@@ -1,8 +1,13 @@
 "use client";
+import { styles } from "@/lib/styles";
+import clsx from "clsx";
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../../../lib/supabase";
 import { useParams, useRouter } from "next/navigation";
+import { ListBulletIcon } from "@heroicons/react/24/outline";
+import Icon from "@/components/icons";
+import SwipeableSheet from "@/components/SwipeableSheet";
 
 export default function CookMode() {
   const params = useParams();
@@ -12,6 +17,8 @@ export default function CookMode() {
   const [recipe, setRecipe] = useState<any>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [showFloating, setShowFloating] = useState(false);
+  const [ingredientsOpen, setIngredientsOpen] = useState(false);
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -53,8 +60,12 @@ export default function CookMode() {
           <h1 className="text-base font-semibold truncate max-w-[200px] text-center">
             {formattedTitle}
           </h1>
-
-          <div className="w-6" />
+          <button
+            onClick={() => setIngredientsOpen(true)}
+            className="h-9 w-9 flex items-center justify-center rounded-full text-gray-500 hover:text-[var(--color-accent)] hover:bg-gray-100 transition"
+          >
+            <ListBulletIcon className="w-6 h-6" />
+          </button>
         </div>
 
         {/* Progress bar */}
@@ -109,6 +120,29 @@ export default function CookMode() {
           );
         })}
       </div>
+
+      <SwipeableSheet
+        open={ingredientsOpen}
+        onClose={() => setIngredientsOpen(false)}
+        title="Ingrediënten"
+        maxHeight="60dvh"
+        overflowVisible={false}
+        overlay={false}
+      >
+        <div
+          className="px-6 space-y-3"
+          style={{ paddingBottom: "calc(4rem + env(safe-area-inset-bottom))" }}
+        >
+          <ul className="space-y-3">
+            {recipe.ingredients.map((item: string, index: number) => (
+              <li key={index} className="flex items-start gap-3 text-sm">
+                <span className="mt-2 h-1 w-1 rounded-full bg-gray-400 shrink-0" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </SwipeableSheet>
     </main>
   );
 }

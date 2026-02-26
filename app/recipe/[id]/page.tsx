@@ -10,8 +10,10 @@ import {
   PencilSquareIcon,
   ChevronDownIcon,
   ClockIcon,
+  PlayCircleIcon,
 } from "@heroicons/react/24/outline";
 import Icon from "@/components/icons";
+import { CookingPot, PlayCircle, PlayIcon } from "lucide-react";
 import Header from "@/components/Header";
 import Card from "@/components/Card";
 import SwipeableSheet from "@/components/SwipeableSheet";
@@ -56,7 +58,7 @@ export default function RecipeDetail() {
         if (entry.isIntersecting) {
           setHeaderTitle("Recept");
         } else {
-          setHeaderTitle(recipe.title);
+          setHeaderTitle(formatTitle(recipe.title));
         }
       },
       { threshold: 0, rootMargin: "-70px 0px 0px 0px" },
@@ -152,13 +154,6 @@ export default function RecipeDetail() {
             </div>
           </div>
 
-          <button
-            onClick={() => router.push(`/recipe/${recipe.id}/cook`)}
-            className={`${styles.button.primary} w-full`}
-          >
-            Start met koken
-          </button>
-
           <Card>
             <h2 className="font-semibold mb-4 text-lg">Ingrediënten</h2>
             <ul className="space-y-3">
@@ -173,7 +168,17 @@ export default function RecipeDetail() {
           </Card>
 
           <Card>
-            <h2 className="font-semibold mb-4 text-lg">Bereiding</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-lg leading-none">Bereiding</h2>
+              <button
+                onClick={() => router.push(`/recipe/${recipe.id}/cook`)}
+                className="flex items-center gap-2 text-sm text-[var(--color-accent)] font-medium"
+              >
+                <PlayCircle size={22} />
+                Start met koken
+              </button>
+            </div>
+
             <ol className="space-y-0">
               {recipe.steps?.map((step: string, index: number) => (
                 <li
