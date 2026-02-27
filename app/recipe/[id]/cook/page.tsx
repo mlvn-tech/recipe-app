@@ -117,14 +117,14 @@ export default function CookMode() {
             ✕
           </button>
 
-          <h1 className="text-base font-semibold truncate max-w-[200px] text-center">
+          <h1 className="text-base font-semibold truncate max-w-[180px] text-center">
             {formattedTitle}
           </h1>
           <button
             onClick={() => setIngredientsOpen(true)}
             className="flex items-center justify-center rounded-full text-gray-500 hover:text-[var(--color-accent)] hover:bg-gray-100 transition"
           >
-            <ListBulletIcon className="w-6 h-6" />
+            <ListBulletIcon className="w-7 h-7" />
           </button>
           <button
             onClick={() => {
@@ -134,11 +134,11 @@ export default function CookMode() {
                 startTimer(detectedMinutes);
               }
             }}
-            className="flex items-center text-gray-500 hover:text-[var(--color-accent)] transition"
+            className="flex items-center pr-2 text-gray-500 hover:text-[var(--color-accent)] transition"
           >
             <ClockIcon
               className={clsx(
-                "w-5 h-5 transition-colors duration-200",
+                "w-6 h-6 transition-colors duration-200",
                 timerSeconds !== null
                   ? "text-[var(--color-accent)]" // timer loopt
                   : detectedMinutes !== null
