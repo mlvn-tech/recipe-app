@@ -237,7 +237,7 @@ export default function EditRecipe() {
 
           {/* Titel */}
           <Card className="p-5">
-            <label className={clsx(styles.label.default, "mb-2")}>Titel</label>
+            <label className="text-sm text-gray-500 block mb-2">Titel</label>
             <input
               type="text"
               value={title}
@@ -248,10 +248,27 @@ export default function EditRecipe() {
 
           {/* Meta */}
           <Card className="p-5 space-y-4">
+            <div>
+              <label className={clsx(styles.label.default, "mb-2")}>
+                Kooktijd (minuten)
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={cookingTime ?? ""}
+                onChange={(e) =>
+                  setCookingTime(e.target.value ? Number(e.target.value) : null)
+                }
+                className={styles.input.default}
+              />
+            </div>
+
             {/* Dropdown */}
             {/* Aantal + Categorie naast elkaar */}
             <div className="flex gap-4 mt-4">
               {/* Aantal */}
+
               <div className="flex flex-col gap-2 w-16">
                 <label className={clsx(styles.label.default)}>Porties</label>
 
@@ -310,21 +327,6 @@ export default function EditRecipe() {
                   />
                 </div>
               </div>
-            </div>
-            <div>
-              <label className={clsx(styles.label.default, "mb-2")}>
-                Kooktijd (minuten)
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={cookingTime ?? ""}
-                onChange={(e) =>
-                  setCookingTime(e.target.value ? Number(e.target.value) : null)
-                }
-                className={styles.input.default}
-              />
             </div>
           </Card>
 
