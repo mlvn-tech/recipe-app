@@ -237,7 +237,7 @@ export default function EditRecipe() {
 
           {/* Titel */}
           <Card className="p-5">
-            <label className="text-sm text-gray-500 block mb-2">Titel</label>
+            <label className={clsx(styles.label.default, "mb-2")}>Titel</label>
             <input
               type="text"
               value={title}
@@ -253,7 +253,7 @@ export default function EditRecipe() {
             <div className="flex gap-4 mt-4">
               {/* Aantal */}
               <div className="flex flex-col gap-2 w-16">
-                <label className="block text-sm font-medium">Porties</label>
+                <label className={clsx(styles.label.default)}>Porties</label>
 
                 <div className="relative">
                   <select
@@ -283,7 +283,7 @@ export default function EditRecipe() {
 
               {/* Categorie */}
               <div className="flex flex-col gap-2 flex-1">
-                <label className="block text-sm font-medium">Categorie</label>
+                <label className={clsx(styles.label.default)}>Categorie</label>
 
                 <div className="relative">
                   <select
@@ -312,7 +312,7 @@ export default function EditRecipe() {
               </div>
             </div>
             <div>
-              <label className="text-sm text-gray-500 block mb-2">
+              <label className={clsx(styles.label.default, "mb-2")}>
                 Kooktijd (minuten)
               </label>
               <input
@@ -330,7 +330,7 @@ export default function EditRecipe() {
 
           {/* Ingrediënten */}
           <Card className="p-5">
-            <label className="text-sm text-gray-500 block mb-2">
+            <label className={clsx(styles.label.default, "mb-2")}>
               Ingrediënten (één per regel)
             </label>
             <textarea
@@ -342,7 +342,7 @@ export default function EditRecipe() {
 
           {/* Bereiding */}
           <Card className="p-5">
-            <label className="text-sm text-gray-500 block mb-2">
+            <label className={clsx(styles.label.default, "mb-2")}>
               Bereiding
             </label>
             <textarea
@@ -354,7 +354,9 @@ export default function EditRecipe() {
 
           {/* Notities */}
           <Card className="p-5">
-            <label className="text-sm text-gray-500 block mb-2">Notities</label>
+            <label className={clsx(styles.label.default, "mb-2")}>
+              Notities
+            </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}

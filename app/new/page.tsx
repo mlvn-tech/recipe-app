@@ -191,7 +191,7 @@ export default function NewRecipe() {
           {/* Meta + Categorie */}
           <Card className="p-5 space-y-4">
             <div>
-              <label className="text-sm text-gray-500 block mb-2">
+              <label className={clsx(styles.label.default, "mb-2")}>
                 Kooktijd (minuten) <span className="text-red-500">*</span>
               </label>
               <input
@@ -208,7 +208,7 @@ export default function NewRecipe() {
             <div className="flex gap-4 mt-4">
               {/* Aantal */}
               <div className="flex flex-col gap-2 w-16">
-                <label className="block text-sm font-medium">Porties</label>
+                <label className={clsx(styles.label.default)}>Porties</label>
 
                 <div className="relative">
                   <select
@@ -238,7 +238,7 @@ export default function NewRecipe() {
 
               {/* Categorie */}
               <div className="flex flex-col gap-2 flex-1">
-                <label className="block text-sm font-medium">Categorie</label>
+                <label className={clsx(styles.label.default)}>Categorie</label>
 
                 <div className="relative">
                   <select
@@ -270,7 +270,7 @@ export default function NewRecipe() {
 
           {/* Ingrediënten */}
           <Card className="p-5">
-            <label className="text-sm text-gray-500 block mb-2">
+            <label className={clsx(styles.label.default, "mb-2")}>
               Ingrediënten <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -282,7 +282,7 @@ export default function NewRecipe() {
 
           {/* Bereiding */}
           <Card className="p-5">
-            <label className="text-sm text-gray-500 block mb-2">
+            <label className={clsx(styles.label.default, "mb-2")}>
               Bereiding <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -294,7 +294,7 @@ export default function NewRecipe() {
 
           {/* Notities */}
           <Card className="p-5">
-            <label className="text-sm text-gray-500 block mb-2">
+            <label className={clsx(styles.label.default, "mb-2")}>
               Notities (optioneel)
             </label>
             <textarea

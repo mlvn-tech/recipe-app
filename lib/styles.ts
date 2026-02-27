@@ -16,6 +16,10 @@ export const styles = {
     inline: "bg-transparent border-b border-transparent focus:border-gray-300 focus:outline-none text-sm",
   },
 
+label: {
+  default: "block text-sm font-medium text-gray-500",
+},
+
   dropdown: {
   trigger: `
     w-full

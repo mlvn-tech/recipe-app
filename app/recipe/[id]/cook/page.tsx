@@ -2,10 +2,10 @@
 import { styles } from "@/lib/styles";
 import clsx from "clsx";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "../../../../lib/supabase";
 import { useParams, useRouter } from "next/navigation";
-import { ListBulletIcon } from "@heroicons/react/24/outline";
+import { ListBulletIcon, ClockIcon } from "@heroicons/react/24/outline";
 import Icon from "@/components/icons";
 import SwipeableSheet from "@/components/SwipeableSheet";
 
@@ -19,6 +19,41 @@ export default function CookMode() {
   const [loading, setLoading] = useState(true);
   const [showFloating, setShowFloating] = useState(false);
   const [ingredientsOpen, setIngredientsOpen] = useState(false);
+
+  const [timerSeconds, setTimerSeconds] = useState<number | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimer = (minutes: number) => {
+    const totalSeconds = minutes * 60;
+    setTimerSeconds(totalSeconds);
+
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    intervalRef.current = setInterval(() => {
+      setTimerSeconds((prev) => {
+        if (prev === null || prev <= 1) {
+          clearInterval(intervalRef.current!);
+          intervalRef.current = null;
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+  const stopTimer = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    setTimerSeconds(null);
+  };
+
+  const currentStepText = recipe?.steps?.[currentStep] ?? "";
+
+  const match = currentStepText.match(/(\d+)\s*(minuut|minuten|min)/i);
+
+  const detectedMinutes = match ? Number(match[1]) : null;
 
   useEffect(() => {
     let wakeLock: any = null;
@@ -73,6 +108,8 @@ export default function CookMode() {
       {/* Sticky Header */}
       <div className="sticky top-0 z-50 bg-[var(--color-bg)] px-4 pt-6 pb-4">
         <div className="flex items-center justify-between mb-3">
+          {/* Timer */}
+
           <button
             onClick={() => router.push(`/recipe/${id}`)}
             className="text-gray-500 text-xl"
@@ -85,9 +122,46 @@ export default function CookMode() {
           </h1>
           <button
             onClick={() => setIngredientsOpen(true)}
-            className="h-9 w-9 flex items-center justify-center rounded-full text-gray-500 hover:text-[var(--color-accent)] hover:bg-gray-100 transition"
+            className="flex items-center justify-center rounded-full text-gray-500 hover:text-[var(--color-accent)] hover:bg-gray-100 transition"
           >
             <ListBulletIcon className="w-6 h-6" />
+          </button>
+          <button
+            onClick={() => {
+              if (timerSeconds) {
+                stopTimer();
+              } else if (detectedMinutes) {
+                startTimer(detectedMinutes);
+              }
+            }}
+            className="flex items-center text-gray-500 hover:text-[var(--color-accent)] transition"
+          >
+            <ClockIcon
+              className={clsx(
+                "w-5 h-5 transition-colors duration-200",
+                timerSeconds !== null
+                  ? "text-[var(--color-accent)]" // timer loopt
+                  : detectedMinutes !== null
+                    ? "text-gray-600" // timer mogelijk
+                    : "text-gray-300", // geen timer
+              )}
+            />
+
+            <span
+              className={clsx(
+                "overflow-hidden whitespace-nowrap transition-all duration-300 ease-out",
+                timerSeconds !== null
+                  ? "ml-2 max-w-[60px] opacity-100"
+                  : "ml-0 max-w-0 opacity-0",
+              )}
+            >
+              {timerSeconds !== null && (
+                <span className="text-sm font-medium">
+                  {Math.floor(timerSeconds / 60)}:
+                  {(timerSeconds % 60).toString().padStart(2, "0")}
+                </span>
+              )}
+            </span>
           </button>
         </div>
 
