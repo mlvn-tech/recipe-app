@@ -5,7 +5,11 @@ import clsx from "clsx";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "../../../../lib/supabase";
 import { useParams, useRouter } from "next/navigation";
-import { ListBulletIcon, ClockIcon } from "@heroicons/react/24/outline";
+import {
+  ListBulletIcon,
+  ClockIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import Icon from "@/components/icons";
 import SwipeableSheet from "@/components/SwipeableSheet";
 
@@ -108,63 +112,67 @@ export default function CookMode() {
       {/* Sticky Header */}
       <div className="sticky top-0 z-50 bg-[var(--color-bg)] px-4 pt-6 pb-4">
         <div className="flex items-center justify-between mb-3">
-          {/* Timer */}
-
+          {/* Left – Close cook mode */}
           <button
             onClick={() => router.push(`/recipe/${id}`)}
-            className="text-gray-500 text-xl"
+            className="flex items-center justify-center text-gray-500 hover:text-gray-700 transition"
           >
-            ✕
+            <XMarkIcon className="w-6 h-6" />
           </button>
 
+          {/* Center – Title */}
           <h1 className="text-base font-semibold truncate max-w-[180px] text-center">
             {formattedTitle}
           </h1>
-          <button
-            onClick={() => setIngredientsOpen(true)}
-            className="flex items-center justify-center rounded-full text-gray-500 hover:text-[var(--color-accent)] hover:bg-gray-100 transition"
-          >
-            <ListBulletIcon className="w-7 h-7" />
-          </button>
-          <button
-            onClick={() => {
-              if (timerSeconds) {
-                stopTimer();
-              } else if (detectedMinutes) {
-                startTimer(detectedMinutes);
-              }
-            }}
-            className="flex items-center pr-2 text-gray-500 hover:text-[var(--color-accent)] transition"
-          >
-            <ClockIcon
-              className={clsx(
-                "w-6 h-6 transition-colors duration-200",
-                timerSeconds !== null
-                  ? "text-[var(--color-accent)]" // timer loopt
-                  : detectedMinutes !== null
-                    ? "text-gray-600" // timer mogelijk
-                    : "text-gray-300", // geen timer
-              )}
-            />
 
-            <span
-              className={clsx(
-                "overflow-hidden whitespace-nowrap transition-all duration-300 ease-out",
-                timerSeconds !== null
-                  ? "ml-2 max-w-[60px] opacity-100"
-                  : "ml-0 max-w-0 opacity-0",
-              )}
+          {/* Right – Actions */}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIngredientsOpen(true)}
+              className="flex items-center justify-center text-gray-500 hover:text-[var(--color-accent)] transition"
             >
-              {timerSeconds !== null && (
-                <span className="text-sm font-medium">
-                  {Math.floor(timerSeconds / 60)}:
-                  {(timerSeconds % 60).toString().padStart(2, "0")}
-                </span>
-              )}
-            </span>
-          </button>
-        </div>
+              <ListBulletIcon className="w-6 h-6" />
+            </button>
 
+            <button
+              onClick={() => {
+                if (timerSeconds) {
+                  stopTimer();
+                } else if (detectedMinutes) {
+                  startTimer(detectedMinutes);
+                }
+              }}
+              className="flex items-center text-gray-500 hover:text-[var(--color-accent)] transition"
+            >
+              <ClockIcon
+                className={clsx(
+                  "w-6 h-6 transition-colors duration-200",
+                  timerSeconds !== null
+                    ? "text-[var(--color-accent)]"
+                    : detectedMinutes !== null
+                      ? "text-gray-600"
+                      : "text-gray-300",
+                )}
+              />
+
+              <span
+                className={clsx(
+                  "overflow-hidden whitespace-nowrap transition-all duration-300 ease-out",
+                  timerSeconds !== null
+                    ? "ml-2 max-w-[60px] opacity-100"
+                    : "ml-0 max-w-0 opacity-0",
+                )}
+              >
+                {timerSeconds !== null && (
+                  <span className="text-sm font-medium">
+                    {Math.floor(timerSeconds / 60)}:
+                    {(timerSeconds % 60).toString().padStart(2, "0")}
+                  </span>
+                )}
+              </span>
+            </button>
+          </div>
+        </div>
         {/* Progress bar */}
         <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
           <div
