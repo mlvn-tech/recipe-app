@@ -163,10 +163,10 @@ export default function RecipeDetail() {
 
                 if (isTitle) {
                   return (
-                    <li key={index} className="pt-6">
+                    <li key={index} className="pt-2">
                       {/* Subtiele divider */}
                       {index !== 0 && (
-                        <div className="border-t border-gray-200 mb-4" />
+                        <div className="border-t border-gray-100 mb-4" />
                       )}
 
                       <h3 className="text-md font-semibold text-gray-400 tracking-tight">
