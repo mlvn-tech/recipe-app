@@ -17,10 +17,8 @@ export default function NewRecipe() {
   const [title, setTitle] = useState("");
   const [ingredients, setIngredients] = useState("");
   const [steps, setSteps] = useState("");
-  const [category, setCategory] = useState("");
   const [cookingTime, setCookingTime] = useState<number | null>(null);
   const [notes, setNotes] = useState("");
-  const [servings, setServings] = useState<number | null>(null);
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -38,9 +36,9 @@ export default function NewRecipe() {
       title.trim() === "" ||
       ingredients.trim() === "" ||
       steps.trim() === "" ||
-      category.trim() === "" ||
+      selectedCategory.trim() === "" ||
       cookingTime === null ||
-      servings === null
+      selectedServings === null
     ) {
       toast.error("Oeps, het recept is niet compleet");
       return;
@@ -90,9 +88,9 @@ export default function NewRecipe() {
           title,
           ingredients: cleanedIngredients,
           steps: cleanedSteps,
-          category,
+          category: selectedCategory,
           cooking_time: cookingTime,
-          servings,
+          servings: selectedServings,
           notes,
           image_url: imageUrl,
           user_id: userId,
