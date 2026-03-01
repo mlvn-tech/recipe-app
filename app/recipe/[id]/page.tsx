@@ -169,7 +169,7 @@ export default function RecipeDetail() {
                         <div className="border-t border-gray-100 mb-4" />
                       )}
 
-                      <h3 className="text-md font-semibold text-gray-400 tracking-tight">
+                      <h3 className="text-sm font-semibold text-gray-400 tracking-tight">
                         {trimmed.replace(/^#\s*/, "")}
                       </h3>
                     </li>
@@ -178,7 +178,7 @@ export default function RecipeDetail() {
 
                 return (
                   <li key={index} className="flex items-start gap-3">
-                    <span className="mt-2.5 h-1.5 w-1.5 rounded-full bg-gray-400 shrink-0" />
+                    <span className="mt-2.5 h-1 w-1 rounded-full bg-gray-400 shrink-0" />
                     <span>{trimmed.replace(/^-\s*/, "")}</span>
                   </li>
                 );
