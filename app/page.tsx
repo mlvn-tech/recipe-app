@@ -10,9 +10,6 @@ import {
   ChevronDownIcon,
   BeakerIcon,
 } from "@heroicons/react/24/outline";
-
-import { UserIcon as UserSolidIcon } from "@heroicons/react/24/solid";
-
 import Icon from "@/components/icons";
 import Link from "next/link";
 import Card from "@/components/Card";
@@ -25,14 +22,6 @@ import clsx from "clsx";
 import { formatTitle } from "@/lib/utils";
 
 export default function Home() {
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
-    });
-  }, []);
-
   const [recipes, setRecipes] = useState<any[] | null>(null);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("Alles");
@@ -81,6 +70,7 @@ export default function Home() {
           category: selectedCategory,
         }),
       });
+      ``;
 
       const text = await res.text();
       let data;
@@ -153,16 +143,6 @@ export default function Home() {
     <>
       {/* 🔝 Search Header */}
       <div className="fixed top-0 left-0 w-full bg-[var(--color-brand)] z-50 shadow-[0_1px_6px_rgba(0,0,0,0.05)]">
-        <button
-          onClick={() => router.push("/account")}
-          className="p-2 rounded-full hover:bg-gray-100 transition"
-        >
-          {user ? (
-            <UserSolidIcon className="w-6 h-6 text-gray-700" />
-          ) : (
-            <UserIcon className="w-6 h-6 text-gray-500" />
-          )}
-        </button>
         <div className="max-w-4xl mx-auto px-4 h-20 flex items-center gap-3">
           <div className="flex-1">
             <SearchInput
