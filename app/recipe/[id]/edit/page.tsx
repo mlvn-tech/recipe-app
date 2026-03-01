@@ -34,6 +34,32 @@ export default function EditRecipe() {
   const [selectedServings, setSelectedServings] = useState(2);
   const [selectedCategory, setSelectedCategory] = useState("Diner");
 
+  const ingredientsTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const insertIngredientTitle = () => {
+    if (!ingredientsTextareaRef.current) return;
+
+    const textarea = ingredientsTextareaRef.current;
+    const cursorPos = textarea.selectionStart;
+
+    const before = ingredients.slice(0, cursorPos);
+    const after = ingredients.slice(cursorPos);
+
+    const needsNewLine = before.length > 0 && !before.endsWith("\n");
+    const prefix = needsNewLine ? "\n\n# " : "# ";
+
+    const newValue = before + prefix + after;
+
+    setIngredients(newValue);
+
+    // Cursor achter "# "
+    setTimeout(() => {
+      const newCursorPos = cursorPos + prefix.length;
+      textarea.focus();
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    }, 0);
+  };
+
   const categories = ["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"];
 
   useEffect(() => {
@@ -106,8 +132,8 @@ export default function EditRecipe() {
         .filter(Boolean);
     } else {
       cleanedSteps = steps
-        .split(/\n\s*\n/)
-        .map((step) => step.trim())
+        .split(/\n(?=\d+\.\s)|\n\s*\n/)
+        .map((step) => step.replace(/^\d+\.\s*/, "").trim())
         .filter(Boolean);
     }
 
@@ -336,10 +362,18 @@ export default function EditRecipe() {
               Ingrediënten (één per regel)
             </label>
             <textarea
+              ref={ingredientsTextareaRef}
               value={ingredients}
               onChange={(e) => setIngredients(e.target.value)}
               className={`${styles.input.default} min-h-[280px]`}
             />
+            <button
+              type="button"
+              onClick={insertIngredientTitle}
+              className="mt-2 text-sm text-gray-500 hover:text-[var(--color-accent)] transition"
+            >
+              + Voeg ingrediënten titel toe
+            </button>
           </Card>
 
           {/* Bereiding */}

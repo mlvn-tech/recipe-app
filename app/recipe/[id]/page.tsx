@@ -157,12 +157,18 @@ export default function RecipeDetail() {
           <Card>
             <h2 className="font-semibold mb-4 text-lg">Ingrediënten</h2>
             <ul className="space-y-3">
-              {recipe.ingredients?.map((item: string, index: number) => (
-                <li key={index} className="flex items-start gap-3">
-                  <span className="mt-2.5 h-1.5 w-1.5 rounded-xl bg-gray-400 shrink-0" />
-                  <span>{item}</span>
-                </li>
-              ))}
+              <Card>
+                <h2 className="font-semibold mb-4 text-lg">Ingrediënten</h2>
+                <ul className="space-y-3">
+                  {recipe.ingredients?.map((item: string, index: number) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <span className="mt-2.5 h-1.5 w-1.5 rounded-xl bg-gray-400 shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div ref={ingredientsEndRef} className="h-1" />
+              </Card>
             </ul>
             <div ref={ingredientsEndRef} className="h-1" />
           </Card>
