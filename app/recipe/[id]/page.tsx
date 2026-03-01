@@ -157,18 +157,28 @@ export default function RecipeDetail() {
           <Card>
             <h2 className="font-semibold mb-4 text-lg">Ingrediënten</h2>
             <ul className="space-y-3">
-              <Card>
-                <h2 className="font-semibold mb-4 text-lg">Ingrediënten</h2>
-                <ul className="space-y-3">
-                  {recipe.ingredients?.map((item: string, index: number) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <span className="mt-2.5 h-1.5 w-1.5 rounded-xl bg-gray-400 shrink-0" />
-                      <span>{item}</span>
+              {recipe.ingredients?.map((item: string, index: number) => {
+                const trimmed = item.trim();
+                const isTitle = trimmed.startsWith("#");
+
+                if (isTitle) {
+                  return (
+                    <li
+                      key={index}
+                      className="text-sm pt-4 pb-1 font-semibold text-gray-400"
+                    >
+                      {trimmed.replace(/^#\s*/, "")}
                     </li>
-                  ))}
-                </ul>
-                <div ref={ingredientsEndRef} className="h-1" />
-              </Card>
+                  );
+                }
+
+                return (
+                  <li key={index} className="flex items-start gap-3">
+                    <span className="mt-2.5 h-1.5 w-1.5 rounded-full bg-gray-400 shrink-0" />
+                    <span>{trimmed.replace(/^-\s*/, "")}</span>
+                  </li>
+                );
+              })}
             </ul>
             <div ref={ingredientsEndRef} className="h-1" />
           </Card>
@@ -228,12 +238,28 @@ export default function RecipeDetail() {
           }}
         >
           <ul className="space-y-3">
-            {recipe?.ingredients?.map((item: string, index: number) => (
-              <li key={index} className="flex items-start gap-3 text-sm">
-                <span className="mt-2 h-1 w-1 rounded-full bg-gray-400 shrink-0" />
-                <span>{item}</span>
-              </li>
-            ))}
+            {recipe.ingredients?.map((item: string, index: number) => {
+              const trimmed = item.trim();
+              const isTitle = trimmed.startsWith("#");
+
+              if (isTitle) {
+                return (
+                  <li
+                    key={index}
+                    className="pt-4 pb-1 font-semibold text-gray-900"
+                  >
+                    {trimmed.replace(/^#\s*/, "")}
+                  </li>
+                );
+              }
+
+              return (
+                <li key={index} className="flex items-start gap-3">
+                  <span className="mt-2.5 h-1.5 w-1.5 rounded-full bg-gray-400 shrink-0" />
+                  <span>{trimmed.replace(/^-\s*/, "")}</span>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </SwipeableSheet>
