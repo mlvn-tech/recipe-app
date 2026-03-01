@@ -169,7 +169,7 @@ export default function RecipeDetail() {
                         <div className="border-t border-gray-100 mb-4" />
                       )}
 
-                      <h3 className="text-sm font-semibold text-gray-400 tracking-tight">
+                      <h3 className="font-semibold text-gray-400 tracking-tight">
                         {trimmed.replace(/^#\s*/, "")}
                       </h3>
                     </li>
