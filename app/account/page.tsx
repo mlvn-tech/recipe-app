@@ -9,9 +9,56 @@ export default function AccountPage() {
   const router = useRouter();
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
-    });
+    const setupHousehold = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      console.log("USER:", user);
+
+      if (!user) return;
+
+      setUser(user);
+
+      // check membership
+      const { data: membership } = await supabase
+        .from("household_members")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      console.log("MEMBERSHIP:", membership);
+
+      if (!membership) {
+        // create household
+        console.log("NO MEMBERSHIP → CREATING HOUSEHOLD");
+        const result = await supabase
+          .from("households")
+          .insert({ name: "Ons huishouden" })
+          .select()
+          .single();
+
+        console.log("HOUSEHOLD RESULT:", result);
+
+        if (result.error) {
+          console.error("HOUSEHOLD ERROR:", result.error);
+          return;
+        }
+
+        const household = result.data;
+
+        if (household) {
+          const memberResult = await supabase.from("household_members").insert({
+            household_id: household.id,
+            user_id: user.id,
+          });
+
+          console.log("MEMBER RESULT:", memberResult);
+        }
+      }
+    };
+
+    setupHousehold();
   }, []);
 
   const handleLogout = async () => {
