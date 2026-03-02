@@ -106,6 +106,21 @@ export default function NewRecipe() {
     } = await supabase.auth.getSession();
     const userId = session?.user?.id;
 
+    if (!userId) return;
+
+    const { data: membership } = await supabase
+      .from("household_members")
+      .select("household_id")
+      .eq("user_id", userId)
+      .single();
+
+    if (!membership) {
+      toast.error("Geen household gevonden");
+      return;
+    }
+
+    const householdId = membership.household_id;
+
     const { data, error } = await supabase
       .from("recipes")
       .insert([
@@ -119,6 +134,7 @@ export default function NewRecipe() {
           notes,
           image_url: imageUrl,
           user_id: userId,
+          household_id: householdId,
         },
       ])
       .select()

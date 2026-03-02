@@ -93,9 +93,32 @@ export default function Home() {
 
   useEffect(() => {
     const fetchRecipes = async () => {
+      // 1️⃣ user ophalen
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        setRecipes([]);
+        return;
+      }
+
+      // 2️⃣ household ophalen via membership
+      const { data: membership } = await supabase
+        .from("household_members")
+        .select("household_id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!membership) {
+        setRecipes([]);
+        return;
+      }
+
+      // 3️⃣ recepten ophalen op household
       const { data } = await supabase
         .from("recipes")
         .select("*")
+        .eq("household_id", membership.household_id)
         .order("created_at", { ascending: false });
 
       setRecipes(data || []);

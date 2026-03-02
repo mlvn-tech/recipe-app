@@ -8,12 +8,13 @@ export default function AuthCallback() {
   const router = useRouter();
 
   useEffect(() => {
-    const handleAuth = async () => {
-      await supabase.auth.getSession();
-      router.push("/account");
+    const exchange = async () => {
+      await supabase.auth.exchangeCodeForSession(window.location.href);
+
+      router.replace("/");
     };
 
-    handleAuth();
+    exchange();
   }, []);
 
   return <p>Inloggen...</p>;
