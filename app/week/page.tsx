@@ -37,6 +37,23 @@ export default function WeekPage() {
     return session?.user?.id;
   };
 
+  const getHouseholdId = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const userId = session?.user?.id;
+    if (!userId) return null;
+
+    const { data: membership } = await supabase
+      .from("household_members")
+      .select("household_id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    return membership?.household_id || null;
+  };
+
   const weekOptions = [
     { label: "Deze week", offset: 0 },
     { label: "Volgende week", offset: 1 },
@@ -57,12 +74,18 @@ export default function WeekPage() {
 
   useEffect(() => {
     const fetchShoppingCount = async () => {
+      const householdId = await getHouseholdId();
+      if (!householdId) return;
+
       const { count } = await supabase
         .from("shopping_list")
         .select("*", { count: "exact", head: true })
-        .eq("checked", false);
+        .eq("checked", false)
+        .eq("household_id", householdId);
+
       setShoppingCount(count || 0);
     };
+
     fetchShoppingCount();
   }, []);
 
@@ -118,10 +141,15 @@ export default function WeekPage() {
 
   useEffect(() => {
     const fetchRecipes = async () => {
+      const householdId = await getHouseholdId();
+      if (!householdId) return;
+
       const { data } = await supabase
         .from("recipes")
         .select("*")
+        .eq("household_id", householdId)
         .order("created_at", { ascending: false });
+
       setRecipes(data || []);
     };
     fetchRecipes();
@@ -129,10 +157,14 @@ export default function WeekPage() {
 
   useEffect(() => {
     const fetchWeekPlan = async () => {
+      const householdId = await getHouseholdId();
+      if (!householdId) return;
+
       const { data } = await supabase
         .from("week_plans")
         .select("day_index, recipe_id, recipes(*)")
-        .eq("week_start", weekStartDate);
+        .eq("week_start", weekStartDate)
+        .eq("household_id", householdId);
 
       const grouped: Record<number, any[]> = {
         0: [],
@@ -143,11 +175,14 @@ export default function WeekPage() {
         5: [],
         6: [],
       };
+
       data?.forEach((item: any) => {
         if (item.recipes) grouped[item.day_index].push(item.recipes);
       });
+
       setWeekPlan(grouped);
     };
+
     fetchWeekPlan();
   }, [weekStartDate]);
 
@@ -191,13 +226,16 @@ export default function WeekPage() {
     const exists = weekPlan[activeDay].some((r) => r.id === recipe.id);
 
     if (exists) {
+      const householdId = await getHouseholdId();
+      if (!householdId) return;
+
       const { error } = await supabase
         .from("week_plans")
         .delete()
         .eq("week_start", weekStartDate)
         .eq("day_index", activeDay)
         .eq("recipe_id", recipe.id)
-        .eq("user_id", userId);
+        .eq("household_id", householdId);
 
       if (!error) {
         setWeekPlan((prev) => ({
@@ -206,11 +244,15 @@ export default function WeekPage() {
         }));
       }
     } else {
+      const householdId = await getHouseholdId();
+      if (!householdId) return;
+
       const { error } = await supabase.from("week_plans").insert({
         week_start: weekStartDate,
         day_index: activeDay,
         recipe_id: recipe.id,
         user_id: userId,
+        household_id: householdId,
       });
 
       if (!error) {
@@ -221,13 +263,10 @@ export default function WeekPage() {
       }
     }
   };
-  const removeFromDay = async (dayIndex: number, recipeId: string) => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
 
-    const userId = session?.user?.id;
-    if (!userId) return;
+  const removeFromDay = async (dayIndex: number, recipeId: any) => {
+    const householdId = await getHouseholdId();
+    if (!householdId) return;
 
     const { error } = await supabase
       .from("week_plans")
@@ -235,7 +274,7 @@ export default function WeekPage() {
       .eq("week_start", weekStartDate)
       .eq("day_index", dayIndex)
       .eq("recipe_id", recipeId)
-      .eq("user_id", userId);
+      .eq("household_id", householdId);
 
     if (!error) {
       setWeekPlan((prev) => ({
@@ -244,6 +283,7 @@ export default function WeekPage() {
       }));
     }
   };
+
   return (
     <>
       <Header title="Weekplanner" />
