@@ -97,6 +97,7 @@ export default function Home() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
+
       if (!user) {
         setRecipes([]);
         return;
@@ -124,7 +125,17 @@ export default function Home() {
       setRecipes(data || []);
     };
 
+    // Eerste load
     fetchRecipes();
+
+    // 🔄 Luister naar auth veranderingen (belangrijk voor Elisa scenario)
+    const { data: listener } = supabase.auth.onAuthStateChange(() => {
+      fetchRecipes();
+    });
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   const categories = ["Alles", "Ontbijt", "Lunch", "Diner", "Dessert", "Snack"];
