@@ -208,9 +208,9 @@ export default function RecipeDetail() {
                 {burst && (
                   <div className="absolute inset-0 pointer-events-none">
                     {[
-                      { x: -8, scale: 0.9, delay: 0 },
-                      { x: 0, scale: 1.1, delay: 80 },
-                      { x: 10, scale: 0.8, delay: 140 },
+                      { x: -18, scale: 1.2, delay: 0 },
+                      { x: 0, scale: 1.6, delay: 120 },
+                      { x: 20, scale: 0.8, delay: 200 },
                     ].map((p, i) => (
                       <span
                         key={i}
