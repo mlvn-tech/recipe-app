@@ -18,7 +18,6 @@ export default function AccountPage() {
       const { data, error } = await supabase.auth.getUser();
       console.log("ACCOUNT getUser:", data?.user);
 
-      // 🔒 Expliciet user state zetten
       if (error || !data?.user) {
         setUser(null);
         setHouseholdId(null);
@@ -141,7 +140,7 @@ export default function AccountPage() {
             )}
           </div>
 
-          {/* Invite Card */}
+          {/* CASE 1: User heeft household */}
           {user?.email && householdId && (
             <Card>
               <div className="flex flex-col items-center text-center space-y-6">
@@ -174,6 +173,12 @@ export default function AccountPage() {
                   </button>
                 </div>
               </div>
+            </Card>
+          )}
+
+          {/* CASE 2: User heeft GEEN household */}
+          {user?.email && !householdId && (
+            <Card>
               <div className="space-y-4 text-center">
                 <h2 className="text-lg font-semibold">Nog geen huishouden</h2>
 
