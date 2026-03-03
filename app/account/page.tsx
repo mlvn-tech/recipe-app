@@ -10,7 +10,7 @@ export default function AccountPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const setupHousehold = async () => {
+    const fetchMembership = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -19,7 +19,6 @@ export default function AccountPage() {
 
       setUser(user);
 
-      // check membership
       const { data: membership } = await supabase
         .from("household_members")
         .select("household_id")
@@ -29,36 +28,9 @@ export default function AccountPage() {
       if (membership) {
         setHouseholdId(membership.household_id);
       }
-
-      if (!membership) {
-        const result = await supabase
-          .from("households")
-          .insert({ name: "Ons huishouden" })
-          .select()
-          .maybeSingle();
-
-        if (result.error) {
-          console.error("HOUSEHOLD ERROR:", result.error);
-          return;
-        }
-
-        const household = result.data;
-
-        if (household) {
-          await supabase.from("household_members").upsert(
-            {
-              household_id: householdId,
-              user_id: user.id,
-            },
-            { onConflict: "user_id,household_id" },
-          );
-
-          setHouseholdId(household.id);
-        }
-      }
     };
 
-    setupHousehold();
+    fetchMembership();
   }, []);
 
   const handleLogout = async () => {
@@ -70,6 +42,28 @@ export default function AccountPage() {
     householdId && typeof window !== "undefined"
       ? `${window.location.origin}/join?household=${householdId}`
       : "";
+
+  const handleCreateHousehold = async () => {
+    if (!user) return;
+
+    const { data: household, error } = await supabase
+      .from("households")
+      .insert({ name: "Ons huishouden" })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("CREATE HOUSEHOLD ERROR:", error);
+      return;
+    }
+
+    await supabase.from("household_members").insert({
+      household_id: household.id,
+      user_id: user.id,
+    });
+
+    setHouseholdId(household.id);
+  };
 
   return (
     <div className="p-6">
@@ -90,6 +84,14 @@ export default function AccountPage() {
                 className="w-full p-2 bg-gray-100 rounded-lg text-sm"
               />
             </div>
+          )}
+          {!householdId && user && (
+            <button
+              onClick={handleCreateHousehold}
+              className="px-4 py-2 bg-black text-white rounded-lg"
+            >
+              Maak nieuw huishouden
+            </button>
           )}
 
           <button

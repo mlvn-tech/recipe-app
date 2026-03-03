@@ -11,7 +11,8 @@ export default function JoinPage() {
 
   useEffect(() => {
     if (!householdId) return; // 🔥 eerst wachten tot param er is
-
+    console.log("RAW searchParams:", params.toString());
+    console.log("householdId param:", householdId);
     const joinHousehold = async () => {
       console.log("JOIN householdId:", householdId);
 
@@ -33,7 +34,7 @@ export default function JoinPage() {
         .maybeSingle();
 
       if (!existingMembership) {
-        const { error } = await supabase.from("household_members").upsert(
+        const response = await supabase.from("household_members").upsert(
           {
             household_id: householdId,
             user_id: user.id,
@@ -41,8 +42,15 @@ export default function JoinPage() {
           { onConflict: "user_id,household_id" },
         );
 
-        if (error) {
-          console.error("JOIN ERROR:", error);
+        console.log("JOIN RESPONSE:", response);
+        console.log("JOIN user:", user);
+        console.log("JOIN householdId:", householdId);
+
+        if (response.error) {
+          console.error(
+            "JOIN ERROR FULL:",
+            JSON.stringify(response.error, null, 2),
+          );
           return;
         }
       }
