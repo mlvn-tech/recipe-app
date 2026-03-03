@@ -14,32 +14,40 @@ export default function AccountPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchMembership = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      console.log("ACCOUNT getUser:", user);
+    const init = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      console.log("ACCOUNT getUser:", data?.user);
 
-      if (!user) return;
+      // 🔒 Expliciet user state zetten
+      if (error || !data?.user) {
+        setUser(null);
+        setHouseholdId(null);
+        return;
+      }
 
-      setUser(user);
+      const currentUser = data.user;
+      setUser(currentUser);
 
       const { data: membership } = await supabase
         .from("household_members")
         .select("household_id")
-        .eq("user_id", user.id)
+        .eq("user_id", currentUser.id)
         .maybeSingle();
 
       if (membership) {
         setHouseholdId(membership.household_id);
+      } else {
+        setHouseholdId(null);
       }
     };
 
-    fetchMembership();
+    init();
   }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    setUser(null);
+    setHouseholdId(null);
     router.replace("/login");
   };
 
@@ -96,7 +104,6 @@ export default function AccountPage() {
         alert("Link gekopieerd!");
       }
     } catch (err: any) {
-      // Alleen loggen als het geen cancel is
       if (err.name !== "AbortError") {
         console.error("Share failed:", err);
       }
@@ -108,27 +115,36 @@ export default function AccountPage() {
       <Header title="Account" onBack={() => router.back()} />
       <main className="min-h-dvh bg-[var(--color-bg)] pt-16 pb-24">
         <div className="p-6 space-y-8">
-          {/* Header */}
+          {/* Account info */}
           <div className="space-y-2">
-            <p className="text-sm text-gray-500">{user?.email}</p>
-            <p className="text-xs text-red-500">
-              DEBUG USER: {JSON.stringify(user)}
-            </p>
+            {user?.email ? (
+              <>
+                <p className="text-sm text-gray-500">{user.email}</p>
+                <p className="text-xs text-red-500">
+                  DEBUG USER: {JSON.stringify(user)}
+                </p>
 
-            <button
-              onClick={handleLogout}
-              className="text-sm text-gray-500 underline"
-            >
-              Uitloggen
-            </button>
+                <button
+                  onClick={handleLogout}
+                  className="text-sm text-gray-500 underline"
+                >
+                  Uitloggen
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-gray-500">Niet ingelogd</p>
+                <p className="text-xs text-red-500">
+                  DEBUG USER: {JSON.stringify(user)}
+                </p>
+              </>
+            )}
           </div>
 
           {/* Invite Card */}
-
-          {householdId && (
+          {user?.email && householdId && (
             <Card>
               <div className="flex flex-col items-center text-center space-y-6">
-                {/* Titel */}
                 <div>
                   <h2 className="text-lg font-semibold">Nodig iemand uit</h2>
                   <p className="text-sm text-gray-500 mt-1">
@@ -136,12 +152,10 @@ export default function AccountPage() {
                   </p>
                 </div>
 
-                {/* QR */}
                 <div className="bg-white p-4 rounded-2xl shadow-sm">
                   <QRCodeCanvas value={inviteLink} size={200} />
                 </div>
 
-                {/* Actie iconen */}
                 <div className="flex gap-10">
                   <button
                     onClick={handleShare}
@@ -159,6 +173,20 @@ export default function AccountPage() {
                     <span className="text-xs">Kopieer</span>
                   </button>
                 </div>
+              </div>
+              <div className="space-y-4 text-center">
+                <h2 className="text-lg font-semibold">Nog geen huishouden</h2>
+
+                <p className="text-sm text-gray-500">
+                  Maak een huishouden aan om recepten te delen.
+                </p>
+
+                <button
+                  onClick={handleCreateHousehold}
+                  className="px-4 py-2 rounded-xl bg-[var(--color-primary)] text-white"
+                >
+                  Maak huishouden aan
+                </button>
               </div>
             </Card>
           )}
