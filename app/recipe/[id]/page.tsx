@@ -178,39 +178,45 @@ export default function RecipeDetail() {
               onClick={() => {
                 if (!isFavorite) {
                   setBurst(true);
-                  setTimeout(() => setBurst(false), 500);
+                  setTimeout(() => setBurst(false), 450);
                 }
                 toggleFavorite();
               }}
               className="
-    absolute bottom-4 right-4
-    bg-white/80 backdrop-blur-md
-    rounded-full p-3
-    shadow-md
-    relative
-    flex items-center justify-center
-  "
+        absolute
+        bottom-4
+        right-4
+        bg-white/80
+        backdrop-blur-md
+        rounded-full
+        p-3
+        shadow-md
+        flex
+        items-center
+        justify-center
+      "
             >
-              {/* Hart icoon */}
-              <Icon
-                icon={isFavorite ? HeartSolid : HeartOutline}
-                className={`${
-                  isFavorite ? "text-[var(--color-accent)]" : "text-gray-500"
-                } transition`}
-              />
+              {/* 👇 Inner wrapper alleen voor burst */}
+              <div className="relative flex items-center justify-center">
+                <Icon
+                  icon={isFavorite ? HeartSolid : HeartOutline}
+                  className={`${
+                    isFavorite ? "text-[var(--color-accent)]" : "text-gray-500"
+                  } transition`}
+                />
 
-              {/* 💚 Subtiele burst */}
-              {burst && (
-                <div className="absolute inset-0 pointer-events-none">
-                  {[0, 1, 2].map((i) => (
-                    <span
-                      key={i}
-                      className="heart-particle"
-                      style={{ animationDelay: `${i * 60}ms` }}
-                    />
-                  ))}
-                </div>
-              )}
+                {burst && (
+                  <div className="absolute inset-0 pointer-events-none">
+                    {[0, 1, 2].map((i) => (
+                      <span
+                        key={i}
+                        className="heart-particle"
+                        style={{ animationDelay: `${i * 60}ms` }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             </button>
           </div>
         )}
