@@ -182,8 +182,8 @@ export default function RecipeDetail() {
               onClick={toggleFavorite}
               className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-md rounded-full p-3 shadow-md"
               style={{
-                transform: animating ? "scale(1.4)" : "scale(1)",
-                transition: "transform 0.15s ease-out",
+                transform: animating ? "scale(1.2)" : "scale(1)",
+                transition: "transform 0.20s ease-in-out",
               }}
             >
               <Icon
