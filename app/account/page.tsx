@@ -18,6 +18,7 @@ export default function AccountPage() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
+      console.log("ACCOUNT getUser:", user);
 
       if (!user) return;
 
@@ -110,6 +111,9 @@ export default function AccountPage() {
           {/* Header */}
           <div className="space-y-2">
             <p className="text-sm text-gray-500">{user?.email}</p>
+            <p className="text-xs text-red-500">
+              DEBUG USER: {JSON.stringify(user)}
+            </p>
 
             <button
               onClick={handleLogout}
