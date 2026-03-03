@@ -84,18 +84,13 @@ function SwipeableItem({
 
   const onTouchMove = (e: React.TouchEvent) => {
     const diff = e.touches[0].clientX - startX.current;
-    if (diff < 0) {
-      setOffsetX(rubberband(diff, threshold));
-    }
+    if (diff < 0) setOffsetX(rubberband(diff, threshold));
   };
 
   const onTouchEnd = () => {
     setSwiping(false);
-    if (offsetX < -threshold * 0.7) {
-      onDelete();
-    } else {
-      setOffsetX(0);
-    }
+    if (offsetX < -threshold * 0.7) onDelete();
+    else setOffsetX(0);
   };
 
   const progress = Math.min(Math.abs(offsetX) / threshold, 1);
@@ -158,18 +153,41 @@ function ShoppingPageContent() {
   const [justChecked, setJustChecked] = useState<Set<string>>(new Set());
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    document.querySelectorAll("textarea").forEach((el) => {
-      el.style.height = "auto";
-      el.style.height = el.scrollHeight + "px";
-    });
-  }, [items]);
+  // ✅ Household state
+  const [householdId, setHouseholdId] = useState<string | null>(null);
 
+  // ✅ Load household once
+  useEffect(() => {
+    const loadHousehold = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const userId = session?.user?.id;
+      if (!userId) return;
+
+      const { data: membership } = await supabase
+        .from("household_members")
+        .select("household_id")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      setHouseholdId(membership?.household_id || null);
+    };
+
+    loadHousehold();
+  }, []);
+
+  // ✅ Fetch shopping items
   useEffect(() => {
     const fetchItems = async () => {
+      if (!householdId || !weekStart) return;
+
       const { data } = await supabase
         .from("shopping_list")
         .select("*")
+        .eq("household_id", householdId)
+        .eq("week_start", weekStart)
         .order("created_at", { ascending: false });
 
       setItems(data || []);
@@ -177,34 +195,22 @@ function ShoppingPageContent() {
     };
 
     fetchItems();
-  }, []);
+  }, [householdId, weekStart]);
 
   const loadFromWeek = async () => {
-    if (!weekStart) return;
-
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    const userId = session?.user?.id;
-    if (!userId) return;
+    if (!weekStart || !householdId) return;
 
     setLoadingWeek(true);
 
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("week_plans")
       .select("recipes(*)")
       .eq("week_start", weekStart)
-      .eq("user_id", userId);
-
-    if (error || !data) {
-      setLoadingWeek(false);
-      return;
-    }
+      .eq("household_id", householdId);
 
     const allIngredients: string[] = [];
 
-    data.forEach((item: any) => {
+    data?.forEach((item: any) => {
       if (item.recipes?.ingredients) {
         allIngredients.push(...item.recipes.ingredients);
       }
@@ -222,140 +228,105 @@ function ShoppingPageContent() {
         name,
         amount: null,
         checked: false,
-        user_id: userId,
+        household_id: householdId,
+        week_start: weekStart,
       }));
 
-    if (toInsert.length === 0) {
-      setLoadingWeek(false);
-      return;
-    }
+    if (toInsert.length > 0) {
+      const { data: inserted } = await supabase
+        .from("shopping_list")
+        .insert(toInsert)
+        .select();
 
-    const { data: inserted, error: insertError } = await supabase
-      .from("shopping_list")
-      .insert(toInsert)
-      .select();
-
-    if (!insertError && inserted) {
-      setItems((prev) => [...inserted, ...prev]);
+      if (inserted) setItems((prev) => [...inserted, ...prev]);
     }
 
     setLoadingWeek(false);
   };
 
   const addItem = async () => {
-    if (!newName.trim()) return;
+    if (!newName.trim() || !householdId || !weekStart) return;
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    const userId = session?.user?.id;
-    if (!userId) return;
-
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("shopping_list")
       .insert([
         {
           name: newName.trim(),
           amount: null,
           checked: false,
-          user_id: userId,
+          household_id: householdId,
+          week_start: weekStart,
         },
       ])
       .select()
       .single();
 
-    if (!error && data) {
+    if (data) {
       setItems((prev) => [data, ...prev]);
       setNewName("");
     }
   };
 
   const toggleChecked = async (item: ShoppingItem) => {
-    if (!item.checked) {
-      setJustChecked((prev) => new Set(prev).add(item.id));
-      setItems((prev) =>
-        prev.map((i) => (i.id === item.id ? { ...i, checked: true } : i)),
-      );
+    await supabase
+      .from("shopping_list")
+      .update({ checked: !item.checked })
+      .eq("id", item.id)
+      .eq("household_id", householdId)
+      .eq("week_start", weekStart);
 
-      await supabase
-        .from("shopping_list")
-        .update({ checked: true })
-        .eq("id", item.id);
-
-      setTimeout(() => {
-        setJustChecked((prev) => {
-          const next = new Set(prev);
-          next.delete(item.id);
-          return next;
-        });
-      }, 800);
-    } else {
-      setItems((prev) =>
-        prev.map((i) => (i.id === item.id ? { ...i, checked: false } : i)),
-      );
-
-      await supabase
-        .from("shopping_list")
-        .update({ checked: false })
-        .eq("id", item.id);
-    }
+    setItems((prev) =>
+      prev.map((i) => (i.id === item.id ? { ...i, checked: !i.checked } : i)),
+    );
   };
 
   const updateName = async (item: ShoppingItem, name: string) => {
+    await supabase
+      .from("shopping_list")
+      .update({ name })
+      .eq("id", item.id)
+      .eq("household_id", householdId)
+      .eq("week_start", weekStart);
+
     setItems((prev) =>
       prev.map((i) => (i.id === item.id ? { ...i, name } : i)),
     );
-    await supabase.from("shopping_list").update({ name }).eq("id", item.id);
   };
 
   const deleteItem = async (id: string) => {
-    setRemovingIds((prev) => new Set(prev).add(id));
-    setTimeout(async () => {
-      const { error } = await supabase
-        .from("shopping_list")
-        .delete()
-        .eq("id", id);
-      if (!error) {
-        setItems((prev) => prev.filter((i) => i.id !== id));
-        setRemovingIds((prev) => {
-          const next = new Set(prev);
-          next.delete(id);
-          return next;
-        });
-      }
-    }, 350);
+    await supabase
+      .from("shopping_list")
+      .delete()
+      .eq("id", id)
+      .eq("household_id", householdId)
+      .eq("week_start", weekStart);
+
+    setItems((prev) => prev.filter((i) => i.id !== id));
   };
 
   const clearChecked = async () => {
-    const checkedIds = items.filter((i) => i.checked).map((i) => i.id);
-    if (checkedIds.length === 0) return;
-
-    const { error } = await supabase
+    await supabase
       .from("shopping_list")
       .delete()
-      .in("id", checkedIds);
+      .eq("household_id", householdId)
+      .eq("week_start", weekStart)
+      .eq("checked", true);
 
-    if (!error) {
-      setItems((prev) => prev.filter((i) => !i.checked));
-    }
+    setItems((prev) => prev.filter((i) => !i.checked));
   };
 
   const clearAll = async () => {
-    const { error } = await supabase
+    await supabase
       .from("shopping_list")
       .delete()
-      .neq("id", "00000000-0000-0000-0000-000000000000");
+      .eq("household_id", householdId)
+      .eq("week_start", weekStart);
 
-    if (!error) {
-      setItems([]);
-    }
+    setItems([]);
   };
 
-  const visibleUnchecked = items.filter(
-    (i) => !i.checked || justChecked.has(i.id),
-  );
-  const checkedItems = items.filter((i) => i.checked && !justChecked.has(i.id));
+  const visibleUnchecked = items.filter((i) => !i.checked);
+  const checkedItems = items.filter((i) => i.checked);
 
   if (loading) return <p className="p-8">Laden...</p>;
 
