@@ -199,6 +199,7 @@ export default function CookMode() {
       </div>
 
       {/* Scrollable Steps */}
+
       <div className="flex-1 overflow-y-auto px-4 pb-28 space-y-4">
         {recipe.steps.map((step: string, index: number) => {
           const isActive = index === currentStep;
