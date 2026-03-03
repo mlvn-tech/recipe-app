@@ -16,7 +16,6 @@ export default function AccountPage() {
   useEffect(() => {
     const init = async () => {
       const { data, error } = await supabase.auth.getUser();
-      console.log("ACCOUNT getUser:", data?.user);
 
       if (error || !data?.user) {
         setUser(null);
@@ -119,9 +118,6 @@ export default function AccountPage() {
             {user?.email ? (
               <>
                 <p className="text-sm text-gray-500">{user.email}</p>
-                <p className="text-xs text-red-500">
-                  DEBUG USER: {JSON.stringify(user)}
-                </p>
 
                 <button
                   onClick={handleLogout}
@@ -133,9 +129,6 @@ export default function AccountPage() {
             ) : (
               <>
                 <p className="text-sm text-gray-500">Niet ingelogd</p>
-                <p className="text-xs text-red-500">
-                  DEBUG USER: {JSON.stringify(user)}
-                </p>
               </>
             )}
           </div>
