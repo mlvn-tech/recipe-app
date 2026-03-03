@@ -3,6 +3,10 @@
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { QRCodeCanvas } from "qrcode.react";
+import Header from "@/components/Header";
+import Card from "@/components/Card";
+import { ShareIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 
 export default function AccountPage() {
   const [user, setUser] = useState<any>(null);
@@ -65,45 +69,97 @@ export default function AccountPage() {
     setHouseholdId(household.id);
   };
 
-  return (
-    <div className="p-6">
-      <h1 className="text-xl font-semibold mb-4">Account</h1>
+  const handleCopy = async () => {
+    if (!inviteLink) return;
 
-      {user ? (
-        <>
-          <p className="mb-4 text-gray-600">{user.email}</p>
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      alert("Invite link gekopieerd!");
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
+  };
+
+  const handleShare = async () => {
+    if (!inviteLink) return;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "Word lid van mijn huishouden",
+          text: "Scan of open deze link om recepten te delen 🍳",
+          url: inviteLink,
+        });
+      } else {
+        await navigator.clipboard.writeText(inviteLink);
+        alert("Link gekopieerd!");
+      }
+    } catch (err: any) {
+      // Alleen loggen als het geen cancel is
+      if (err.name !== "AbortError") {
+        console.error("Share failed:", err);
+      }
+    }
+  };
+
+  return (
+    <>
+      <Header title="Account" onBack={() => router.back()} />
+      <main className="min-h-dvh bg-[var(--color-bg)] pt-16 pb-24">
+        <div className="p-6 space-y-8">
+          {/* Header */}
+          <div className="space-y-2">
+            <p className="text-sm text-gray-500">{user?.email}</p>
+
+            <button
+              onClick={handleLogout}
+              className="text-sm text-gray-500 underline"
+            >
+              Uitloggen
+            </button>
+          </div>
+
+          {/* Invite Card */}
 
           {householdId && (
-            <div className="mb-6">
-              <p className="text-sm text-gray-500 mb-2">
-                Nodig iemand uit met deze link:
-              </p>
-              <input
-                readOnly
-                value={inviteLink}
-                className="w-full p-2 bg-gray-100 rounded-lg text-sm"
-              />
-            </div>
-          )}
-          {!householdId && user && (
-            <button
-              onClick={handleCreateHousehold}
-              className="px-4 py-2 bg-black text-white rounded-lg"
-            >
-              Maak nieuw huishouden
-            </button>
-          )}
+            <Card>
+              <div className="flex flex-col items-center text-center space-y-6">
+                {/* Titel */}
+                <div>
+                  <h2 className="text-lg font-semibold">Nodig iemand uit</h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Deel de uitnodiging of laat iemand de QR-code scannen.
+                  </p>
+                </div>
 
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-gray-100 rounded-lg"
-          >
-            Uitloggen
-          </button>
-        </>
-      ) : (
-        <p>Niet ingelogd</p>
-      )}
-    </div>
+                {/* QR */}
+                <div className="bg-white p-4 rounded-2xl shadow-sm">
+                  <QRCodeCanvas value={inviteLink} size={200} />
+                </div>
+
+                {/* Actie iconen */}
+                <div className="flex gap-10">
+                  <button
+                    onClick={handleShare}
+                    className="flex flex-col items-center text-gray-600 active:scale-95 transition"
+                  >
+                    <ShareIcon className="w-6 h-6 mb-1" />
+                    <span className="text-xs">Deel</span>
+                  </button>
+
+                  <button
+                    onClick={handleCopy}
+                    className="flex flex-col items-center text-gray-600 active:scale-95 transition"
+                  >
+                    <ClipboardDocumentIcon className="w-6 h-6 mb-1" />
+                    <span className="text-xs">Kopieer</span>
+                  </button>
+                </div>
+              </div>
+            </Card>
+          )}
+        </div>
+      </main>
+    </>
   );
 }
