@@ -2,18 +2,25 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const redirectTo = searchParams.get("redirect") || "/";
 
   const handleLogin = async () => {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        // 👇 redirectTo moet meegaan naar callback
+        emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(
+          redirectTo,
+        )}`,
       },
     });
 

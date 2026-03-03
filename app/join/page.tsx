@@ -28,7 +28,7 @@ export default function JoinPage() {
 
       if (!data?.user) {
         setStatus("Je moet eerst inloggen.");
-        router.replace("/login");
+        router.replace(`/login?redirect=/join?household=${householdId}`);
         return;
       }
 
