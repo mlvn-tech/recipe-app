@@ -169,7 +169,7 @@ function ShoppingPageContent() {
       const { data: membership } = await supabase
         .from("household_members")
         .select("household_id")
-        .eq("household_id", householdId)
+        .eq("user_id", userId)
         .maybeSingle();
 
       setHouseholdId(membership?.household_id || null);
@@ -181,7 +181,7 @@ function ShoppingPageContent() {
   // ✅ Fetch shopping items
   useEffect(() => {
     const fetchItems = async () => {
-      if (!householdId || !weekStart) return;
+      if (!householdId) return;
 
       const { data } = await supabase
         .from("shopping_list")
@@ -245,7 +245,7 @@ function ShoppingPageContent() {
   };
 
   const addItem = async () => {
-    if (!newName.trim() || !householdId || !weekStart) return;
+    if (!newName.trim() || !householdId) return;
 
     const { data } = await supabase
       .from("shopping_list")
