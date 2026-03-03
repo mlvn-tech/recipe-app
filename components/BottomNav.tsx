@@ -38,7 +38,7 @@ export default function BottomNav() {
       iconActive: PlusCircleIcon,
     },
     {
-      label: "Profiel",
+      label: "Account",
       href: "/account",
       icon: UserIcon,
       iconActive: UserIconSolid,
