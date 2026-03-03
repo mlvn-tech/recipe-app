@@ -20,6 +20,9 @@ export default function CookMode() {
 
   const [recipe, setRecipe] = useState<any>(null);
   const [currentStep, setCurrentStep] = useState(0);
+
+  const [animateStep, setAnimateStep] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [showFloating, setShowFloating] = useState(false);
   const [ingredientsOpen, setIngredientsOpen] = useState(false);
@@ -174,11 +177,30 @@ export default function CookMode() {
           </div>
         </div>
         {/* Progress bar */}
-        <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-[var(--color-brand)] transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          />
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>
+              Stap {currentStep + 1} van {recipe.steps.length}
+            </span>
+            <span>
+              {Math.round(((currentStep + 1) / recipe.steps.length) * 100)}%
+            </span>
+          </div>
+
+          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className="
+        h-full 
+        bg-[var(--color-brand)] 
+        rounded-full
+        transition-all duration-500 ease-out
+        shadow-[0_0_8px_rgba(0,0,0,0.08)]
+      "
+              style={{
+                width: `${((currentStep + 1) / recipe.steps.length) * 100}%`,
+              }}
+            />
+          </div>
         </div>
       </div>
 
@@ -190,7 +212,11 @@ export default function CookMode() {
           return (
             <div
               key={index}
-              onClick={() => setCurrentStep(index)}
+              onClick={() => {
+                setAnimateStep(true);
+                setCurrentStep(index);
+                setTimeout(() => setAnimateStep(false), 300);
+              }}
               className={`
                 cursor-pointer
                 p-6
@@ -199,8 +225,14 @@ export default function CookMode() {
                 duration-200
                 ${
                   isActive
-                    ? "bg-gray-100 text-gray-900 shadow-sm"
-                    : "text-gray-400"
+                    ? `
+                  bg-gray-100 
+                  text-gray-900 
+                  shadow-sm 
+                  scale-[1.02]
+                  ${animateStep ? "animate-stepfade" : ""}
+                `
+                    : "text-gray-400 opacity-70"
                 }
               `}
             >

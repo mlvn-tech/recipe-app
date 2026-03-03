@@ -36,6 +36,7 @@ export default function RecipeDetail() {
 
   // ✅ FAVORITES STATE
   const [isFavorite, setIsFavorite] = useState(false);
+  const [burst, setBurst] = useState(false);
 
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const ingredientsEndRef = useRef<HTMLDivElement | null>(null);
@@ -174,7 +175,11 @@ export default function RecipeDetail() {
 
             {/* ❤️ FAVORITE BUTTON */}
             <button
-              onClick={toggleFavorite}
+              onClick={() => {
+                toggleFavorite();
+                setBurst(true);
+                setTimeout(() => setBurst(false), 600);
+              }}
               className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-md rounded-full p-3 shadow-md"
             >
               <Icon
@@ -184,6 +189,26 @@ export default function RecipeDetail() {
                 } transition`}
               />
             </button>
+            <div className="relative">
+              <HeartSolid className="w-6 h-6 text-red-500" />
+
+              {burst && (
+                <div className="absolute inset-0 pointer-events-none">
+                  {[...Array(4)].map((_, i) => (
+                    <span
+                      key={i}
+                      className="absolute text-red-400 animate-heart"
+                      style={{
+                        left: `${40 + i * 5}%`,
+                        animationDelay: `${i * 50}ms`,
+                      }}
+                    >
+                      ❤️
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
