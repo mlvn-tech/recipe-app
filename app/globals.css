@@ -112,3 +112,7 @@ input, textarea, select {
   animation: pulse-ring 1.8s ease-out 3;
 }
 
+h1, h2 {
+  font-family: var(--font-nunito);
+  font-weight: 600;
+}

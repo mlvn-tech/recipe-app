@@ -7,6 +7,15 @@ import AppShell from "@/components/AppShell";
 import AuthGuard from "@/components/AuthGuard";
 import { UIProvider } from "@/components/UIContext";
 import { OverlayProvider } from "@/components/GlobalOverlay";
+
+import { Nunito } from "next/font/google";
+
+const nunito = Nunito({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-nunito",
+});
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -45,7 +54,7 @@ export default function RootLayout({
     <ViewTransitions>
       <html lang="en" className="h-full">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[var(--color-bg)] text-[#171717] h-full`}
+          className={`${geistSans.variable} ${geistMono.variable} ${nunito.variable} antialiased bg-[var(--color-bg)] text-[#171717] h-full`}
         >
           <AuthGuard>
             <UIProvider>
