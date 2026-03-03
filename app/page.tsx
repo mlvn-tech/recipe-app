@@ -293,32 +293,36 @@ export default function Home() {
                     className="block hover:shadow-md transition shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-xl"
                   >
                     <Card overflow>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavorite(recipe.id);
-                        }}
-                      >
-                        <Icon
-                          icon={isFavorite ? HeartSolid : HeartOutline}
-                          className={`${
-                            isFavorite
-                              ? "text-[var(--color-accent)]"
-                              : "text-gray-400"
-                          } transition`}
-                        />
-                      </button>
-                      {recipe.image_url ? (
-                        <div className="h-40 w-full">
+                      <div className="relative h-40 w-full">
+                        {recipe.image_url ? (
                           <img
                             src={recipe.image_url}
                             alt={recipe.title}
                             className="w-full h-full object-cover"
                           />
-                        </div>
-                      ) : (
-                        <div className="h-40 bg-gray-200 w-full" />
-                      )}
+                        ) : (
+                          <div className="h-full w-full bg-gray-200" />
+                        )}
+
+                        {/* ❤️ Favorite button */}
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault(); // 🔴 voorkomt navigatie
+                            e.stopPropagation();
+                            toggleFavorite(recipe.id);
+                          }}
+                          className="absolute top-3 right-3 bg-white/80 backdrop-blur-md rounded-full p-2 shadow-sm"
+                        >
+                          <Icon
+                            icon={isFavorite ? HeartSolid : HeartOutline}
+                            className={`${
+                              isFavorite
+                                ? "text-[var(--color-accent)]"
+                                : "text-gray-500"
+                            } transition`}
+                          />
+                        </button>
+                      </div>
 
                       <div className="p-4 space-y-2">
                         <p className="text-xs text-gray-400">

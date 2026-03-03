@@ -11,7 +11,9 @@ import {
   ChevronDownIcon,
   ClockIcon,
   PlayCircleIcon,
+  HeartIcon as HeartOutline,
 } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import Icon from "@/components/icons";
 import { CookingPot, PlayCircle, PlayIcon } from "lucide-react";
 import Header from "@/components/Header";
@@ -32,6 +34,9 @@ export default function RecipeDetail() {
   const [ingredientsOpen, setIngredientsOpen] = useState(false);
   const [headerTitle, setHeaderTitle] = useState("Recept");
 
+  // ✅ FAVORITES STATE
+  const [isFavorite, setIsFavorite] = useState(false);
+
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const ingredientsEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -49,6 +54,54 @@ export default function RecipeDetail() {
 
     if (id) fetchRecipe();
   }, [id]);
+
+  // ✅ FAVORITES CHECK
+  useEffect(() => {
+    const checkFavorite = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user || !id) return;
+
+      const { data } = await supabase
+        .from("favorites")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("recipe_id", id)
+        .maybeSingle();
+
+      setIsFavorite(!!data);
+    };
+
+    if (id) checkFavorite();
+  }, [id]);
+
+  // ✅ FAVORITES TOGGLE
+  const toggleFavorite = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user || !id) return;
+
+    if (isFavorite) {
+      await supabase
+        .from("favorites")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("recipe_id", id);
+
+      setIsFavorite(false);
+    } else {
+      await supabase.from("favorites").insert({
+        user_id: user.id,
+        recipe_id: id,
+      });
+
+      setIsFavorite(true);
+    }
+  };
 
   useEffect(() => {
     if (!titleRef.current || !recipe) return;
@@ -112,12 +165,25 @@ export default function RecipeDetail() {
 
       <main className="min-h-dvh bg-[var(--color-bg)] pt-16 pb-32">
         {recipe.image_url && (
-          <div className="w-full h-72">
+          <div className="relative w-full h-72">
             <img
               src={recipe.image_url}
               alt={recipe.title}
               className="w-full h-full object-cover"
             />
+
+            {/* ❤️ FAVORITE BUTTON */}
+            <button
+              onClick={toggleFavorite}
+              className="absolute top-4 right-4 bg-white/80 backdrop-blur-md rounded-full p-3 shadow-md"
+            >
+              <Icon
+                icon={isFavorite ? HeartSolid : HeartOutline}
+                className={`${
+                  isFavorite ? "text-[var(--color-accent)]" : "text-gray-500"
+                } transition`}
+              />
+            </button>
           </div>
         )}
 
@@ -164,11 +230,9 @@ export default function RecipeDetail() {
                 if (isTitle) {
                   return (
                     <li key={index} className="pt-2">
-                      {/* Subtiele divider */}
                       {index !== 0 && (
                         <div className="border-t border-gray-100 mb-4" />
                       )}
-
                       <h3 className="font-semibold text-gray-400 tracking-tight">
                         {trimmed.replace(/^#\s*/, "")}
                       </h3>
@@ -225,7 +289,6 @@ export default function RecipeDetail() {
         </div>
       </main>
 
-      {/* Ingrediënten sheet via SwipeableSheet component */}
       <SwipeableSheet
         open={ingredientsOpen && showFloating}
         onClose={() => setIngredientsOpen(false)}
@@ -268,7 +331,6 @@ export default function RecipeDetail() {
         </div>
       </SwipeableSheet>
 
-      {/* Floating pill knop */}
       <div
         className={`fixed left-1/2 -translate-x-1/2 z-40 transition-all duration-300 ${
           showFloating && !ingredientsOpen
@@ -285,7 +347,9 @@ export default function RecipeDetail() {
           <Icon
             icon={ChevronDownIcon}
             size={16}
-            className={`text-gray-400 transition-transform duration-300 ${ingredientsOpen ? "rotate-180" : ""}`}
+            className={`text-gray-400 transition-transform duration-300 ${
+              ingredientsOpen ? "rotate-180" : ""
+            }`}
           />
         </button>
       </div>
