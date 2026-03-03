@@ -176,39 +176,42 @@ export default function RecipeDetail() {
             {/* ❤️ FAVORITE BUTTON */}
             <button
               onClick={() => {
+                if (!isFavorite) {
+                  setBurst(true);
+                  setTimeout(() => setBurst(false), 500);
+                }
                 toggleFavorite();
-                setBurst(true);
-                setTimeout(() => setBurst(false), 600);
               }}
-              className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-md rounded-full p-3 shadow-md"
+              className="
+    absolute bottom-4 right-4
+    bg-white/80 backdrop-blur-md
+    rounded-full p-3
+    shadow-md
+    relative
+    flex items-center justify-center
+  "
             >
+              {/* Hart icoon */}
               <Icon
                 icon={isFavorite ? HeartSolid : HeartOutline}
                 className={`${
                   isFavorite ? "text-[var(--color-accent)]" : "text-gray-500"
                 } transition`}
               />
-            </button>
-            <div className="relative">
-              <HeartSolid className="w-6 h-6 text-red-500" />
 
+              {/* 💚 Subtiele burst */}
               {burst && (
                 <div className="absolute inset-0 pointer-events-none">
-                  {[...Array(4)].map((_, i) => (
+                  {[0, 1, 2].map((i) => (
                     <span
                       key={i}
-                      className="absolute text-red-400 animate-heart"
-                      style={{
-                        left: `${40 + i * 5}%`,
-                        animationDelay: `${i * 50}ms`,
-                      }}
-                    >
-                      ❤️
-                    </span>
+                      className="heart-particle"
+                      style={{ animationDelay: `${i * 60}ms` }}
+                    />
                   ))}
                 </div>
               )}
-            </div>
+            </button>
           </div>
         )}
 

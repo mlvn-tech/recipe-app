@@ -17,7 +17,6 @@ export default function Card({
         bg-white
         rounded-xl
         shadow-sm
-        active:scale-[0.98] transition-transform duration-150
         ${overflow ? "overflow-hidden p-0" : "p-6"}
         ${className}
       `}
