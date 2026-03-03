@@ -107,7 +107,7 @@ export default function Home() {
         .from("household_members")
         .select("household_id")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       if (!membership) {
         setRecipes([]);

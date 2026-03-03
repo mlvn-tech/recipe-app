@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 export default function AccountPage() {
   const [user, setUser] = useState<any>(null);
+  const [householdId, setHouseholdId] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -14,8 +15,6 @@ export default function AccountPage() {
         data: { user },
       } = await supabase.auth.getUser();
 
-      console.log("USER:", user);
-
       if (!user) return;
 
       setUser(user);
@@ -23,22 +22,20 @@ export default function AccountPage() {
       // check membership
       const { data: membership } = await supabase
         .from("household_members")
-        .select("*")
+        .select("household_id")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
-      console.log("MEMBERSHIP:", membership);
+      if (membership) {
+        setHouseholdId(membership.household_id);
+      }
 
       if (!membership) {
-        // create household
-        console.log("NO MEMBERSHIP → CREATING HOUSEHOLD");
         const result = await supabase
           .from("households")
           .insert({ name: "Ons huishouden" })
           .select()
-          .single();
-
-        console.log("HOUSEHOLD RESULT:", result);
+          .maybeSingle();
 
         if (result.error) {
           console.error("HOUSEHOLD ERROR:", result.error);
@@ -48,12 +45,12 @@ export default function AccountPage() {
         const household = result.data;
 
         if (household) {
-          const memberResult = await supabase.from("household_members").insert({
+          await supabase.from("household_members").insert({
             household_id: household.id,
             user_id: user.id,
           });
 
-          console.log("MEMBER RESULT:", memberResult);
+          setHouseholdId(household.id);
         }
       }
     };
@@ -66,13 +63,31 @@ export default function AccountPage() {
     router.replace("/login");
   };
 
+  const inviteLink =
+    householdId && typeof window !== "undefined"
+      ? `${window.location.origin}/join?household=${householdId}`
+      : "";
+
   return (
     <div className="p-6">
       <h1 className="text-xl font-semibold mb-4">Account</h1>
 
       {user ? (
         <>
-          <p className="mb-6 text-gray-600">{user.email}</p>
+          <p className="mb-4 text-gray-600">{user.email}</p>
+
+          {householdId && (
+            <div className="mb-6">
+              <p className="text-sm text-gray-500 mb-2">
+                Nodig iemand uit met deze link:
+              </p>
+              <input
+                readOnly
+                value={inviteLink}
+                className="w-full p-2 bg-gray-100 rounded-lg text-sm"
+              />
+            </div>
+          )}
 
           <button
             onClick={handleLogout}
