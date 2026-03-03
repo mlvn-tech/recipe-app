@@ -174,7 +174,15 @@ export default function Home() {
     };
   }, []);
 
-  const categories = ["Alles", "Ontbijt", "Lunch", "Diner", "Dessert", "Snack"];
+  const categories = [
+    "Alles",
+    "Favorieten",
+    "Ontbijt",
+    "Lunch",
+    "Diner",
+    "Dessert",
+    "Snack",
+  ];
 
   const getCount = (cat: string) => {
     if (!recipes) return 0;
@@ -186,6 +194,10 @@ export default function Home() {
 
   const filteredRecipes =
     recipes?.filter((recipe) => {
+      if (activeCategory === "Favorieten") {
+        return favorites.includes(recipe.id);
+      }
+
       const matchesSearch = recipe.title
         .toLowerCase()
         .includes(search.toLowerCase());
@@ -311,7 +323,7 @@ export default function Home() {
                             e.stopPropagation();
                             toggleFavorite(recipe.id);
                           }}
-                          className="absolute top-3 right-3 bg-white/80 backdrop-blur-md rounded-full p-2 shadow-sm"
+                          className="absolute bottom-3 right-3 bg-white/80 backdrop-blur-md rounded-full p-2 shadow-sm"
                         >
                           <Icon
                             icon={isFavorite ? HeartSolid : HeartOutline}
