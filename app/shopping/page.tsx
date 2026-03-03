@@ -198,6 +198,8 @@ function ShoppingPageContent() {
 
   const loadFromWeek = async () => {
     if (!weekStart || !householdId) return;
+    console.log("weekStart param:", weekStart);
+    console.log("typeof weekStart:", typeof weekStart);
 
     setLoadingWeek(true);
 
