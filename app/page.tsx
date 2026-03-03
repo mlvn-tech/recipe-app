@@ -9,7 +9,9 @@ import {
   ArrowPathIcon,
   ChevronDownIcon,
   BeakerIcon,
+  HeartIcon as HeartOutline,
 } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import Icon from "@/components/icons";
 import Link from "next/link";
 import Card from "@/components/Card";
@@ -39,6 +41,8 @@ export default function Home() {
 
   const [showText, setShowText] = useState(true);
 
+  const [favorites, setFavorites] = useState<string[]>([]);
+
   useEffect(() => {
     if (generating) {
       setShowText(false);
@@ -49,6 +53,34 @@ export default function Home() {
       return () => clearTimeout(timer);
     }
   }, [generating]);
+
+  const toggleFavorite = async (recipeId: string) => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const userId = session?.user?.id;
+    if (!userId) return;
+
+    const isFav = favorites.includes(recipeId);
+
+    if (isFav) {
+      await supabase
+        .from("favorites")
+        .delete()
+        .eq("user_id", userId)
+        .eq("recipe_id", recipeId);
+
+      setFavorites((prev) => prev.filter((id) => id !== recipeId));
+    } else {
+      await supabase.from("favorites").insert({
+        user_id: userId,
+        recipe_id: recipeId,
+      });
+
+      setFavorites((prev) => [...prev, recipeId]);
+    }
+  };
 
   const handleGenerate = async () => {
     if (!ingredientInput.trim()) return;
@@ -70,7 +102,6 @@ export default function Home() {
           category: selectedCategory,
         }),
       });
-      ``;
 
       const text = await res.text();
       let data;
@@ -93,7 +124,6 @@ export default function Home() {
 
   useEffect(() => {
     const fetchRecipes = async () => {
-      // 1️⃣ user ophalen
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -103,7 +133,6 @@ export default function Home() {
         return;
       }
 
-      // 2️⃣ household ophalen via membership
       const { data: membership } = await supabase
         .from("household_members")
         .select("household_id")
@@ -115,7 +144,6 @@ export default function Home() {
         return;
       }
 
-      // 3️⃣ recepten ophalen op household
       const { data } = await supabase
         .from("recipes")
         .select("*")
@@ -123,12 +151,20 @@ export default function Home() {
         .order("created_at", { ascending: false });
 
       setRecipes(data || []);
+
+      // ✅ Favorites ophalen
+      const { data: favs } = await supabase
+        .from("favorites")
+        .select("recipe_id")
+        .eq("user_id", user.id);
+
+      if (favs) {
+        setFavorites(favs.map((f) => f.recipe_id));
+      }
     };
 
-    // Eerste load
     fetchRecipes();
 
-    // 🔄 Luister naar auth veranderingen (belangrijk voor Elisa scenario)
     const { data: listener } = supabase.auth.onAuthStateChange(() => {
       fetchRecipes();
     });
@@ -247,63 +283,82 @@ export default function Home() {
 
           {recipes !== null && filteredRecipes.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {filteredRecipes.map((recipe) => (
-                <Link
-                  key={recipe.id}
-                  href={`/recipe/${recipe.id}`}
-                  className="block hover:shadow-md transition shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-xl"
-                >
-                  <Card overflow>
-                    {recipe.image_url ? (
-                      <div className="h-40 w-full">
-                        <img
-                          src={recipe.image_url}
-                          alt={recipe.title}
-                          className="w-full h-full object-cover"
+              {filteredRecipes.map((recipe) => {
+                const isFavorite = favorites.includes(recipe.id);
+
+                return (
+                  <Link
+                    key={recipe.id}
+                    href={`/recipe/${recipe.id}`}
+                    className="block hover:shadow-md transition shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-xl"
+                  >
+                    <Card overflow>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(recipe.id);
+                        }}
+                      >
+                        <Icon
+                          icon={isFavorite ? HeartSolid : HeartOutline}
+                          className={`${
+                            isFavorite
+                              ? "text-[var(--color-accent)]"
+                              : "text-gray-400"
+                          } transition`}
                         />
+                      </button>
+                      {recipe.image_url ? (
+                        <div className="h-40 w-full">
+                          <img
+                            src={recipe.image_url}
+                            alt={recipe.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-40 bg-gray-200 w-full" />
+                      )}
+
+                      <div className="p-4 space-y-2">
+                        <p className="text-xs text-gray-400">
+                          {new Date(recipe.created_at).toLocaleDateString(
+                            "nl-NL",
+                          )}
+                        </p>
+
+                        <h2 className="text-xl font-semibold leading-tight">
+                          {formatTitle(recipe.title)}
+                        </h2>
+
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                          {recipe.cooking_time && (
+                            <div className="flex items-center gap-1">
+                              <Icon icon={ClockIcon} size={16} />
+                              <span>{recipe.cooking_time} min</span>
+                            </div>
+                          )}
+
+                          {recipe.servings && (
+                            <div className="flex items-center gap-1">
+                              <Icon icon={UserIcon} size={16} />
+                              <span>
+                                {recipe.servings}{" "}
+                                {recipe.servings === 1 ? "persoon" : "personen"}
+                              </span>
+                            </div>
+                          )}
+                          {recipe.category && (
+                            <div className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-lg">
+                              {recipe.category}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    ) : (
-                      <div className="h-40 bg-gray-200 w-full" />
-                    )}
-
-                    <div className="p-4 space-y-2">
-                      <p className="text-xs text-gray-400">
-                        {new Date(recipe.created_at).toLocaleDateString(
-                          "nl-NL",
-                        )}
-                      </p>
-
-                      <h2 className="text-xl font-semibold leading-tight">
-                        {formatTitle(recipe.title)}
-                      </h2>
-
-                      <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
-                        {recipe.cooking_time && (
-                          <div className="flex items-center gap-1">
-                            <Icon icon={ClockIcon} size={16} />
-                            <span>{recipe.cooking_time} min</span>
-                          </div>
-                        )}
-
-                        {recipe.servings && (
-                          <div className="flex items-center gap-1">
-                            <Icon icon={UserIcon} size={16} />
-                            <span>
-                              {recipe.servings}{" "}
-                              {recipe.servings === 1 ? "persoon" : "personen"}
-                            </span>
-                          </div>
-                        )}
-                        {recipe.category && (
-                          <div className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-lg">
-                            {recipe.category}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </Card>
-                </Link>
-              ))}
+                    </Card>
+                  </Link>
+                );
+              })}
             </div>
           )}
         </div>
