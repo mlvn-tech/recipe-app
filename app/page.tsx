@@ -186,7 +186,15 @@ export default function Home() {
 
   const getCount = (cat: string) => {
     if (!recipes) return 0;
-    if (cat === "Alles") return recipes.length;
+
+    if (cat === "Favorieten") {
+      return favorites.length;
+    }
+
+    if (cat === "Alles") {
+      return recipes.length;
+    }
+
     return recipes.filter(
       (recipe) => recipe.category?.toLowerCase() === cat.toLowerCase(),
     ).length;
@@ -323,7 +331,7 @@ export default function Home() {
                             e.stopPropagation();
                             toggleFavorite(recipe.id);
                           }}
-                          className="absolute bottom-3 right-3 bg-white/80 backdrop-blur-md rounded-full p-2 shadow-sm"
+                          className="absolute top-3 right-3 bg-white/80 backdrop-blur-md rounded-full p-2 shadow-sm"
                         >
                           <Icon
                             icon={isFavorite ? HeartSolid : HeartOutline}
