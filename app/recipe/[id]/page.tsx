@@ -207,11 +207,21 @@ export default function RecipeDetail() {
 
                 {burst && (
                   <div className="absolute inset-0 pointer-events-none">
-                    {[0, 1, 2].map((i) => (
+                    {[
+                      { x: -8, scale: 0.9, delay: 0 },
+                      { x: 0, scale: 1.1, delay: 80 },
+                      { x: 10, scale: 0.8, delay: 140 },
+                    ].map((p, i) => (
                       <span
                         key={i}
                         className="heart-particle"
-                        style={{ animationDelay: `${i * 60}ms` }}
+                        style={
+                          {
+                            animationDelay: `${p.delay}ms`,
+                            transform: `translateX(-50%) scale(${p.scale})`,
+                            "--x": `${p.x}px`,
+                          } as React.CSSProperties
+                        }
                       />
                     ))}
                   </div>
