@@ -4,7 +4,6 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { ViewTransitions } from "next-view-transitions";
 import AppShell from "@/components/AppShell";
-import AuthProvider from "@/components/AuthProvider";
 import AuthGuard from "@/components/AuthGuard";
 import { UIProvider } from "@/components/UIContext";
 import { OverlayProvider } from "@/components/GlobalOverlay";
@@ -49,15 +48,14 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[var(--color-bg)] text-[#171717] h-full`}
         >
-          <AuthProvider>
-            <AuthGuard>
-              <UIProvider>
-                <OverlayProvider>
-                  <AppShell>{children}</AppShell>
-                </OverlayProvider>
-              </UIProvider>
-            </AuthGuard>
-          </AuthProvider>
+          <AuthGuard>
+            <UIProvider>
+              <OverlayProvider>
+                <AppShell>{children}</AppShell>
+              </OverlayProvider>
+            </UIProvider>
+          </AuthGuard>
+
           <Toaster richColors toastOptions={{ style: { zIndex: 30 } }} />
         </body>
       </html>
