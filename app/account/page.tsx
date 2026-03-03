@@ -114,33 +114,38 @@ export default function AccountPage() {
       <main className="min-h-dvh bg-[var(--color-bg)] pt-16 pb-24">
         <div className="p-6 space-y-8">
           {/* Account info */}
-          <div className="space-y-2">
-            {user?.email ? (
-              <>
-                <p className="text-sm text-gray-500">{user.email}</p>
+          <Card>
+            <div className="flex flex-col items-center text-center space-y-6">
+              <div className="space-y-2">
+                {user?.email ? (
+                  <>
+                    <p className="text-sm text-gray-500">{user.email}</p>
 
-                <button
-                  onClick={handleLogout}
-                  className="text-sm text-gray-500 underline"
-                >
-                  Uitloggen
-                </button>
-              </>
-            ) : (
-              <>
-                <p className="text-sm text-gray-500">Niet ingelogd</p>
-              </>
-            )}
-          </div>
-
+                    <button
+                      onClick={handleLogout}
+                      className="text-sm text-gray-500 underline"
+                    >
+                      Uitloggen
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-gray-500">Niet ingelogd</p>
+                  </>
+                )}
+              </div>
+            </div>
+          </Card>
           {/* CASE 1: User heeft household */}
           {user?.email && householdId && (
             <Card>
               <div className="flex flex-col items-center text-center space-y-6">
                 <div>
-                  <h2 className="text-lg font-semibold">Nodig iemand uit</h2>
+                  <h2 className="text-lg font-semibold">
+                    Nodig iemand uit voor jouw huishouden
+                  </h2>
                   <p className="text-sm text-gray-500 mt-1">
-                    Deel de uitnodiging of laat iemand de QR-code scannen.
+                    Laat de QR-code scannen if deel de uitnodiging
                   </p>
                 </div>
 
