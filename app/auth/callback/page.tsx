@@ -1,31 +1,27 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function AuthCallback() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect") || "/";
 
   useEffect(() => {
     const handleAuth = async () => {
-      const { error } = await supabase.auth.exchangeCodeForSession(
-        window.location.href,
-      );
+      // Laat Supabase de hash verwerken
+      const { data } = await supabase.auth.getSession();
 
-      if (error) {
-        console.error("Auth exchange error:", error);
+      if (!data.session) {
         router.replace("/login");
         return;
       }
 
-      router.replace(redirectTo);
+      router.replace("/");
     };
 
     handleAuth();
-  }, [redirectTo, router]);
+  }, [router]);
 
   return <p className="p-6">Bezig met inloggen...</p>;
 }
