@@ -198,8 +198,13 @@ function ShoppingPageContent() {
 
   const loadFromWeek = async () => {
     if (!weekStart || !householdId) return;
-    console.log("weekStart param:", weekStart);
-    console.log("typeof weekStart:", typeof weekStart);
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const userId = session?.user?.id;
+    if (!userId) return;
 
     setLoadingWeek(true);
 
@@ -208,8 +213,6 @@ function ShoppingPageContent() {
       .select("recipes(*)")
       .eq("household_id", householdId)
       .eq("week_start", weekStart);
-
-    console.log("WEEK DATA:", data);
 
     const allIngredients: string[] = [];
 
@@ -232,6 +235,7 @@ function ShoppingPageContent() {
         amount: null,
         checked: false,
         household_id: householdId,
+        user_id: userId,
       }));
 
     if (toInsert.length > 0) {
@@ -249,6 +253,13 @@ function ShoppingPageContent() {
   const addItem = async () => {
     if (!newName.trim() || !householdId) return;
 
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const userId = session?.user?.id;
+    if (!userId) return;
+
     const { data } = await supabase
       .from("shopping_list")
       .insert([
@@ -257,6 +268,7 @@ function ShoppingPageContent() {
           amount: null,
           checked: false,
           household_id: householdId,
+          user_id: userId,
         },
       ])
       .select()
