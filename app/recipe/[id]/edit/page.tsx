@@ -213,7 +213,7 @@ export default function EditRecipe() {
     <>
       <Header title="Recept bewerken" onBack={() => router.back()} />
 
-      <main className="min-h-screen bg-[var(--color-bg)] pt-20 pb-16">
+      <main className="min-h-screen bg-[var(--color-bg)] pt-20 pb-32">
         <div className="px-4 max-w-4xl mx-auto space-y-4">
           {/* Afbeelding */}
           <Card className="p-5">
@@ -396,7 +396,7 @@ export default function EditRecipe() {
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className={`${styles.input.default} min-h-[30px]`}
+              className={`${styles.input.default} min-h-[100px]`}
             />
           </Card>
 

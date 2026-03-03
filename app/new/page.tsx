@@ -347,7 +347,7 @@ export default function NewRecipe() {
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className={`${styles.input.default} min-h-[60px]`}
+              className={`${styles.input.default} min-h-[100px]`}
             />
           </Card>
         </div>
