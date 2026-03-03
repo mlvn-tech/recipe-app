@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   HomeIcon,
   CalendarDaysIcon,
-  PlusIcon,
+  PlusCircleIcon,
   UserIcon,
 } from "@heroicons/react/24/outline";
 import {
@@ -34,8 +34,8 @@ export default function BottomNav() {
     {
       label: "Nieuw",
       href: "/new",
-      icon: PlusIcon,
-      iconActive: PlusIcon,
+      icon: PlusCircleIcon,
+      iconActive: PlusCircleIcon,
     },
     {
       label: "Profiel",
