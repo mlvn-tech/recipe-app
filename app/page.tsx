@@ -174,15 +174,7 @@ export default function Home() {
     };
   }, []);
 
-  const categories = [
-    "Alles",
-    "Favorieten",
-    "Ontbijt",
-    "Lunch",
-    "Diner",
-    "Dessert",
-    "Snack",
-  ];
+  const baseCategories = ["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"];
 
   const getCount = (cat: string) => {
     if (!recipes) return 0;
@@ -200,18 +192,39 @@ export default function Home() {
     ).length;
   };
 
+  const sortedCategories = baseCategories
+    .map((cat) => ({
+      name: cat,
+      count: getCount(cat),
+    }))
+    .sort((a, b) => {
+      // Eerst op aantal (hoog naar laag)
+      if (b.count !== a.count) return b.count - a.count;
+      // Daarna alfabetisch voor stabiliteit
+      return a.name.localeCompare(b.name);
+    });
+
+  const finalFilters = [
+    { name: "Alles", count: recipes?.length ?? 0 },
+    { name: "Favorieten", count: favorites.length },
+    ...sortedCategories,
+  ];
+
   const filteredRecipes =
     recipes?.filter((recipe) => {
-      if (activeCategory === "Favorieten") {
-        return favorites.includes(recipe.id);
-      }
-
       const matchesSearch = recipe.title
         .toLowerCase()
         .includes(search.toLowerCase());
 
+      if (activeCategory === "Alles") {
+        return matchesSearch;
+      }
+
+      if (activeCategory === "Favorieten") {
+        return matchesSearch && favorites.includes(recipe.id);
+      }
+
       const matchesCategory =
-        activeCategory === "Alles" ||
         recipe.category?.toLowerCase() === activeCategory.toLowerCase();
 
       return matchesSearch && matchesCategory;
@@ -255,8 +268,9 @@ export default function Home() {
         {/* Filters */}
         <div className="pt-4 pb-4">
           <div className="flex gap-3 overflow-x-auto px-4 max-w-4xl mx-auto no-scrollbar">
-            {categories.map((cat) => {
-              const count = getCount(cat);
+            {finalFilters.map((item) => {
+              const cat = item.name;
+              const count = item.count;
               const isActive = activeCategory === cat;
 
               return (
