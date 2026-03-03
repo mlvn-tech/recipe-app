@@ -2,14 +2,25 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const checkSession = async () => {
+      // 🔓 Routes die niet beschermd moeten worden
+      if (
+        pathname === "/login" ||
+        pathname.startsWith("/auth") ||
+        pathname.startsWith("/join")
+      ) {
+        setLoading(false);
+        return;
+      }
+
       const { data } = await supabase.auth.getSession();
 
       if (!data.session) {
@@ -20,7 +31,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     };
 
     checkSession();
-  }, [router]);
+  }, [router, pathname]);
 
   if (loading) return null;
 
