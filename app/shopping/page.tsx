@@ -208,6 +208,8 @@ function ShoppingPageContent() {
       .eq("week_start", weekStart)
       .eq("household_id", householdId);
 
+    console.log("WEEK DATA:", data);
+
     const allIngredients: string[] = [];
 
     data?.forEach((item: any) => {
