@@ -201,7 +201,7 @@ export default function RecipeDetail() {
             <p className="text-xs text-gray-400 tracking-wide py-2">
               Toegevoegd op {formattedDate}
             </p>
-            <h1 ref={titleRef} className="font-title">
+            <h1 ref={titleRef} className="text-3xl font-bold">
               {formatTitle(recipe.title)}
             </h1>
 
@@ -230,7 +230,7 @@ export default function RecipeDetail() {
           </div>
 
           <Card>
-            <h2 className="font-title mb-4 text-lg">Ingrediënten</h2>
+            <h2 className="font-semibold mb-4 text-lg">Ingrediënten</h2>
             <ul className="space-y-3">
               {recipe.ingredients?.map((item: string, index: number) => {
                 const trimmed = item.trim();
@@ -262,7 +262,7 @@ export default function RecipeDetail() {
 
           <Card>
             <div className="flex items-center justify-between">
-              <h2 className="font-title text-lg leading-none">Bereiding</h2>
+              <h2 className="font-semibold text-lg leading-none">Bereiding</h2>
               <button
                 onClick={() => router.push(`/recipe/${recipe.id}/cook`)}
                 className="flex items-center gap-2 text-sm text-[var(--color-accent)] font-medium"
@@ -289,7 +289,9 @@ export default function RecipeDetail() {
 
           {recipe.notes && (
             <Card>
-              <h2 className="font-title mb-4 text-lg min-h-[30px]">Notities</h2>
+              <h2 className="font-semibold mb-4 text-lg min-h-[30px]">
+                Notities
+              </h2>
               <p className="whitespace-pre-line">{recipe.notes}</p>
             </Card>
           )}
@@ -300,7 +302,6 @@ export default function RecipeDetail() {
         open={ingredientsOpen && showFloating}
         onClose={() => setIngredientsOpen(false)}
         title="Ingrediënten"
-        className="font-title"
         height="auto"
         maxHeight="60dvh"
         overflowVisible={false}
