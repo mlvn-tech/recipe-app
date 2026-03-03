@@ -8,9 +8,12 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      
       colors: {
         brand: "#A6D160",
       },
+      fontFamily: {
+      title: ['var(--font-outfit)'],}
     },
   },
   plugins: [],

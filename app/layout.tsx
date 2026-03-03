@@ -8,6 +8,13 @@ import AuthGuard from "@/components/AuthGuard";
 import { UIProvider } from "@/components/UIContext";
 import { OverlayProvider } from "@/components/GlobalOverlay";
 
+import { Outfit } from "next/font/google";
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
