@@ -177,19 +177,6 @@ export default function Home() {
     <>
       {/* 🔝 Search Header */}
       <div className="fixed top-0 left-0 w-full bg-[var(--color-brand)] z-50 shadow-[0_1px_6px_rgba(0,0,0,0.05)]">
-        <Link href="/account">
-          <div
-            style={{
-              top: 20,
-              right: 20,
-              cursor: "pointer",
-              fontSize: 24,
-            }}
-          >
-            👤
-          </div>
-        </Link>
-
         <div className="max-w-4xl mx-auto px-4 h-20 flex items-center gap-3">
           <div className="flex-1">
             <SearchInput
