@@ -5,18 +5,18 @@ import {
   HomeIcon,
   CalendarDaysIcon,
   PlusIcon,
+  UserIcon,
 } from "@heroicons/react/24/outline";
 import {
   HomeIcon as HomeIconSolid,
   CalendarDaysIcon as CalendarDaysIconSolid,
+  UserIcon as UserIconSolid,
 } from "@heroicons/react/24/solid";
 import Icon from "@/components/icons";
-import { useUI } from "./UIContext";
 
 export default function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { highlightCreate } = useUI(); // 👈 hier toevoegen
 
   const items = [
     {
@@ -26,16 +26,22 @@ export default function BottomNav() {
       iconActive: HomeIconSolid,
     },
     {
+      label: "Week",
+      href: "/week",
+      icon: CalendarDaysIcon,
+      iconActive: CalendarDaysIconSolid,
+    },
+    {
       label: "Nieuw",
       href: "/new",
       icon: PlusIcon,
       iconActive: PlusIcon,
     },
     {
-      label: "Week",
-      href: "/week",
-      icon: CalendarDaysIcon,
-      iconActive: CalendarDaysIconSolid,
+      label: "Profiel",
+      href: "/account",
+      icon: UserIcon,
+      iconActive: UserIconSolid,
     },
   ];
 
@@ -49,7 +55,7 @@ export default function BottomNav() {
         pb-safe
       "
     >
-      <div className="max-w-4xl mx-auto flex justify-around py-3">
+      <div className="max-w-4xl mx-auto flex justify-between px-6 py-3">
         {items.map((item) => {
           const isActive =
             pathname === item.href ||
@@ -57,40 +63,26 @@ export default function BottomNav() {
 
           const IconComponent = isActive ? item.iconActive : item.icon;
 
-          // 🎯 Speciale styling voor + knop
-          if (item.href === "/new") {
-            return (
-              <button
-                key={item.href}
-                onClick={() => router.push(item.href)}
-                className={`
-                  flex items-center justify-center
-                  bg-[var(--color-accent)]/80
-                  rounded-lg
-                  w-8 h-8
-                  active:scale-95
-                  transition-transform
-                  ${highlightCreate ? "animate-pulse-cta" : ""}
-                `}
-              >
-                <Icon icon={PlusIcon} size={24} className="text-white" />
-              </button>
-            );
-          }
-
           return (
             <button
               key={item.href}
               onClick={() => router.push(item.href)}
-              className="flex flex-col items-center justify-center"
+              className="flex flex-col items-center justify-center flex-1"
             >
               <Icon
                 icon={IconComponent}
-                size={28}
-                className={`${
-                  isActive ? "text-gray-500" : "text-gray-400"
-                } transition-colors`}
+                size={24}
+                className={`transition-colors ${
+                  isActive ? "text-[var(--color-accent)]" : "text-gray-400"
+                }`}
               />
+              <span
+                className={`text-xs mt-1 transition-colors ${
+                  isActive ? "text-[var(--color-accent)]" : "text-gray-400"
+                }`}
+              >
+                {item.label}
+              </span>
             </button>
           );
         })}
