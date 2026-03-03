@@ -110,7 +110,7 @@ export default function AccountPage() {
 
   return (
     <>
-      <Header title="Account" onBack={() => router.back()} />
+      <Header title="Account" showBack={false} />
       <main className="min-h-dvh bg-[var(--color-bg)] pt-16 pb-24">
         <div className="p-6 space-y-8">
           {/* Account info */}

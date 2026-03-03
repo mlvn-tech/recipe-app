@@ -286,9 +286,8 @@ export default function WeekPage() {
 
   return (
     <>
-      <Header title="Weekplanner" />
-
-      <main className="min-h-screen bg-[var(--color-bg)] pt-20 pb-36">
+      <Header title="Weekplanner" showBack={false} />
+      <main className="min-h-dvh bg-[var(--color-bg)] pt-16 pb-32">
         <div className="px-4 max-w-4xl mx-auto space-y-4">
           {weekData.map((day, index) => (
             <Card key={index} className="p-5 space-y-4">

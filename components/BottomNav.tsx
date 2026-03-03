@@ -55,7 +55,7 @@ export default function BottomNav() {
         pb-safe
       "
     >
-      <div className="max-w-4xl mx-auto flex justify-between px-6 py-3">
+      <div className="max-w-4xl mx-auto flex justify-around py-3">
         {items.map((item) => {
           const isActive =
             pathname === item.href ||
@@ -73,12 +73,12 @@ export default function BottomNav() {
                 icon={IconComponent}
                 size={24}
                 className={`transition-colors ${
-                  isActive ? "text-[var(--color-accent)]" : "text-gray-400"
+                  isActive ? "text-[var(--color-accent)]" : "text-gray-500"
                 }`}
               />
               <span
                 className={`text-xs mt-1 transition-colors ${
-                  isActive ? "text-[var(--color-accent)]" : "text-gray-400"
+                  isActive ? "text-[var(--color-accent)]" : "text-gray-500"
                 }`}
               >
                 {item.label}

@@ -211,7 +211,11 @@ export default function EditRecipe() {
 
   return (
     <>
-      <Header title="Recept bewerken" onBack={() => router.back()} />
+      <Header
+        title="Recept bewerken"
+        showBack
+        onBack={() => router.push(`/recipes/${id}`)}
+      />
 
       <main className="min-h-screen bg-[var(--color-bg)] pt-20 pb-32">
         <div className="px-4 max-w-4xl mx-auto space-y-4">
