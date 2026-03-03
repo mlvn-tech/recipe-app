@@ -45,10 +45,13 @@ export default function AccountPage() {
         const household = result.data;
 
         if (household) {
-          await supabase.from("household_members").insert({
-            household_id: household.id,
-            user_id: user.id,
-          });
+          await supabase.from("household_members").upsert(
+            {
+              household_id: householdId,
+              user_id: user.id,
+            },
+            { onConflict: "user_id,household_id" },
+          );
 
           setHouseholdId(household.id);
         }

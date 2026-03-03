@@ -10,17 +10,15 @@ export default function JoinPage() {
   const householdId = params.get("household");
 
   useEffect(() => {
+    if (!householdId) return; // 🔥 eerst wachten tot param er is
+
     const joinHousehold = async () => {
-      if (!householdId) {
-        router.replace("/");
-        return;
-      }
+      console.log("JOIN householdId:", householdId);
 
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
-      // Niet ingelogd → eerst naar account
       if (!user) {
         router.replace("/account");
         return;
@@ -34,7 +32,6 @@ export default function JoinPage() {
         .eq("household_id", householdId)
         .maybeSingle();
 
-      // ➕ Alleen toevoegen als nog geen membership
       if (!existingMembership) {
         const { error } = await supabase.from("household_members").upsert(
           {
@@ -50,7 +47,6 @@ export default function JoinPage() {
         }
       }
 
-      // Klaar → naar homepage
       router.replace("/");
     };
 
