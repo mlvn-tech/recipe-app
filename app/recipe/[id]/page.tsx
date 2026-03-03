@@ -36,7 +36,6 @@ export default function RecipeDetail() {
 
   // ✅ FAVORITES STATE
   const [isFavorite, setIsFavorite] = useState(false);
-  const [burst, setBurst] = useState(false);
 
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const ingredientsEndRef = useRef<HTMLDivElement | null>(null);
@@ -175,52 +174,15 @@ export default function RecipeDetail() {
 
             {/* ❤️ FAVORITE BUTTON */}
             <button
-              onClick={() => {
-                if (!isFavorite) {
-                  setBurst(true);
-                  setTimeout(() => setBurst(false), 450);
-                }
-                toggleFavorite();
-              }}
-              className="
-        absolute
-        bottom-4
-        right-4
-        bg-white/80
-        backdrop-blur-md
-        rounded-full
-        p-3
-        shadow-md
-        flex
-        items-center
-        justify-center
-      "
+              onClick={toggleFavorite}
+              className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-md rounded-full p-3 shadow-md"
             >
-              {/* 👇 Inner wrapper alleen voor burst */}
-              <div
-                className={`relative flex items-center justify-center ${burst ? "animate-heartPulse" : ""}`}
-              >
-                <Icon
-                  icon={isFavorite ? HeartSolid : HeartOutline}
-                  className={`${
-                    isFavorite ? "text-[var(--color-accent)]" : "text-gray-500"
-                  } transition`}
-                />
-
-                {burst && (
-                  <div className="absolute inset-0 pointer-events-none">
-                    {[0, 1].map((i) => (
-                      <span
-                        key={i}
-                        className="heart-sparkle"
-                        style={{
-                          animationDelay: `${i * 120}ms`,
-                        }}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
+              <Icon
+                icon={isFavorite ? HeartSolid : HeartOutline}
+                className={`${
+                  isFavorite ? "text-[var(--color-accent)]" : "text-gray-500"
+                } transition`}
+              />
             </button>
           </div>
         )}
