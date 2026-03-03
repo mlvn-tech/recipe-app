@@ -197,7 +197,9 @@ export default function RecipeDetail() {
       "
             >
               {/* 👇 Inner wrapper alleen voor burst */}
-              <div className="relative flex items-center justify-center">
+              <div
+                className={`relative flex items-center justify-center ${burst ? "animate-heartPulse" : ""}`}
+              >
                 <Icon
                   icon={isFavorite ? HeartSolid : HeartOutline}
                   className={`${
@@ -207,21 +209,13 @@ export default function RecipeDetail() {
 
                 {burst && (
                   <div className="absolute inset-0 pointer-events-none">
-                    {[
-                      { x: -18, scale: 1.2, delay: 0 },
-                      { x: 0, scale: 1.6, delay: 120 },
-                      { x: 20, scale: 0.8, delay: 200 },
-                    ].map((p, i) => (
+                    {[0, 1].map((i) => (
                       <span
                         key={i}
-                        className="heart-particle"
-                        style={
-                          {
-                            animationDelay: `${p.delay}ms`,
-                            transform: `translateX(-50%) scale(${p.scale})`,
-                            "--x": `${p.x}px`,
-                          } as React.CSSProperties
-                        }
+                        className="heart-sparkle"
+                        style={{
+                          animationDelay: `${i * 120}ms`,
+                        }}
                       />
                     ))}
                   </div>

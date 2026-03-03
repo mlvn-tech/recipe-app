@@ -177,6 +177,9 @@ export default function CookMode() {
         <div className="space-y-2">
           <div className="flex justify-between text-xs text-gray-500">
             <span>
+              Stap {currentStep + 1} van {recipe.steps.length}
+            </span>
+            <span>
               {Math.round(((currentStep + 1) / recipe.steps.length) * 100)}%
             </span>
           </div>
@@ -190,16 +193,15 @@ export default function CookMode() {
         transition-all duration-500 ease-out
         shadow-[0_0_8px_rgba(0,0,0,0.08)]
       "
+              style={{
+                width: `${((currentStep + 1) / recipe.steps.length) * 100}%`,
+              }}
             />
           </div>
-          <span>
-            Stap {currentStep + 1} van {recipe.steps.length}
-          </span>
         </div>
       </div>
 
       {/* Scrollable Steps */}
-
       <div className="flex-1 overflow-y-auto px-4 pb-28 space-y-4">
         {recipe.steps.map((step: string, index: number) => {
           const isActive = index === currentStep;
