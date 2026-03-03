@@ -169,7 +169,7 @@ function ShoppingPageContent() {
       const { data: membership } = await supabase
         .from("household_members")
         .select("household_id")
-        .eq("user_id", userId)
+        .eq("household_id", householdId)
         .maybeSingle();
 
       setHouseholdId(membership?.household_id || null);
@@ -187,7 +187,6 @@ function ShoppingPageContent() {
         .from("shopping_list")
         .select("*")
         .eq("household_id", householdId)
-        .eq("week_start", weekStart)
         .order("created_at", { ascending: false });
 
       setItems(data || []);
@@ -195,7 +194,7 @@ function ShoppingPageContent() {
     };
 
     fetchItems();
-  }, [householdId, weekStart]);
+  }, [householdId]);
 
   const loadFromWeek = async () => {
     if (!weekStart || !householdId) return;
@@ -205,8 +204,8 @@ function ShoppingPageContent() {
     const { data } = await supabase
       .from("week_plans")
       .select("recipes(*)")
-      .eq("week_start", weekStart)
-      .eq("household_id", householdId);
+      .eq("household_id", householdId)
+      .eq("week_start", weekStart);
 
     console.log("WEEK DATA:", data);
 
@@ -231,7 +230,6 @@ function ShoppingPageContent() {
         amount: null,
         checked: false,
         household_id: householdId,
-        week_start: weekStart,
       }));
 
     if (toInsert.length > 0) {
@@ -257,7 +255,6 @@ function ShoppingPageContent() {
           amount: null,
           checked: false,
           household_id: householdId,
-          week_start: weekStart,
         },
       ])
       .select()
@@ -274,8 +271,7 @@ function ShoppingPageContent() {
       .from("shopping_list")
       .update({ checked: !item.checked })
       .eq("id", item.id)
-      .eq("household_id", householdId)
-      .eq("week_start", weekStart);
+      .eq("household_id", householdId);
 
     setItems((prev) =>
       prev.map((i) => (i.id === item.id ? { ...i, checked: !i.checked } : i)),
@@ -287,8 +283,7 @@ function ShoppingPageContent() {
       .from("shopping_list")
       .update({ name })
       .eq("id", item.id)
-      .eq("household_id", householdId)
-      .eq("week_start", weekStart);
+      .eq("household_id", householdId);
 
     setItems((prev) =>
       prev.map((i) => (i.id === item.id ? { ...i, name } : i)),
@@ -300,8 +295,7 @@ function ShoppingPageContent() {
       .from("shopping_list")
       .delete()
       .eq("id", id)
-      .eq("household_id", householdId)
-      .eq("week_start", weekStart);
+      .eq("household_id", householdId);
 
     setItems((prev) => prev.filter((i) => i.id !== id));
   };
@@ -311,7 +305,7 @@ function ShoppingPageContent() {
       .from("shopping_list")
       .delete()
       .eq("household_id", householdId)
-      .eq("week_start", weekStart)
+
       .eq("checked", true);
 
     setItems((prev) => prev.filter((i) => !i.checked));
@@ -321,8 +315,7 @@ function ShoppingPageContent() {
     await supabase
       .from("shopping_list")
       .delete()
-      .eq("household_id", householdId)
-      .eq("week_start", weekStart);
+      .eq("household_id", householdId);
 
     setItems([]);
   };
