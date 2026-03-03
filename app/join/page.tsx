@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function JoinPage() {
@@ -9,23 +9,31 @@ export default function JoinPage() {
   const router = useRouter();
   const householdId = params.get("household");
 
+  const [status, setStatus] = useState("Bezig met toevoegen...");
+
   useEffect(() => {
-    if (!householdId) return; // 🔥 eerst wachten tot param er is
-    console.log("RAW searchParams:", params.toString());
-    console.log("householdId param:", householdId);
     const joinHousehold = async () => {
-      console.log("JOIN householdId:", householdId);
-
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        router.replace("/account");
+      if (!householdId) {
+        setStatus("Geen geldige uitnodiging.");
         return;
       }
 
-      // 🔍 Check of user al lid is
+      const { data, error } = await supabase.auth.getUser();
+
+      if (error) {
+        console.error("AUTH ERROR:", error);
+        setStatus("Authenticatie fout.");
+        return;
+      }
+
+      if (!data?.user) {
+        setStatus("Je moet eerst inloggen.");
+        router.replace("/login");
+        return;
+      }
+
+      const user = data.user;
+
       const { data: existingMembership } = await supabase
         .from("household_members")
         .select("*")
@@ -34,28 +42,24 @@ export default function JoinPage() {
         .maybeSingle();
 
       if (!existingMembership) {
-        const response = await supabase.from("household_members").upsert(
-          {
+        const { error: insertError } = await supabase
+          .from("household_members")
+          .insert({
             household_id: householdId,
             user_id: user.id,
-          },
-          { onConflict: "user_id,household_id" },
-        );
+          });
 
-        console.log("JOIN RESPONSE:", response);
-        console.log("JOIN user:", user);
-        console.log("JOIN householdId:", householdId);
-
-        if (response.error) {
-          console.error(
-            "JOIN ERROR FULL:",
-            JSON.stringify(response.error, null, 2),
-          );
+        if (insertError) {
+          console.error("JOIN ERROR:", insertError);
+          setStatus("Er ging iets mis bij toevoegen.");
           return;
         }
       }
 
-      router.replace("/");
+      setStatus("Succes! Je wordt doorgestuurd...");
+      setTimeout(() => {
+        router.replace("/");
+      }, 1500);
     };
 
     joinHousehold();
@@ -63,7 +67,7 @@ export default function JoinPage() {
 
   return (
     <div className="p-6">
-      <p>Je wordt toegevoegd aan het huishouden...</p>
+      <p>{status}</p>
     </div>
   );
 }
