@@ -275,29 +275,39 @@ export default function Home() {
       <main className="min-h-dvh bg-[var(--color-bg)] pt-20 pb-24">
         {/* Filters */}
         <div className="pt-4 pb-4">
-          <div className="flex gap-3 overflow-x-auto px-4 max-w-4xl mx-auto no-scrollbar">
-            {finalFilters.map((item) => {
-              const cat = item.name;
-              const count = item.count;
-              const isActive = activeCategory === cat;
+          <div className="max-w-4xl mx-auto">
+            <div
+              className="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth"
+              style={{
+                scrollPaddingLeft: "1rem",
+                scrollPaddingRight: "1rem",
+                paddingLeft: "1rem",
+                paddingRight: "1rem",
+              }}
+            >
+              {finalFilters.map((item) => {
+                const cat = item.name;
+                const count = item.count;
+                const isActive = activeCategory === cat;
 
-              return (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`px-4 py-2 rounded-xl text-sm whitespace-nowrap border flex items-center gap-2 transition ${
-                    isActive
-                      ? "bg-gray-200 text-gray-900 font-medium border-gray-200"
-                      : "bg-white text-gray-600 border-gray-200"
-                  }`}
-                >
-                  <span>{cat}</span>
-                  {cat !== "Alles" && (
-                    <span className="text-xs opacity-60">{count}</span>
-                  )}
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCategory(cat)}
+                    className={`snap-start px-4 py-2 rounded-xl text-sm whitespace-nowrap border flex items-center gap-2 transition ${
+                      isActive
+                        ? "bg-gray-200 text-gray-900 font-medium border-gray-200"
+                        : "bg-white text-gray-600 border-gray-200"
+                    }`}
+                  >
+                    <span>{cat}</span>
+                    {cat !== "Alles" && (
+                      <span className="opacity-60">{count}</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -374,12 +384,6 @@ export default function Home() {
                       </div>
 
                       <div className="p-4 space-y-2">
-                        <p className="text-xs text-gray-400">
-                          {new Date(recipe.created_at).toLocaleDateString(
-                            "nl-NL",
-                          )}
-                        </p>
-
                         <h2 className="text-xl font-semibold leading-tight">
                           {formatTitle(recipe.title)}
                         </h2>
