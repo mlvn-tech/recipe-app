@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+
 import "./globals.css";
 import { Toaster } from "sonner";
 import { ViewTransitions } from "next-view-transitions";
@@ -8,8 +8,13 @@ import AuthGuard from "@/components/AuthGuard";
 import { UIProvider } from "@/components/UIContext";
 import { OverlayProvider } from "@/components/GlobalOverlay";
 
-import { Nunito } from "next/font/google";
-import { Poppins } from "next/font/google";
+import {
+  Geist,
+  Geist_Mono,
+  Source_Serif_4,
+  Work_Sans,
+  Nunito,
+} from "next/font/google";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -17,10 +22,10 @@ const nunito = Nunito({
   variable: "--font-nunito",
 });
 
-const rubik = Poppins({
+const workSans = Work_Sans({
   subsets: ["latin"],
   weight: ["500", "600", "700"],
-  variable: "--font-poppins",
+  variable: "--font-work-sans",
 });
 
 const geistSans = Geist({
@@ -61,7 +66,7 @@ export default function RootLayout({
     <ViewTransitions>
       <html lang="en" className="h-full">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} ${nunito.variable} ${rubik.variable} antialiased bg-[var(--color-bg)] text-[#171717] h-full`}
+          className={`${geistSans.variable} ${geistMono.variable} ${workSans.variable} ${nunito.variable} antialiased bg-[var(--color-bg)] text-[#171717] h-full`}
         >
           <AuthGuard>
             <UIProvider>

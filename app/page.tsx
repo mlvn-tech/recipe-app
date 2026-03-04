@@ -424,7 +424,7 @@ export default function Home() {
       <SwipeableSheet
         open={isIngredientSheetOpen}
         onClose={() => setIsIngredientSheetOpen(false)}
-        title="Wat heb je nog in huis?"
+        title="Welke ingrediënten heb je nog in huis?"
         height="auto"
         maxHeight="60dvh"
         overflowVisible

@@ -106,6 +106,7 @@ export default function EditRecipe() {
             .join("\n"),
         );
         setCategory(data.category || "");
+        setSelectedCategory(data.category || "Diner");
         setCookingTime(data.cooking_time);
         setNotes(data.notes || "");
         setServings(data.servings);
@@ -172,7 +173,7 @@ export default function EditRecipe() {
         title,
         ingredients: cleanedIngredients,
         steps: cleanedSteps,
-        category,
+        category: selectedCategory,
         cooking_time: cookingTime,
         servings,
         notes,
@@ -341,6 +342,8 @@ export default function EditRecipe() {
                       "appearance-none cursor-pointer",
                     )}
                   >
+                    <option value="">Kies categorie</option>
+
                     {["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"].map(
                       (cat) => (
                         <option key={cat} value={cat}>

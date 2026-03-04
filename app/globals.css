@@ -30,6 +30,20 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+
+h1, h2, h3 {
+  font-family: var(--font-work-sans);
+}
+
+body {
+  font-family: var(--font-nunito);
+}
+
+button {
+  font-family: var(--font-nunito);
+  font-weight: 800;
+}
+
 * {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -112,19 +126,6 @@ input, textarea, select {
   animation: pulse-ring 1.8s ease-out 3;
 }
 
-h1, h2, h3 {
-  font-family: var(--font-poppins);
-  font-weight: 600;
-}
-
-/* button {
-  font-family: var(--font-poppins);
-  
-} */
-
-/* p {
-  font-family: var(--font-nunito);
-} */
 
 .snap-none {
   scroll-snap-align: none;
