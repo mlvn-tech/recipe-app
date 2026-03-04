@@ -42,6 +42,7 @@ export default function Home() {
   const [showText, setShowText] = useState(true);
 
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [animatingId, setAnimatingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (generating) {
@@ -53,6 +54,13 @@ export default function Home() {
       return () => clearTimeout(timer);
     }
   }, [generating]);
+
+  const handleFavorite = (id: string) => {
+    toggleFavorite(id);
+
+    setAnimatingId(id);
+    setTimeout(() => setAnimatingId(null), 180);
+  };
 
   const toggleFavorite = async (recipeId: string) => {
     const {
@@ -341,11 +349,18 @@ export default function Home() {
                         {/* ❤️ Favorite button */}
                         <button
                           onClick={(e) => {
-                            e.preventDefault(); // 🔴 voorkomt navigatie
+                            e.preventDefault();
                             e.stopPropagation();
-                            toggleFavorite(recipe.id);
+                            handleFavorite(recipe.id);
                           }}
                           className="absolute top-3 right-3 bg-white/80 backdrop-blur-md rounded-full p-2 shadow-sm"
+                          style={{
+                            transform:
+                              animatingId === recipe.id
+                                ? "scale(1.1)"
+                                : "scale(1)",
+                            transition: "transform 0.18s ease-out",
+                          }}
                         >
                           <Icon
                             icon={isFavorite ? HeartSolid : HeartOutline}

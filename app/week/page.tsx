@@ -26,6 +26,7 @@ type ShoppingItem = {
 
 export default function WeekPage() {
   const [recipes, setRecipes] = useState<any[]>([]);
+  const [favorites, setFavorites] = useState<string[]>([]);
   const [activeDay, setActiveDay] = useState<number | null>(null);
   const [weekOffset, setWeekOffset] = useState(0);
   const [isWeekPickerOpen, setIsWeekPickerOpen] = useState(false);
@@ -92,7 +93,38 @@ export default function WeekPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("Alles");
-  const categories = ["Alles", "Ontbijt", "Lunch", "Diner", "Dessert", "Snack"];
+
+  const baseCategories = ["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"];
+
+  const getCount = (cat: string) => {
+    if (cat === "Favorieten") {
+      return favorites.length;
+    }
+
+    if (cat === "Alles") {
+      return recipes.length;
+    }
+
+    return recipes.filter(
+      (r) => r.category?.toLowerCase() === cat.toLowerCase(),
+    ).length;
+  };
+
+  const sortedCategories = baseCategories
+    .map((cat) => ({
+      name: cat,
+      count: getCount(cat),
+    }))
+    .sort((a, b) => {
+      if (b.count !== a.count) return b.count - a.count;
+      return a.name.localeCompare(b.name);
+    });
+
+  const finalFilters = [
+    { name: "Alles", count: recipes.length },
+    { name: "Favorieten", count: favorites.length },
+    ...sortedCategories,
+  ];
 
   const baseDate = useMemo(() => {
     const date = new Date();
@@ -156,6 +188,22 @@ export default function WeekPage() {
   }, []);
 
   useEffect(() => {
+    const fetchFavorites = async () => {
+      const userId = await getUserId();
+      if (!userId) return;
+
+      const { data } = await supabase
+        .from("favorites")
+        .select("recipe_id")
+        .eq("user_id", userId);
+
+      setFavorites(data?.map((f) => f.recipe_id) || []);
+    };
+
+    fetchFavorites();
+  }, []);
+
+  useEffect(() => {
     const fetchWeekPlan = async () => {
       const householdId = await getHouseholdId();
       if (!householdId) return;
@@ -204,13 +252,22 @@ export default function WeekPage() {
   }, [weekPlan]);
 
   const filteredRecipes = recipes.filter((recipe) => {
-    const matchesCategory =
-      activeCategory === "Alles" ||
-      recipe.category?.toLowerCase() === activeCategory.toLowerCase();
     const matchesSearch = recipe.title
       .toLowerCase()
       .includes(search.toLowerCase());
-    return matchesCategory && matchesSearch;
+
+    if (activeCategory === "Alles") {
+      return matchesSearch;
+    }
+
+    if (activeCategory === "Favorieten") {
+      return matchesSearch && favorites.includes(recipe.id);
+    }
+
+    const matchesCategory =
+      recipe.category?.toLowerCase() === activeCategory.toLowerCase();
+
+    return matchesSearch && matchesCategory;
   });
 
   const toggleRecipeForDay = async (recipe: any) => {
@@ -287,7 +344,7 @@ export default function WeekPage() {
   return (
     <>
       <Header title="Weekplanner" showBack={false} />
-      <main className="min-h-dvh bg-[var(--color-bg)] pt-24 pb-32">
+      <main className="min-h-dvh bg-[var(--color-bg)] pt-20 pb-40">
         <div className="px-4 max-w-4xl mx-auto space-y-4">
           {weekData.map((day, index) => (
             <Card key={index} className="p-5 space-y-4">
@@ -452,21 +509,18 @@ export default function WeekPage() {
         </div>
 
         <div className="px-6 flex gap-3 overflow-x-auto mb-4 no-scrollbar shrink-0">
-          {categories.map((cat) => {
+          {finalFilters.map((item) => {
+            const cat = item.name;
+            const count = item.count;
             const isActive = activeCategory === cat;
-            const count =
-              cat === "Alles"
-                ? recipes.length
-                : recipes.filter(
-                    (r) => r.category?.toLowerCase() === cat.toLowerCase(),
-                  ).length;
+
             return (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
                 className={`px-4 py-2 rounded-xl text-sm whitespace-nowrap border transition ${
                   isActive
-                    ? "bg-gray-200 border-gray-200 font-medium"
+                    ? "bg-gray-100 border-gray-100 font-medium"
                     : "bg-white border-gray-200 text-gray-600"
                 }`}
               >

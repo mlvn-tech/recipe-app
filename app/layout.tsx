@@ -9,11 +9,18 @@ import { UIProvider } from "@/components/UIContext";
 import { OverlayProvider } from "@/components/GlobalOverlay";
 
 import { Nunito } from "next/font/google";
+import { Poppins } from "next/font/google";
 
 const nunito = Nunito({
   subsets: ["latin"],
   weight: ["500", "600", "700"],
   variable: "--font-nunito",
+});
+
+const rubik = Poppins({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-poppins",
 });
 
 const geistSans = Geist({
@@ -54,7 +61,7 @@ export default function RootLayout({
     <ViewTransitions>
       <html lang="en" className="h-full">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} ${nunito.variable} antialiased bg-[var(--color-bg)] text-[#171717] h-full`}
+          className={`${geistSans.variable} ${geistMono.variable} ${nunito.variable} ${rubik.variable} antialiased bg-[var(--color-bg)] text-[#171717] h-full`}
         >
           <AuthGuard>
             <UIProvider>

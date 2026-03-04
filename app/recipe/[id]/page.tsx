@@ -182,8 +182,8 @@ export default function RecipeDetail() {
               onClick={toggleFavorite}
               className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-md rounded-full p-3 shadow-md"
               style={{
-                transform: animating ? "scale(1.2)" : "scale(1)",
-                transition: "transform 0.20s ease-in-out",
+                transform: animating ? "scale(1.1)" : "scale(1)",
+                transition: "transform 0.18s ease-out",
               }}
             >
               <Icon
@@ -308,7 +308,7 @@ export default function RecipeDetail() {
         overlay={false}
       >
         <div
-          className="px-8 max-h-[65dvh]"
+          className="px-6 space-y-3 pt-2"
           style={{
             paddingBottom: "calc(5rem + env(safe-area-inset-bottom))",
           }}

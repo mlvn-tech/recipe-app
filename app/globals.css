@@ -113,10 +113,10 @@ input, textarea, select {
 }
 
 h1, h2, h3 {
-  font-family: var(--font-nunito);
-  font-weight: 700;
+  font-family: var(--font-poppins);
+  font-weight: 600;
 }
 
-p {
+/* p {
   font-family: var(--font-nunito);
-}
+} */
