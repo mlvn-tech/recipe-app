@@ -432,7 +432,7 @@ export default function Home() {
         <div
           className="px-6 space-y-3 pt-2"
           style={{
-            paddingBottom: "calc(6rem + env(safe-area-inset-bottom))",
+            paddingBottom: "calc(7rem + env(safe-area-inset-bottom))",
           }}
         >
           <textarea
@@ -449,7 +449,7 @@ export default function Home() {
           />
 
           {/* Aantal + Categorie naast elkaar */}
-          <div className="flex gap-4 mt-4">
+          <div className="flex gap-4">
             {/* Aantal */}
             <div className="flex flex-col gap-2 w-16">
               <label className="block text-sm font-medium">Porties</label>
@@ -513,7 +513,7 @@ export default function Home() {
             disabled={generating}
             className={clsx(
               styles.button.primary,
-              "h-[58px] relative flex items-center justify-center mx-auto transition-all duration-300",
+              "h-[58px] mt-6 relative flex items-center justify-center mx-auto transition-all duration-300",
               generating ? "w-[58px] !px-0 bg-gray-200" : "w-full",
             )}
           >

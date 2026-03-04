@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { ReactNode } from "react";
-import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Icon from "@/components/icons";
 
 type HeaderProps = {
@@ -11,6 +11,7 @@ type HeaderProps = {
   rightContent?: ReactNode;
   onBack?: () => void;
   showBack?: boolean;
+  showClose?: boolean;
 };
 
 export default function Header({
@@ -19,20 +20,35 @@ export default function Header({
   rightContent,
   onBack,
   showBack = true,
+  showClose = false,
 }: HeaderProps) {
   const router = useRouter();
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      router.push("/");
+    }
+  };
 
   return (
     <div className="fixed top-0 left-0 w-full z-50 bg-[var(--color-brand)] shadow-[0_1px_6px_rgba(0,0,0,0.05)]">
       <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between relative">
         {/* Left */}
-        {showBack ? (
-          <button onClick={() => (onBack ? onBack() : router.push("/"))}>
-            <Icon icon={ChevronLeftIcon} className="text-white/80" />
-          </button>
-        ) : (
-          <div className="w-6" />
-        )}
+        <div className="w-8 flex justify-start">
+          {showBack && !showClose && (
+            <button onClick={handleBack}>
+              <Icon icon={ChevronLeftIcon} className="text-white/80" />
+            </button>
+          )}
+
+          {showClose && (
+            <button onClick={handleBack}>
+              <Icon icon={XMarkIcon} className="text-white/80" />
+            </button>
+          )}
+        </div>
 
         {/* Center */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
@@ -48,7 +64,9 @@ export default function Header({
         </div>
 
         {/* Right */}
-        <div className="flex items-center gap-2">{rightContent}</div>
+        <div className="flex items-center gap-2 w-8 justify-end">
+          {rightContent}
+        </div>
       </div>
     </div>
   );

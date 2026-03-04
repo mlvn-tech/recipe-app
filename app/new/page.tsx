@@ -166,7 +166,7 @@ export default function NewRecipe() {
 
   return (
     <>
-      <Header title="Nieuw recept" onBack={() => router.back()} />
+      <Header title="Nieuw recept" showClose onBack={() => router.push("/")} />
 
       <main className="min-h-screen bg-[var(--color-bg)] pt-20 pb-36">
         <div className="px-4 max-w-4xl mx-auto space-y-4">
