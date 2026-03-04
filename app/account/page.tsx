@@ -112,7 +112,7 @@ export default function AccountPage() {
     <>
       <Header title="Account" showBack={false} />
       <main className="min-h-dvh bg-[var(--color-bg)] pt-16 pb-24">
-        <div className="p-6 space-y-8">
+        <div className="p-4 space-y-4">
           {/* Account info */}
           <Card>
             <div className="flex flex-col items-center text-center space-y-6">
