@@ -142,10 +142,10 @@ export default function AccountPage() {
               <div className="flex flex-col items-center text-center space-y-6">
                 <div>
                   <h2 className="text-lg font-semibold">
-                    Nodig iemand uit en deel je recepten
+                    Samen recepten verzamelen?
                   </h2>
                   <p className="text-sm text-gray-500 mt-1">
-                    Laat de QR-code scannen of verstuurd een uitnodiging
+                    Laat iemand de QR-code scannen of verstuur een uitnodiging
                   </p>
                 </div>
 
