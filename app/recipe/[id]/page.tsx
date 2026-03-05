@@ -169,8 +169,8 @@ export default function RecipeDetail() {
       />
 
       <main
-        // style={{ paddingTop: "var(--header-height)" }}
-        className="min-h-dvh bg-[var(--color-bg)] pb-24 pt-16"
+        style={{ paddingTop: "var(--header-height)" }}
+        className="min-h-dvh bg-[var(--color-bg)] pb-24"
       >
         {recipe.image_url && (
           <div className="relative w-full h-72">
