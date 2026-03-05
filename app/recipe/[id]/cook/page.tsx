@@ -110,7 +110,10 @@ export default function CookMode() {
   return (
     <main className="h-screen bg-[var(--color-bg)] flex flex-col">
       {/* Sticky Header */}
-      <div className="sticky top-0 z-50 bg-[var(--color-bg)] px-4 pt-6 pb-4">
+      <div
+        className="sticky top-0 z-50 bg-[var(--color-bg)] px-4 pb-4"
+        style={{ paddingTop: "calc(1.5rem + env(safe-area-inset-top))" }}
+      >
         <div className="flex items-center justify-between mb-3">
           {/* Left – Close cook mode */}
           <button
