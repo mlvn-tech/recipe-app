@@ -511,7 +511,14 @@ export default function WeekPage() {
           />
         </div>
 
-        <div className="px-6 flex gap-3 overflow-x-auto mb-4 no-scrollbar shrink-0">
+        <div
+          className="flex gap-3 overflow-x-auto mb-4 no-scrollbar shrink-0 snap-x snap-mandatory scroll-smooth"
+          style={{
+            scrollPaddingLeft: "1.5rem",
+            paddingLeft: "1.5rem",
+            paddingRight: "1.5rem",
+          }}
+        >
           {finalFilters.map((item) => {
             const cat = item.name;
             const count = item.count;
@@ -521,7 +528,7 @@ export default function WeekPage() {
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-2 rounded-xl text-sm whitespace-nowrap border transition ${
+                className={`snap-start px-4 py-2 rounded-xl text-sm whitespace-nowrap border transition ${
                   isActive
                     ? "bg-gray-100 border-gray-100 font-medium"
                     : "bg-white border-gray-200 text-gray-600"
