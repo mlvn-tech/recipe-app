@@ -254,7 +254,7 @@ export default function Home() {
     <>
       {/* 🔝 Search Header */}
       <div
-        className="fixed top-0 left-0 w-full z-50 bg-[var(--color-brand)] shadow-[0_1px_6px_rgba(0,0,0,0.05)]"
+        className="fixed top-0 left-0 w-full z-50 bg-[var(--color-brand)] shadow-[0_1px_6px_rgba(0,0,0,0.05)] "
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
         <div className="max-w-4xl mx-auto px-4 h-20 flex items-center gap-3">
@@ -277,7 +277,7 @@ export default function Home() {
 
       <main
         style={{ paddingTop: "var(--header-height)" }}
-        className="min-h-dvh bg-[var(--color-bg)] pb-24"
+        className="min-h-dvh bg-[var(--color-bg)] pb-28"
       >
         {/* Filters */}
         <div className="pt-4 pb-4">
