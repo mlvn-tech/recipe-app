@@ -347,13 +347,7 @@ function ShoppingPageContent() {
         onBack={() => router.push("/week")}
       />
 
-      <main
-        style={{
-          paddingTop: "var(--header-height)",
-          paddingBottom: "calc(6rem + env(safe-area-inset-bottom))",
-        }}
-        className="min-h-screen bg-[var(--color-bg)]"
-      >
+      <main className="min-h-screen bg-[var(--color-bg)] pt-20 pb-30">
         <div className="px-4 max-w-4xl mx-auto space-y-4">
           {weekStart && (
             <button
