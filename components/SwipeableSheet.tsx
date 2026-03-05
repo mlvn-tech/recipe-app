@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef } from "react";
+import { createPortal } from "react-dom";
 
 type Props = {
   open: boolean;
@@ -46,11 +47,25 @@ export default function SwipeableSheet({
 
   return (
     <>
-      {/* 🔥 Fullscreen overlay (PWA-proof) */}
-      {open && overlay && (
-        <div onClick={onClose} className="fixed inset-0 z-100 bg-black/70" />
-      )}
-
+      // In je return:
+      {open &&
+        overlay &&
+        createPortal(
+          <div
+            onClick={onClose}
+            style={{
+              position: "fixed",
+              inset: 0,
+              top: "-100px",
+              bottom: "-100px",
+              left: "-100px",
+              right: "-100px",
+              backgroundColor: "rgba(0,0,0,0.7)",
+              zIndex: 100,
+            }}
+          />,
+          document.body,
+        )}
       {/* 🔥 Sheet */}
       <div
         className={`fixed left-0 w-full bg-white rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.1)] z-[110] flex flex-col ${className ?? ""}`}
