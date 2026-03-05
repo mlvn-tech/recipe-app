@@ -253,7 +253,10 @@ export default function Home() {
   return (
     <>
       {/* 🔝 Search Header */}
-      <div className="fixed top-0 left-0 w-full bg-[var(--color-brand)] z-50 shadow-[0_1px_6px_rgba(0,0,0,0.05)]">
+      <div
+        className="fixed top-0 left-0 w-full z-50 bg-[var(--color-brand)] shadow-[0_1px_6px_rgba(0,0,0,0.05)]"
+        style={{ paddingTop: "env(safe-area-inset-top)" }}
+      >
         <div className="max-w-4xl mx-auto px-4 h-20 flex items-center gap-3">
           <div className="flex-1">
             <SearchInput
