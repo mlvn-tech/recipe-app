@@ -168,7 +168,10 @@ export default function RecipeDetail() {
         }
       />
 
-      <main className="min-h-dvh bg-[var(--color-bg)] pt-16 pb-32">
+      <main
+        style={{ paddingTop: "var(--header-height)" }}
+        className="min-h-dvh bg-[var(--color-bg)] pb-24"
+      >
         {recipe.image_url && (
           <div className="relative w-full h-72">
             <img
@@ -189,7 +192,7 @@ export default function RecipeDetail() {
               <Icon
                 icon={isFavorite ? HeartSolid : HeartOutline}
                 className={`${
-                  isFavorite ? "text-[var(--color-accent)]" : "text-gray-500"
+                  isFavorite ? "text-[var(--color-accent)]" : "text-[#6B7280]"
                 } transition`}
               />
             </button>
@@ -205,7 +208,7 @@ export default function RecipeDetail() {
               {formatTitle(recipe.title)}
             </h1>
 
-            <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-600">
+            <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-[#6B7280]">
               {recipe.cooking_time && (
                 <div className="flex items-center gap-1">
                   <Icon icon={ClockIcon} size={18} className="text-[#6B7280]" />

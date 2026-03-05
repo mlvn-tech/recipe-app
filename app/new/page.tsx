@@ -168,7 +168,10 @@ export default function NewRecipe() {
     <>
       <Header title="Nieuw recept" showClose onBack={() => router.push("/")} />
 
-      <main className="min-h-screen bg-[var(--color-bg)] pt-20 pb-36">
+      <main
+        style={{ paddingTop: "var(--header-height)" }}
+        className="min-h-dvh bg-[var(--color-bg)] pb-24"
+      >
         <div className="px-4 max-w-4xl mx-auto space-y-4">
           {/* Afbeelding */}
           <Card className="p-5">

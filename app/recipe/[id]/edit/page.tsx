@@ -218,7 +218,11 @@ export default function EditRecipe() {
         onBack={() => router.push(`/recipe/${id}`)}
       />
 
-      <main className="min-h-screen bg-[var(--color-bg)] pt-20 pb-32">
+      <main
+        style={{ paddingTop: "var(--header-height)" }}
+        className="min-h-dvh bg-[var(--color-bg)] pb-24"
+      >
+        3
         <div className="px-4 max-w-4xl mx-auto space-y-4">
           {/* Afbeelding */}
           <Card className="p-5">

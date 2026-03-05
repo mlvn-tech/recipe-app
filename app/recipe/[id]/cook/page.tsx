@@ -108,7 +108,10 @@ export default function CookMode() {
     recipe.title.charAt(0).toUpperCase() + recipe.title.slice(1).toLowerCase();
 
   return (
-    <main className="h-screen bg-[var(--color-bg)] flex flex-col">
+    <main
+      className="h-screen bg-[var(--color-bg)] flex flex-col"
+      style={{ paddingTop: "var(--header-height)" }}
+    >
       {/* Sticky Header */}
       <div className="sticky top-0 z-50 bg-[var(--color-bg)] px-4 pt-6 pb-4">
         <div className="flex items-center justify-between mb-3">

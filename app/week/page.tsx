@@ -344,9 +344,13 @@ export default function WeekPage() {
   return (
     <>
       <Header title="Weekplanner" showBack={false} />
+
       <main
-        className="min-h-dvh bg-[var(--color-bg)] pt-20"
-        style={{ paddingBottom: "calc(10rem + env(safe-area-inset-bottom))" }}
+        className="min-h-dvh bg-[var(--color-bg)] pb-24"
+        style={{
+          paddingBottom: "calc(10rem + env(safe-area-inset-bottom))",
+          paddingTop: "var(--header-height)",
+        }}
       >
         <div className="px-4 max-w-4xl mx-auto space-y-4">
           {weekData.map((day, index) => (

@@ -111,7 +111,10 @@ export default function AccountPage() {
   return (
     <>
       <Header title="Account" showBack={false} />
-      <main className="min-h-dvh bg-[var(--color-bg)] pt-16 pb-24">
+      <main
+        style={{ paddingTop: "var(--header-height)" }}
+        className="min-h-dvh bg-[var(--color-bg)] pb-24"
+      >
         <div className="p-4 space-y-4">
           {/* Account info */}
           <Card>

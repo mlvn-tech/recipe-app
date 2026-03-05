@@ -38,7 +38,10 @@ export default function PreviewPage() {
 
   if (!preview) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
+      <main
+        className="min-h-dvh bg-[var(--color-bg)] pb-24 flex items-center justify-center"
+        style={{ paddingTop: "var(--header-height)" }}
+      >
         <p className="text-sm text-gray-500">Laden...</p>
       </main>
     );
@@ -181,7 +184,6 @@ export default function PreviewPage() {
   return (
     <>
       <Header title="Recept preview" onBack={() => router.push("/")} />
-
       <main className="min-h-dvh bg-[var(--color-bg)] pt-20 pb-24 px-4">
         <div className="max-w-3xl mx-auto space-y-6">
           {/* Hero placeholder */}
@@ -283,6 +285,7 @@ export default function PreviewPage() {
           </div>
         </div>
       )}
+      ``
     </>
   );
 }
