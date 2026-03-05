@@ -53,9 +53,9 @@ export default function Header({
         {/* Center */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
           {title && (
-            <h1 className="text-base text-white font-semibold leading-tight truncate max-w-[240px]">
+            <span className="text-md text-base text-white font-bold leading-tight truncate max-w-[240px]">
               {title}
-            </h1>
+            </span>
           )}
 
           {subtitle && (
