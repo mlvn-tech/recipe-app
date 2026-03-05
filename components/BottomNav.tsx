@@ -47,7 +47,7 @@ export default function BottomNav() {
 
   return (
     <div
-      className="w-full backdrop-blur-xl bg-white/70 border-t border-gray-200 z-[120] shrink-0"
+      className="fixed bottom-0 left-0 w-full backdrop-blur-xl bg-white/70 border-t border-gray-200 z-[120]"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="max-w-4xl mx-auto flex justify-around py-3">
