@@ -115,7 +115,7 @@ export default function AccountPage() {
         style={{ paddingTop: "var(--header-height)" }}
         className="min-h-dvh bg-[var(--color-bg)] pb-24"
       >
-        <div className="p-4 space-y-4">
+        <div className="px-4 space-y-4">
           {/* Account info */}
           <Card>
             <div className="flex flex-col items-center text-center space-y-6">

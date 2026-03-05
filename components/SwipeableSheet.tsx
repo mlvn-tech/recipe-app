@@ -47,7 +47,6 @@ export default function SwipeableSheet({
 
   return (
     <>
-      // In je return:
       {open &&
         overlay &&
         createPortal(

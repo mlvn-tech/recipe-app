@@ -222,7 +222,6 @@ export default function EditRecipe() {
         style={{ paddingTop: "var(--header-height)" }}
         className="min-h-dvh bg-[var(--color-bg)] pb-24"
       >
-        3
         <div className="px-4 max-w-4xl mx-auto space-y-4">
           {/* Afbeelding */}
           <Card className="p-5">
