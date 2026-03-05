@@ -198,7 +198,7 @@ export default function RecipeDetail() {
 
         <div className="px-4 pt-4 pb-16 space-y-4 rounded-xl">
           <div>
-            <p className="text-xs text-gray-400 tracking-wide py-2">
+            <p className="text-xs text-[#6B7280] tracking-wide py-2">
               Toegevoegd op {formattedDate}
             </p>
             <h1 ref={titleRef} className="text-3xl font-bold">
@@ -208,13 +208,13 @@ export default function RecipeDetail() {
             <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-600">
               {recipe.cooking_time && (
                 <div className="flex items-center gap-1">
-                  <Icon icon={ClockIcon} size={18} className="text-gray-500" />
+                  <Icon icon={ClockIcon} size={18} className="text-[#6B7280]" />
                   <span>{recipe.cooking_time} min</span>
                 </div>
               )}
               {recipe.servings && (
                 <div className="flex items-center gap-1">
-                  <Icon icon={UserIcon} size={18} className="text-gray-500" />
+                  <Icon icon={UserIcon} size={18} className="text-[#6B7280]" />
                   <span>
                     {recipe.servings}{" "}
                     {recipe.servings === 1 ? "persoon" : "personen"}
@@ -242,7 +242,7 @@ export default function RecipeDetail() {
                       {index !== 0 && (
                         <div className="border-t border-gray-100 mb-4" />
                       )}
-                      <h3 className="font-semibold text-gray-400 tracking-tight">
+                      <h3 className="font-semibold text-[#6B7280] tracking-tight">
                         {trimmed.replace(/^#\s*/, "")}
                       </h3>
                     </li>

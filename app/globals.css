@@ -7,11 +7,12 @@
 
 @theme {
   --color-bg: #F8F8F8;
-  /* Terracota */
-  --color-brand: #C4785A;
+  /* Teal */
+  --color-brand: #2F5D67;
   /* Turquoise
   --color-brand: #EFA30A; */
-  --color-accent: #28ada0;
+  /* Oranje-geel */
+  --color-accent: #F4A261;
   --color-danger: #ef4444;
 }
 
@@ -33,10 +34,12 @@ body {
 
 h1, h2, h3 {
   font-family: var(--font-work-sans);
+  color: #1F2933;
 }
 
 body {
   font-family: var(--font-nunito);
+  color: #1F2933;
 }
 
 button {
