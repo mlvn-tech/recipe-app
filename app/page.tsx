@@ -275,7 +275,10 @@ export default function Home() {
         </div>
       </div>
 
-      <main className="min-h-dvh bg-[var(--color-bg)] pt-20 pb-24">
+      <main
+        style={{ paddingTop: "var(--header-height)" }}
+        className="min-h-dvh bg-[var(--color-bg)] pb-24"
+      >
         {/* Filters */}
         <div className="pt-4 pb-4">
           <div className="max-w-4xl mx-auto">
