@@ -348,8 +348,11 @@ function ShoppingPageContent() {
       />
 
       <main
-        style={{ paddingTop: "var(--header-height)" }}
-        className="min-h-dvh bg-[var(--color-bg)] pb-24"
+        style={{
+          paddingTop: "var(--header-height)",
+          paddingBottom: "calc(6rem + env(safe-area-inset-bottom))",
+        }}
+        className="min-h-dvh bg-[var(--color-bg)]"
       >
         <div className="px-4 max-w-4xl mx-auto space-y-4">
           {weekStart && (
