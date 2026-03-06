@@ -25,8 +25,10 @@ export default function CookMode() {
   const [showFloating, setShowFloating] = useState(false);
   const [ingredientsOpen, setIngredientsOpen] = useState(false);
 
+  const alarmRef = useRef<HTMLAudioElement | null>(null);
   const [timerSeconds, setTimerSeconds] = useState<number | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
   const startTimer = (minutes: number) => {
     const totalSeconds = minutes * 60;
     setTimerSeconds(totalSeconds);
@@ -55,6 +57,7 @@ export default function CookMode() {
     }
     setTimerSeconds(null);
   };
+  const [timerFinished, setTimerFinished] = useState(false);
 
   const currentStepText = recipe?.steps?.[currentStep] ?? "";
 
@@ -78,53 +81,24 @@ export default function CookMode() {
     }
   }
 
-  const playBeep = () => {
-    const ctx = new (
-      window.AudioContext || (window as any).webkitAudioContext
-    )();
-
-    const oscillator = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    oscillator.type = "sine";
-    oscillator.frequency.value = 1200;
-
-    oscillator.connect(gain);
-    gain.connect(ctx.destination);
-
-    oscillator.start();
-
-    gain.gain.setValueAtTime(1, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-
-    oscillator.stop(ctx.currentTime + 0.9);
-  };
+  useEffect(() => {
+    alarmRef.current = new Audio("/alarm.mp3");
+    alarmRef.current.volume = 1;
+  }, []);
 
   const playTimerSound = () => {
-    let count = 0;
+    if (!alarmRef.current) return;
 
-    const alarm = setInterval(() => {
-      playBeep();
-      count++;
+    alarmRef.current.currentTime = 0;
+    alarmRef.current.play().catch(() => {});
 
-      if (count >= 6) {
-        clearInterval(alarm);
-      }
-    }, 900);
+    setTimeout(() => {
+      alarmRef.current?.play().catch(() => {});
+    }, 2000);
   };
-
-  const vibrate = () => {
-    if (navigator.vibrate) {
-      navigator.vibrate([200, 100, 200]);
-    }
-  };
-
-  const [timerFinished, setTimerFinished] = useState(false);
-
   useEffect(() => {
     if (timerSeconds === 0) {
       playTimerSound();
-      vibrate();
       toast("Timer klaar ⏰");
 
       setTimerFinished(true);
@@ -134,7 +108,6 @@ export default function CookMode() {
       }, 1500);
     }
   }, [timerSeconds]);
-
   useEffect(() => {
     let wakeLock: any = null;
 
