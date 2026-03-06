@@ -104,16 +104,31 @@ export default function CookMode() {
       alarmRef.current?.play().catch(() => {});
     }, 2000);
   };
+
   useEffect(() => {
     if (timerSeconds === 0) {
       playTimerSound();
-      toast("Timer klaar ⏰", {
-        duration: Infinity,
-        action: {
-          label: "Stop",
-          onClick: () => stopTimer(),
+
+      toast.custom(
+        (t) => (
+          <div className="floating-blur flex items-center gap-4 bg-white/70 shadow-[0_8px_30px_rgba(0,0,0,0.12)] rounded-full text-sm font-semibold text-gray-500 whitespace-nowrap px-4 py-3 w-fit mx-auto">
+            <span className="pl-1">Timer klaar ⏰</span>
+
+            <button
+              onClick={() => {
+                stopTimer();
+                toast.dismiss(t);
+              }}
+              className="ml-auto bg-[var(--color-accent)] text-white px-4 py-2 rounded-full text-sm font-semibold"
+            >
+              Stop
+            </button>
+          </div>
+        ),
+        {
+          duration: Infinity,
         },
-      });
+      );
 
       setTimerFinished(true);
 
@@ -185,10 +200,10 @@ export default function CookMode() {
     recipe.title.charAt(0).toUpperCase() + recipe.title.slice(1).toLowerCase();
 
   return (
-    <main className="h-screen bg-[var(--color-bg)] flex flex-col">
+    <main className="h-screen bg-white flex flex-col">
       {/* Sticky Header */}
       <div
-        className="sticky top-0 z-50 bg-[var(--color-bg)] px-4 pb-4"
+        className="sticky top-0 z-50 bg-white px-4 pb-4"
         style={{ paddingTop: "calc(1.5rem + env(safe-area-inset-top))" }}
       >
         <div className="flex items-center justify-between mb-3">
@@ -277,7 +292,7 @@ export default function CookMode() {
         {/* je cook UI */}
 
         {/* Scrollable Steps */}
-        <div className="flex-1 overflow-y-auto px-4 pb-28 space-y-4">
+        <div className="flex-1 overflow-y-auto bg-white px-4 pb-40 space-y-4">
           {recipe.steps.map((step: string, index: number) => {
             const isActive = index === currentStep;
 
