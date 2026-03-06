@@ -21,18 +21,29 @@ export default function EditRecipe() {
   const [category, setCategory] = useState("");
   const [cookingTime, setCookingTime] = useState<number | null>(null);
   const [notes, setNotes] = useState("");
-  const [servings, setServings] = useState<number | null>(null);
+  const [servings, setServings] = useState<number>(2);
   const [loading, setLoading] = useState(true);
   const [showFloatingSave, setShowFloatingSave] = useState(true);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const deleteRef = useRef<HTMLDivElement | null>(null);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [originalForm, setOriginalForm] = useState<string | null>(null);
 
   const [categoryOpen, setCategoryOpen] = useState(false);
   const categoryRef = useRef<HTMLDivElement>(null);
-  const [selectedServings, setSelectedServings] = useState(2);
-  const [selectedCategory, setSelectedCategory] = useState("Diner");
+
+  const currentForm = {
+    title,
+    ingredients,
+    steps,
+    category,
+    cookingTime,
+    servings,
+    notes,
+    imagePreview,
+  };
 
   const ingredientsTextareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -88,6 +99,32 @@ export default function EditRecipe() {
   }, []);
 
   useEffect(() => {
+    if (!originalForm) return;
+
+    const changed =
+      JSON.stringify({
+        title,
+        ingredients,
+        steps,
+        category,
+        cookingTime,
+        servings,
+        notes,
+      }) !== originalForm;
+
+    setHasChanges(changed);
+  }, [
+    title,
+    ingredients,
+    steps,
+    category,
+    cookingTime,
+    servings,
+    notes,
+    originalForm,
+  ]);
+
+  useEffect(() => {
     const fetchRecipe = async () => {
       const { data } = await supabase
         .from("recipes")
@@ -106,10 +143,24 @@ export default function EditRecipe() {
             .join("\n"),
         );
         setCategory(data.category || "");
-        setSelectedCategory(data.category || "Diner");
         setCookingTime(data.cooking_time);
         setNotes(data.notes || "");
         setServings(data.servings);
+
+        const initialForm = {
+          title: data.title || "",
+          ingredients: (data.ingredients || []).join("\n"),
+          steps: (data.steps || [])
+            .map((s: string, i: number) => `${i + 1}. ${s}`)
+            .join("\n"),
+          category: data.category || "",
+          cookingTime: data.cooking_time,
+          servings: data.servings,
+          notes: data.notes || "",
+          imagePreview: data.image_url || null,
+        };
+
+        setOriginalForm(JSON.stringify(initialForm));
       }
 
       setLoading(false);
@@ -173,7 +224,7 @@ export default function EditRecipe() {
         title,
         ingredients: cleanedIngredients,
         steps: cleanedSteps,
-        category: selectedCategory,
+        category,
         cooking_time: cookingTime,
         servings,
         notes,
@@ -183,6 +234,7 @@ export default function EditRecipe() {
 
     if (!error) {
       toast.success("Recept aangepast");
+      setOriginalForm(JSON.stringify(currentForm));
       router.replace(`/recipe/${id}`);
     }
   };
@@ -308,10 +360,8 @@ export default function EditRecipe() {
 
                 <div className="relative">
                   <select
-                    value={selectedServings}
-                    onChange={(e) =>
-                      setSelectedServings(Number(e.target.value))
-                    }
+                    value={servings ?? ""}
+                    onChange={(e) => setServings(Number(e.target.value))}
                     className={clsx(
                       styles.dropdown.trigger,
                       "appearance-none cursor-pointer text-center",
@@ -338,8 +388,8 @@ export default function EditRecipe() {
 
                 <div className="relative">
                   <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
                     className={clsx(
                       styles.dropdown.trigger,
                       "appearance-none cursor-pointer",
@@ -431,10 +481,14 @@ export default function EditRecipe() {
       {/* Floating opslaan knop */}
       <div
         className={`
-          fixed bottom-12 left-1/2 -translate-x-1/2 z-50
-          transition-all duration-300
-          ${showFloatingSave ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
-        `}
+    fixed bottom-12 left-1/2 -translate-x-1/2 z-50
+    transition-all duration-300
+    ${
+      showFloatingSave && hasChanges
+        ? "opacity-100 pointer-events-auto"
+        : "opacity-0 pointer-events-none"
+    }
+  `}
       >
         <SaveButton />
       </div>
