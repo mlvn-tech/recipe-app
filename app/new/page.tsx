@@ -170,7 +170,7 @@ export default function NewRecipe() {
 
       <main
         style={{ paddingTop: "var(--header-height)" }}
-        className="min-h-dvh bg-[var(--color-bg)] pb-24"
+        className="min-h-dvh bg-[var(--color-bg)] pb-32"
       >
         <div className="px-4 max-w-4xl mx-auto space-y-4">
           {/* Afbeelding */}

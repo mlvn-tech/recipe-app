@@ -157,7 +157,6 @@ export default function EditRecipe() {
           cookingTime: data.cooking_time,
           servings: data.servings,
           notes: data.notes || "",
-          imagePreview: data.image_url || null,
         };
 
         setOriginalForm(JSON.stringify(initialForm));
