@@ -333,7 +333,7 @@ export default function Home() {
               ))}
             </div>
           )}
-          <div className="flex gap-3 mb-4">
+          <div className="flex gap-3 mb-6">
             <div className="flex-1">
               <SearchInput
                 value={search}
@@ -342,7 +342,7 @@ export default function Home() {
                 className="bg-white border border-gray-200"
               />
             </div>
-            <div className="flex floating-blur bg-white/70 rounded-full p-1 shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
+            <div className="flex border border-gray-200 bg-white rounded-full p-1">
               <button
                 onClick={() => setView("list")}
                 className={`p-2 rounded-full transition ${
