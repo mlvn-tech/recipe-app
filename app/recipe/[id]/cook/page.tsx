@@ -50,13 +50,21 @@ export default function CookMode() {
       });
     }, 1000);
   };
+
   const stopTimer = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
+
+    if (alarmRef.current) {
+      alarmRef.current.pause();
+      alarmRef.current.currentTime = 0;
+    }
+
     setTimerSeconds(null);
   };
+
   const [timerFinished, setTimerFinished] = useState(false);
 
   const currentStepText = recipe?.steps?.[currentStep] ?? "";
@@ -99,7 +107,13 @@ export default function CookMode() {
   useEffect(() => {
     if (timerSeconds === 0) {
       playTimerSound();
-      toast("Timer klaar ⏰");
+      toast("Timer klaar ⏰", {
+        duration: Infinity,
+        action: {
+          label: "Stop",
+          onClick: () => stopTimer(),
+        },
+      });
 
       setTimerFinished(true);
 
@@ -108,6 +122,20 @@ export default function CookMode() {
       }, 1500);
     }
   }, [timerSeconds]);
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+
+      if (alarmRef.current) {
+        alarmRef.current.pause();
+        alarmRef.current.currentTime = 0;
+      }
+    };
+  }, []);
+
   useEffect(() => {
     let wakeLock: any = null;
 
