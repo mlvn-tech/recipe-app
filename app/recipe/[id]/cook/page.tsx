@@ -12,6 +12,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Icon from "@/components/icons";
 import SwipeableSheet from "@/components/SwipeableSheet";
+import { toast } from "sonner";
 
 export default function CookMode() {
   const params = useParams();
@@ -36,10 +37,12 @@ export default function CookMode() {
 
     intervalRef.current = setInterval(() => {
       setTimerSeconds((prev) => {
-        if (prev === null || prev <= 1) {
+        if (prev === null) return null;
+
+        if (prev <= 1) {
           clearInterval(intervalRef.current!);
           intervalRef.current = null;
-          return null;
+          return 0;
         }
         return prev - 1;
       });
@@ -55,9 +58,82 @@ export default function CookMode() {
 
   const currentStepText = recipe?.steps?.[currentStep] ?? "";
 
-  const match = currentStepText.match(/(\d+)\s*(minuut|minuten|min)/i);
+  const match = currentStepText.match(
+    /(\d+)\s*(minuut|minuten|min|seconde|seconden|sec)/i,
+  );
 
-  const detectedMinutes = match ? Number(match[1]) : null;
+  let detectedMinutes = null;
+  let detectedSeconds = null;
+
+  if (match) {
+    const value = Number(match[1]);
+    const unit = match[2].toLowerCase();
+
+    if (unit.startsWith("min")) {
+      detectedMinutes = value;
+    }
+
+    if (unit.startsWith("sec") || unit.startsWith("secon")) {
+      detectedSeconds = value;
+    }
+  }
+
+  const playBeep = () => {
+    const ctx = new (
+      window.AudioContext || (window as any).webkitAudioContext
+    )();
+
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    oscillator.type = "sine";
+    oscillator.frequency.value = 1200;
+
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+
+    oscillator.start();
+
+    gain.gain.setValueAtTime(1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+
+    oscillator.stop(ctx.currentTime + 0.9);
+  };
+
+  const playTimerSound = () => {
+    let count = 0;
+
+    const alarm = setInterval(() => {
+      playBeep();
+      count++;
+
+      if (count >= 6) {
+        clearInterval(alarm);
+      }
+    }, 900);
+  };
+
+  const vibrate = () => {
+    if (navigator.vibrate) {
+      navigator.vibrate([200, 100, 200]);
+    }
+  };
+
+  const [timerFinished, setTimerFinished] = useState(false);
+
+  useEffect(() => {
+    if (timerSeconds === 0) {
+      playTimerSound();
+      vibrate();
+      toast("Timer klaar ⏰");
+
+      setTimerFinished(true);
+
+      setTimeout(() => {
+        setTimerFinished(false);
+      }, 1500);
+    }
+  }, [timerSeconds]);
 
   useEffect(() => {
     let wakeLock: any = null;
@@ -141,8 +217,14 @@ export default function CookMode() {
               onClick={() => {
                 if (timerSeconds) {
                   stopTimer();
-                } else if (detectedMinutes) {
-                  startTimer(detectedMinutes);
+                } else if (detectedMinutes || detectedSeconds) {
+                  if (detectedMinutes) {
+                    startTimer(detectedMinutes);
+                  }
+
+                  if (detectedSeconds) {
+                    startTimer(detectedSeconds / 60);
+                  }
                 }
               }}
               className="flex items-center text-gray-500 hover:text-[var(--color-accent)] transition"
@@ -152,7 +234,7 @@ export default function CookMode() {
                   "w-6 h-6 transition-colors duration-200",
                   timerSeconds !== null
                     ? "text-[var(--color-accent)]"
-                    : detectedMinutes !== null
+                    : detectedMinutes !== null || detectedSeconds !== null
                       ? "text-gray-600"
                       : "text-gray-300",
                 )}
@@ -185,16 +267,24 @@ export default function CookMode() {
         </div>
       </div>
 
-      {/* Scrollable Steps */}
-      <div className="flex-1 overflow-y-auto px-4 pb-28 space-y-4">
-        {recipe.steps.map((step: string, index: number) => {
-          const isActive = index === currentStep;
+      <div
+        className={`
+    transition-all duration-300
+    ${timerFinished ? "scale-[1.02]" : "scale-100"}
+  `}
+      >
+        {/* je cook UI */}
 
-          return (
-            <div
-              key={index}
-              onClick={() => setCurrentStep(index)}
-              className={`
+        {/* Scrollable Steps */}
+        <div className="flex-1 overflow-y-auto px-4 pb-28 space-y-4">
+          {recipe.steps.map((step: string, index: number) => {
+            const isActive = index === currentStep;
+
+            return (
+              <div
+                key={index}
+                onClick={() => setCurrentStep(index)}
+                className={`
                 cursor-pointer
                 p-6
                 rounded-2xl
@@ -206,29 +296,29 @@ export default function CookMode() {
                     : "text-gray-400"
                 }
               `}
-            >
-              <div className="flex items-start gap-4">
-                <span
-                  className={`font-semibold ${
-                    isActive ? "text-gray-900" : "text-gray-300"
-                  }`}
-                >
-                  {index + 1}.
-                </span>
+              >
+                <div className="flex items-start gap-4">
+                  <span
+                    className={`font-semibold ${
+                      isActive ? "text-gray-900" : "text-gray-300"
+                    }`}
+                  >
+                    {index + 1}.
+                  </span>
 
-                <p
-                  className={
-                    isActive ? "text-lg leading-relaxed" : "leading-relaxed"
-                  }
-                >
-                  {step}
-                </p>
+                  <p
+                    className={
+                      isActive ? "text-lg leading-relaxed" : "leading-relaxed"
+                    }
+                  >
+                    {step}
+                  </p>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
-
       <SwipeableSheet
         open={ingredientsOpen}
         onClose={() => setIngredientsOpen(false)}

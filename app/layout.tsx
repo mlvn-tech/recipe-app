@@ -81,7 +81,16 @@ export default function RootLayout({
             </UIProvider>
           </AuthGuard>
 
-          <Toaster richColors toastOptions={{ style: { zIndex: 30 } }} />
+          <Toaster
+            richColors
+            position="bottom-center"
+            toastOptions={{
+              style: {
+                marginBottom: "calc(4rem + env(safe-area-inset-bottom))",
+                zIndex: 200,
+              },
+            }}
+          />
         </body>
       </html>
     </ViewTransitions>
