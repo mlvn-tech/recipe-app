@@ -5,12 +5,14 @@ type Props = {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  className?: string;
 };
 
 export default function SearchInput({
   value,
   onChange,
   placeholder = "Zoeken...",
+  className = "",
 }: Props) {
   return (
     <div className="relative group w-full">
@@ -26,7 +28,7 @@ export default function SearchInput({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="
+        className={`
           w-full
           rounded-full
           bg-gray-100
@@ -40,8 +42,9 @@ export default function SearchInput({
           focus:border
           focus:border-gray-100 focus:outline-none
           focus:bg-gray-50
-          transition
-        "
+          transition        
+          ${className}
+        `}
       />
     </div>
   );

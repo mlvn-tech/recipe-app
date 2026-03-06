@@ -4,12 +4,14 @@ type CardProps = {
   children: ReactNode;
   className?: string;
   overflow?: boolean;
+  view?: "list" | "grid";
 };
 
 export default function Card({
   children,
   className = "",
   overflow = false,
+  view = "list",
 }: CardProps) {
   return (
     <div

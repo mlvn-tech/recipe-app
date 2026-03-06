@@ -10,11 +10,17 @@ import {
   ChevronDownIcon,
   BeakerIcon,
   HeartIcon as HeartOutline,
+  Squares2X2Icon,
+  Bars3Icon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import Icon from "@/components/icons";
 import Link from "next/link";
 import Card from "@/components/Card";
+
+import Header from "@/components/Header";
+
 import SearchInput from "@/components/SearchInput";
 import EmptyRecipesState from "@/components/EmptyRecipesState";
 import { useUI } from "@/components/UIContext";
@@ -25,6 +31,10 @@ import { formatTitle } from "@/lib/utils";
 
 export default function Home() {
   const [recipes, setRecipes] = useState<any[] | null>(null);
+  const [headerTitle, setHeaderTitle] = useState("Recept");
+
+  const [view, setView] = useState<"list" | "grid">("list");
+
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("Alles");
   const router = useRouter();
@@ -252,35 +262,26 @@ export default function Home() {
 
   return (
     <>
-      {/* 🔝 Search Header */}
-      <div
-        className="fixed top-0 left-0 w-full z-50 bg-[var(--color-brand)] shadow-[0_1px_6px_rgba(0,0,0,0.05)] "
-        style={{ paddingTop: "env(safe-area-inset-top)" }}
-      >
-        <div className="max-w-4xl mx-auto px-4 h-20 flex items-center gap-3">
-          <div className="flex-1">
-            <SearchInput
-              value={search}
-              onChange={setSearch}
-              placeholder="Wat gaan we eten?"
-            />
-          </div>
-
+      {/* Header */}
+      <Header
+        title="Mijn recepten"
+        showBack={false}
+        rightContent={
           <button
             onClick={() => setIsIngredientSheetOpen(true)}
-            className="text-gray-500 p-3 rounded-full bg-gray-100 border border-gray-100 flex items-center justify-center active:scale-95 transition"
+            // className="text-gray-500 p-3 rounded-full bg-gray-100 border border-gray-100 flex items-center justify-center active:scale-95 transition"
           >
-            <Icon icon={BeakerIcon} size={20} />
+            <Icon icon={SparklesIcon} size={26} className="text-white/80" />
           </button>
-        </div>
-      </div>
+        }
+      />
 
       <main
         style={{ paddingTop: "var(--header-height)" }}
         className="min-h-dvh bg-[var(--color-bg)] pb-28"
       >
         {/* Filters */}
-        <div className="pt-4 pb-4">
+        <div className="pb-4">
           <div className="max-w-4xl mx-auto">
             <div
               className="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth"
@@ -317,7 +318,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="px-4 py-4 max-w-4xl mx-auto">
+        <div className="px-4 max-w-4xl mx-auto">
           {recipes === null && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[...Array(4)].map((_, i) => (
@@ -332,7 +333,39 @@ export default function Home() {
               ))}
             </div>
           )}
+          <div className="flex gap-3 mb-4">
+            <div className="flex-1">
+              <SearchInput
+                value={search}
+                onChange={setSearch}
+                placeholder="Wat gaan we eten?"
+                className="bg-white border border-gray-200"
+              />
+            </div>
+            <div className="flex floating-blur bg-white/70 rounded-full p-1 shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
+              <button
+                onClick={() => setView("list")}
+                className={`p-2 rounded-full transition ${
+                  view === "list"
+                    ? "bg-white shadow-sm text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                <Bars3Icon className="w-5 h-5" />
+              </button>
 
+              <button
+                onClick={() => setView("grid")}
+                className={`p-2 rounded-full transition ${
+                  view === "grid"
+                    ? "bg-white shadow-sm text-gray-700"
+                    : "text-gray-400"
+                }`}
+              >
+                <Squares2X2Icon className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
           {recipes !== null && filteredRecipes.length === 0 && (
             <Card>
               <EmptyRecipesState category={activeCategory} />
@@ -340,7 +373,13 @@ export default function Home() {
           )}
 
           {recipes !== null && filteredRecipes.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div
+              className={
+                view === "grid"
+                  ? "grid grid-cols-2 gap-4"
+                  : "flex flex-col gap-4"
+              }
+            >
               {filteredRecipes.map((recipe) => {
                 const isFavorite = favorites.includes(recipe.id);
 
@@ -350,8 +389,12 @@ export default function Home() {
                     href={`/recipe/${recipe.id}`}
                     className="block hover:shadow-md transition shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-xl"
                   >
-                    <Card overflow>
-                      <div className="relative h-40 w-full">
+                    <Card overflow view={view}>
+                      <div
+                        className={`relative w-full ${
+                          view === "grid" ? "aspect-[4/3]" : "h-40"
+                        }`}
+                      >
                         {recipe.image_url ? (
                           <img
                             src={recipe.image_url}
@@ -389,29 +432,49 @@ export default function Home() {
                         </button>
                       </div>
 
-                      <div className="p-4 space-y-2">
-                        <h2 className="text-xl font-semibold leading-tight">
+                      <div
+                        className={`flex flex-col ${
+                          view === "grid" ? "p-3 gap-1" : "p-4 gap-2"
+                        }`}
+                      >
+                        <h2
+                          className={`font-semibold ${
+                            view === "grid"
+                              ? "text-sm leading-snug line-clamp-2 min-h-[2.5rem] mt-1"
+                              : "text-xl leading-tight"
+                          }`}
+                        >
                           {formatTitle(recipe.title)}
                         </h2>
 
-                        <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                        <div
+                          className={`flex items-center gap-2 text-gray-600 ${
+                            view === "grid" ? "text-xs" : "text-sm"
+                          }`}
+                        >
                           {recipe.cooking_time && (
                             <div className="flex items-center gap-1">
-                              <Icon icon={ClockIcon} size={16} />
-                              <span>{recipe.cooking_time} min</span>
+                              <Icon
+                                icon={ClockIcon}
+                                size={view === "grid" ? 14 : 16}
+                              />
+                              <span>{recipe.cooking_time} min.</span>
                             </div>
                           )}
 
                           {recipe.servings && (
                             <div className="flex items-center gap-1">
-                              <Icon icon={UserIcon} size={16} />
+                              <Icon
+                                icon={UserIcon}
+                                size={view === "grid" ? 14 : 16}
+                              />
                               <span>
                                 {recipe.servings}{" "}
-                                {recipe.servings === 1 ? "persoon" : "personen"}
+                                {recipe.servings === 1 ? "pers." : "pers."}
                               </span>
                             </div>
                           )}
-                          {recipe.category && (
+                          {view === "list" && recipe.category && (
                             <div className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-lg">
                               {recipe.category}
                             </div>
