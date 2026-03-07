@@ -88,7 +88,7 @@ export default function BottomNav() {
                       : "opacity-0 translate-y-4 pointer-events-none",
                   )}
                   style={{
-                    bottom: "calc(4.5rem + env(safe-area-inset-bottom))",
+                    bottom: "calc(4rem + env(safe-area-inset-bottom))",
                   }}
                 >
                   <button
