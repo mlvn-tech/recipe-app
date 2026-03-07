@@ -120,7 +120,11 @@ export default function BottomNav() {
                     className={`transition-all duration-200 ${
                       isRotated ? "rotate-45" : "rotate-0"
                     }`}
-                    style={{ transformOrigin: "12px 12px" }}
+                    style={{
+                      transformOrigin: "center",
+                      width: "24px",
+                      height: "24px",
+                    }}
                   >
                     <Icon
                       icon={IconComponent}
