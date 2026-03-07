@@ -357,16 +357,8 @@ export default function NewRecipe() {
       </main>
 
       <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-50">
-        <button
-          onClick={handleSave}
-          disabled={saving || saved}
-          className={styles.button.save}
-        >
-          {saved
-            ? "Opgeslagen!"
-            : saving
-              ? "Opslaan..."
-              : "Voeg toe aan mijn recepten"}
+        <button onClick={handleSubmit} className={styles.button.save}>
+          Opslaan
         </button>
       </div>
     </>
