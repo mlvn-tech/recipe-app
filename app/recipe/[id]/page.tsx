@@ -11,6 +11,7 @@ import {
   ChevronDownIcon,
   ClockIcon,
   PlayCircleIcon,
+  ShareIcon,
   HeartIcon as HeartOutline,
 } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
@@ -110,6 +111,45 @@ export default function RecipeDetail() {
     }
   };
 
+  const handleShare = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user || !id) return;
+
+    // Check of er al een token bestaat
+    const { data: existing } = await supabase
+      .from("shared_recipes")
+      .select("token")
+      .eq("recipe_id", id)
+      .eq("created_by", user.id)
+      .maybeSingle();
+
+    let token = existing?.token;
+
+    if (!token) {
+      const { data: created } = await supabase
+        .from("shared_recipes")
+        .insert({ recipe_id: id, created_by: user.id })
+        .select("token")
+        .single();
+
+      token = created?.token;
+    }
+
+    if (!token) return;
+
+    const url = `${window.location.origin}/recipe/share/${token}`;
+
+    if (navigator.share) {
+      await navigator.share({ title: recipe.title, url });
+    } else {
+      await navigator.clipboard.writeText(url);
+      alert("Link gekopieerd!");
+    }
+  };
+
   useEffect(() => {
     if (!titleRef.current || !recipe) return;
 
@@ -164,9 +204,14 @@ export default function RecipeDetail() {
         title={headerTitle}
         onBack={() => router.replace("/")}
         rightContent={
-          <button onClick={() => router.push(`/recipe/${recipe.id}/edit`)}>
-            <Icon icon={PencilSquareIcon} className="text-white/80" />
-          </button>
+          <div className="flex items-center gap-3">
+            <button onClick={handleShare}>
+              <Icon icon={ShareIcon} className="text-white/80" />
+            </button>
+            <button onClick={() => router.push(`/recipe/${recipe.id}/edit`)}>
+              <Icon icon={PencilSquareIcon} className="text-white/80" />
+            </button>
+          </div>
         }
       />
 
