@@ -93,9 +93,9 @@ export default function AIPage() {
             />
 
             {/* Porties + Categorie */}
-            <div className="flex gap-4">
+            <div className="flex gap-4 mt-4">
               {/* Porties */}
-              <div className="flex flex-col gap-2 w-24">
+              <div className="flex flex-col gap-2 w-16">
                 <label className="text-sm font-medium">Porties</label>
 
                 <div className="relative">

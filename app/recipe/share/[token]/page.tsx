@@ -56,8 +56,7 @@ export default function SharedRecipePage() {
   }, [token]);
 
   const handleSave = async () => {
-    toast.success("Recept toegevoegd aan jouw recepten!");
-    router.push("/");
+    setSaving(true);
 
     const {
       data: { user },
@@ -79,21 +78,26 @@ export default function SharedRecipePage() {
       return;
     }
 
-    await supabase.from("recipes").insert({
-      title: recipe.title,
-      ingredients: recipe.ingredients,
-      steps: recipe.steps,
-      notes: recipe.notes,
-      cooking_time: recipe.cooking_time,
-      servings: recipe.servings,
-      category: recipe.category,
-      image_url: recipe.image_url,
-      household_id: membership.household_id,
-      user_id: user.id,
-    });
+    const { data: newRecipe } = await supabase
+      .from("recipes")
+      .insert({
+        title: recipe.title,
+        ingredients: recipe.ingredients,
+        steps: recipe.steps,
+        notes: recipe.notes,
+        cooking_time: recipe.cooking_time,
+        servings: recipe.servings,
+        category: recipe.category,
+        image_url: recipe.image_url,
+        household_id: membership.household_id,
+        user_id: user.id,
+      })
+      .select()
+      .single();
 
     setSaving(false);
-    setSaved(true);
+    toast.success("Recept toegevoegd aan jouw recepten!");
+    router.push(`/recipe/${newRecipe.id}`);
   };
 
   if (loading) return <p className="p-8">Laden...</p>;
