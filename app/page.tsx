@@ -325,11 +325,11 @@ export default function Home() {
                 placeholder="Wat gaan we eten?"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-full bg-white/80 border border-gray-900 backdrop-blur-md p-3 pl-12 text-sm text-gray-800 placeholder:text-gray-400 border-0 focus:outline-none transition"
+                className="w-full rounded-full bg-white/80 border border-gray-200 backdrop-blur-md p-3 pl-12 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-gray-300 transition"
               />
             </div>
 
-            <div className="flex bg-white/80 border border-gray-100 backdrop-blur-md rounded-full p-1">
+            <div className="flex bg-white/80 border border-gray-200 backdrop-blur-md rounded-full p-1">
               <button
                 onClick={() => setView("list")}
                 className={`p-2 rounded-full transition ${

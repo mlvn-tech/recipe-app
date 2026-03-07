@@ -20,6 +20,7 @@ import Header from "@/components/Header";
 import Card from "@/components/Card";
 import SwipeableSheet from "@/components/SwipeableSheet";
 import { formatTitle } from "@/lib/utils";
+import { useUI } from "@/components/UIContext";
 
 export default function RecipeDetail() {
   const params = useParams();
@@ -33,6 +34,7 @@ export default function RecipeDetail() {
   const [showFloating, setShowFloating] = useState(false);
   const [ingredientsOpen, setIngredientsOpen] = useState(false);
   const [headerTitle, setHeaderTitle] = useState("Recept");
+  const { createMenuOpen } = useUI();
 
   // ✅ FAVORITES STATE
   const [isFavorite, setIsFavorite] = useState(false);
@@ -345,7 +347,7 @@ export default function RecipeDetail() {
 
       <div
         className={`fixed left-1/2 -translate-x-1/2 z-40 transition-all duration-300 ${
-          showFloating && !ingredientsOpen
+          showFloating && !ingredientsOpen && !createMenuOpen
             ? "opacity-100"
             : "opacity-0 pointer-events-none"
         }`}

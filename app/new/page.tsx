@@ -172,7 +172,7 @@ export default function NewRecipe() {
         style={{ paddingTop: "var(--header-height)" }}
         className="min-h-dvh bg-[var(--color-bg)] pb-32"
       >
-        <div className="px-4 max-w-4xl mx-auto space-y-4">
+        <div className="px-4 max-w-4xl mx-auto space-y-4 pt-4">
           {/* Afbeelding */}
           <Card className="p-5">
             <label className="text-sm text-gray-500 block mb-3">

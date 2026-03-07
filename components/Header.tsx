@@ -37,7 +37,10 @@ export default function Header({
       className="fixed top-0 left-0 w-full z-50 bg-[var(--color-brand)] shadow-[0_1px_6px_rgba(0,0,0,0.05)]"
       style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
-      <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between relative">
+      <div
+        className="max-w-4xl mx-auto px-4 flex items-center justify-between relative"
+        style={{ height: "4rem" }}
+      >
         {/* Left */}
         <div className="w-8 flex justify-start">
           {showBack && !showClose && (

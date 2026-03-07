@@ -62,7 +62,7 @@ export default function PreviewPage() {
         <Header title="Recept preview" />
 
         <main className="min-h-dvh bg-[var(--color-bg)] pt-20 pb-24 px-4">
-          <div className="max-w-3xl mx-auto space-y-6 animate-pulse">
+          <div className="max-w-3xl mx-auto space-y-6 animate-pulse pt-4">
             {/* hero */}
             <div className="h-52 bg-gray-200 rounded-2xl" />
 

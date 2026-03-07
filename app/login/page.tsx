@@ -34,7 +34,7 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center px-6">
-      <div className="w-full max-w-sm space-y-6">
+      <div className="w-full max-w-sm space-y-6 pt-4">
         <h1 className="text-xl font-semibold text-center">Inloggen</h1>
 
         {sent ? (

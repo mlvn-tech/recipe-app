@@ -355,7 +355,7 @@ export default function WeekPage() {
           paddingTop: "var(--header-height)",
         }}
       >
-        <div className="px-4 max-w-4xl mx-auto space-y-4">
+        <div className="px-4 max-w-4xl mx-auto space-y-4 pt-4">
           {weekData.map((day, index) => (
             <Card key={index} className="p-5 space-y-4">
               <div className="flex items-center justify-between">
