@@ -53,7 +53,7 @@ export default function BottomNav() {
 
   return (
     <div
-      className="fixed bottom-0 left-0 w-full backdrop-blur-xl bg-white/70 z-[120]"
+      className="fixed bottom-0 left-0 w-full backdrop-blur-xl bg-white/70 z-[120] border-t border-gray-100"
       style={{
         height: "calc(64px + env(safe-area-inset-bottom))",
       }}
