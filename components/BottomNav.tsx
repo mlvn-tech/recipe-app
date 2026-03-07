@@ -114,13 +114,13 @@ export default function BottomNav() {
 
                 <button
                   onClick={() => setCreateMenuOpen((prev) => !prev)}
-                  className="flex flex-col items-center justify-center"
+                  className="flex flex-col items-center justify-center w-full"
                 >
                   <div
-                    style={{ transformOrigin: "center" }}
                     className={`transition-all duration-200 ${
                       isRotated ? "rotate-45" : "rotate-0"
                     }`}
+                    style={{ transformOrigin: "12px 12px" }}
                   >
                     <Icon
                       icon={IconComponent}
