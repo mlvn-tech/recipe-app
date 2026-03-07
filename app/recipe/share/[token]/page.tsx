@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import Header from "@/components/Header";
 import { formatTitle } from "@/lib/utils";
 import Card from "@/components/Card";
 import {
@@ -98,7 +99,8 @@ export default function SharedRecipePage() {
 
   return (
     <>
-      <main className="min-h-dvh bg-[var(--color-bg)] pb-16">
+      <Header title="Gedeeld recept" />
+      <main className="min-h-dvh bg-[var(--color-bg)] pb-32">
         {recipe.image_url && (
           <div className="relative w-full h-72">
             <img
