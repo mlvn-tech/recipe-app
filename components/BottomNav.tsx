@@ -124,6 +124,11 @@ export default function BottomNav() {
                       transformOrigin: "center",
                       width: "24px",
                       height: "24px",
+                      willChange: "transform",
+                      WebkitTransform: isRotated
+                        ? "rotate(45deg)"
+                        : "rotate(0deg)",
+                      WebkitTransition: "transform 0.2s ease",
                     }}
                   >
                     <Icon
