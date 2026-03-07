@@ -15,7 +15,8 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       if (
         pathname === "/login" ||
         pathname.startsWith("/auth") ||
-        pathname.startsWith("/join")
+        pathname.startsWith("/join") ||
+        pathname.startsWith("/recipe/share")
       ) {
         setLoading(false);
         return;
