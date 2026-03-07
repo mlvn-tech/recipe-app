@@ -18,6 +18,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SearchInput from "@/components/SearchInput";
 import SwipeableSheet from "@/components/SwipeableSheet";
+import { useUI } from "@/components/UIContext";
 
 type ShoppingItem = {
   name: string;
@@ -30,6 +31,8 @@ export default function WeekPage() {
   const [activeDay, setActiveDay] = useState<number | null>(null);
   const [weekOffset, setWeekOffset] = useState(0);
   const [isWeekPickerOpen, setIsWeekPickerOpen] = useState(false);
+
+  const { createMenuOpen } = useUI();
 
   const getUserId = async () => {
     const {
@@ -416,8 +419,13 @@ export default function WeekPage() {
 
       {/* Floating knoppen */}
       <div
-        className="fixed left-1/2 -translate-x-1/2 z-40 flex items-center gap-2"
-        style={{ bottom: "calc(5rem + env(safe-area-inset-bottom))" }}
+        className={clsx(
+          "fixed left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 transition-all duration-200",
+          createMenuOpen ? "opacity-0 pointer-events-none" : "opacity-100",
+        )}
+        style={{
+          bottom: "calc(5rem + env(safe-area-inset-bottom))",
+        }}
       >
         <button
           onClick={() => setIsWeekPickerOpen(true)}

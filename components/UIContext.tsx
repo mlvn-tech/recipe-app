@@ -4,16 +4,26 @@ import { createContext, useContext, useState } from "react";
 
 type UIContextType = {
   highlightCreate: boolean;
-  setHighlightCreate: (value: boolean) => void;
+  setHighlightCreate: React.Dispatch<React.SetStateAction<boolean>>;
+  createMenuOpen: boolean;
+  setCreateMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const UIContext = createContext<UIContextType | null>(null);
 
 export function UIProvider({ children }: { children: React.ReactNode }) {
   const [highlightCreate, setHighlightCreate] = useState(false);
+  const [createMenuOpen, setCreateMenuOpen] = useState(false);
 
   return (
-    <UIContext.Provider value={{ highlightCreate, setHighlightCreate }}>
+    <UIContext.Provider
+      value={{
+        highlightCreate,
+        setHighlightCreate,
+        createMenuOpen,
+        setCreateMenuOpen,
+      }}
+    >
       {children}
     </UIContext.Provider>
   );

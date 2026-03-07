@@ -1,6 +1,10 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useUI } from "@/components/UIContext";
+import clsx from "clsx";
+
 import {
   HomeIcon,
   CalendarDaysIcon,
@@ -15,6 +19,8 @@ import {
 import Icon from "@/components/icons";
 
 export default function BottomNav() {
+  const { createMenuOpen, setCreateMenuOpen } = useUI();
+
   const pathname = usePathname();
   const router = useRouter();
 
@@ -55,15 +61,82 @@ export default function BottomNav() {
       <div className="max-w-4xl mx-auto flex justify-around h-16 items-center">
         {items.map((item) => {
           const isActive =
-            pathname === item.href ||
-            (item.href === "/week" && pathname.startsWith("/shopping"));
+            item.label === "Nieuw"
+              ? createMenuOpen
+              : !createMenuOpen &&
+                (pathname === item.href ||
+                  (item.href === "/week" && pathname.startsWith("/shopping")));
 
           const IconComponent = isActive ? item.iconActive : item.icon;
+
+          // 🔹 SPECIALE WRAPPER VOOR NIEUW
+          if (item.label === "Nieuw") {
+            return (
+              <div
+                key={item.href}
+                className="relative flex flex-col items-center justify-center flex-1"
+              >
+                <div
+                  className={clsx(
+                    "absolute bottom-15 flex flex-col gap-2 items-center w-35 z-[130] transition-all duration-200 ease-out",
+                    createMenuOpen
+                      ? "opacity-100 translate-y-0 pointer-events-auto"
+                      : "opacity-0 translate-y-4 pointer-events-none",
+                  )}
+                >
+                  <button
+                    onClick={() => {
+                      setCreateMenuOpen(false);
+                      router.push("/ai");
+                    }}
+                    className="floating-blur bg-white/90 w-full px-4 py-3 rounded-full shadow text-sm font-medium flex items-center justify-center gap-2"
+                  >
+                    ✨ AI genereren
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setCreateMenuOpen(false);
+                      router.push("/new");
+                    }}
+                    className="floating-blur bg-white/90 w-full px-4 py-3 rounded-full shadow text-sm font-medium flex items-center justify-center gap-2"
+                  >
+                    ✍️ Zelf maken
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => setCreateMenuOpen((prev) => !prev)}
+                  className="flex flex-col items-center justify-center"
+                >
+                  <Icon
+                    icon={IconComponent}
+                    size={24}
+                    className={`transition-all duration-200 ${
+                      isActive
+                        ? "text-[var(--color-accent)] rotate-45"
+                        : "text-gray-500"
+                    }`}
+                  />
+                  <span
+                    className={`text-xs mt-1 transition-colors ${
+                      isActive ? "text-[var(--color-accent)]" : "text-gray-500"
+                    }`}
+                  >
+                    {item.label}
+                  </span>
+                </button>
+              </div>
+            );
+          }
 
           return (
             <button
               key={item.href}
-              onClick={() => router.push(item.href)}
+              onClick={() => {
+                setCreateMenuOpen(false);
+                router.push(item.href);
+              }}
               className="flex flex-col items-center justify-center flex-1"
             >
               <Icon
