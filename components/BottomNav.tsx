@@ -89,7 +89,7 @@ export default function BottomNav() {
                       setCreateMenuOpen(false);
                       router.push("/ai");
                     }}
-                    className="floating-blur bg-white/90 w-full px-4 py-3 rounded-full shadow text-sm font-medium flex items-center justify-center gap-2"
+                    className="floating-blur bg-white/95 w-full px-4 py-4 rounded-full shadow text-sm font-medium flex items-center justify-center gap-2"
                   >
                     ✨ Koken met AI
                   </button>
@@ -99,7 +99,7 @@ export default function BottomNav() {
                       setCreateMenuOpen(false);
                       router.push("/new");
                     }}
-                    className="floating-blur bg-white/90 w-full px-4 py-3 rounded-full shadow text-sm font-medium flex items-center justify-center gap-2"
+                    className="floating-blur bg-white/95 w-full px-4 py-4 rounded-full shadow text-sm font-medium flex items-center justify-center gap-2"
                   >
                     ✍️ Zelf maken
                   </button>
@@ -135,6 +135,15 @@ export default function BottomNav() {
               key={item.href}
               onClick={() => {
                 setCreateMenuOpen(false);
+
+                if (pathname === item.href && item.href === "/") {
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  });
+                  return;
+                }
+
                 router.push(item.href);
               }}
               className="flex flex-col items-center justify-center flex-1"

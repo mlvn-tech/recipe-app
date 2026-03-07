@@ -11,6 +11,7 @@ import {
   HeartIcon as HeartOutline,
   Squares2X2Icon,
   Bars3Icon,
+  MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import Icon from "@/components/icons";
@@ -22,7 +23,7 @@ import Header from "@/components/Header";
 import SearchInput from "@/components/SearchInput";
 import EmptyRecipesState from "@/components/EmptyRecipesState";
 import { useUI } from "@/components/UIContext";
-import SwipeableSheet from "@/components/SwipeableSheet";
+
 import { styles } from "@/lib/styles";
 import clsx from "clsx";
 import { formatTitle } from "@/lib/utils";
@@ -268,7 +269,7 @@ export default function Home() {
         className="min-h-dvh bg-[var(--color-bg)] pb-28"
       >
         {/* Filters */}
-        <div className="pb-4">
+        <div className="pt-4">
           <div className="max-w-4xl mx-auto">
             <div
               className="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth"
@@ -305,31 +306,30 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="px-4 max-w-4xl mx-auto">
-          {recipes === null && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[...Array(4)].map((_, i) => (
-                <div
-                  key={i}
-                  className="bg-white rounded-xl p-4 animate-pulse shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
-                >
-                  <div className="h-40 bg-gray-200 rounded-xl mb-4" />
-                  <div className="h-4 bg-gray-200 rounded w-2/3 mb-3" />
-                  <div className="h-3 bg-gray-200 rounded w-1/2" />
-                </div>
-              ))}
-            </div>
-          )}
-          <div className="flex gap-3 mb-6">
-            <div className="flex-1">
-              <SearchInput
-                value={search}
-                onChange={setSearch}
+        {/* 🔹 Sticky search + toggle */}
+        <div
+          className="sticky z-40 bg-[var(--color-bg)]/80 backdrop-blur-md pt-4"
+          style={{ top: "var(--header-height)" }}
+        >
+          <div className="px-4 max-w-4xl mx-auto flex gap-3 pb-4">
+            <div className="relative group flex-1">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+                <Icon
+                  icon={MagnifyingGlassIcon}
+                  size={22}
+                  className="text-gray-400 transition-colors duration-200 group-focus-within:text-gray-500"
+                />
+              </div>
+              <input
+                type="text"
                 placeholder="Wat gaan we eten?"
-                className="bg-white border border-gray-200"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full rounded-full bg-white/80 border border-gray-900 backdrop-blur-md p-3 pl-12 text-sm text-gray-800 placeholder:text-gray-400 border-0 focus:outline-none transition"
               />
             </div>
-            <div className="flex border border-gray-200 bg-white rounded-full p-1">
+
+            <div className="flex bg-white/80 border border-gray-100 backdrop-blur-md rounded-full p-1">
               <button
                 onClick={() => setView("list")}
                 className={`p-2 rounded-full transition ${
@@ -353,6 +353,25 @@ export default function Home() {
               </button>
             </div>
           </div>
+        </div>
+
+        {/* 🔹 Recepten */}
+        <div className="px-4 max-w-4xl mx-auto">
+          {recipes === null && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[...Array(4)].map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-white rounded-xl p-4 animate-pulse shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                >
+                  <div className="h-40 bg-gray-200 rounded-xl mb-4" />
+                  <div className="h-4 bg-gray-200 rounded w-2/3 mb-3" />
+                  <div className="h-3 bg-gray-200 rounded w-1/2" />
+                </div>
+              ))}
+            </div>
+          )}
+
           {recipes !== null && filteredRecipes.length === 0 && (
             <Card>
               <EmptyRecipesState category={activeCategory} />
@@ -392,7 +411,6 @@ export default function Home() {
                           <div className="h-full w-full bg-gray-200" />
                         )}
 
-                        {/* ❤️ Favorite button */}
                         <button
                           onClick={(e) => {
                             e.preventDefault();
@@ -400,21 +418,14 @@ export default function Home() {
                             handleFavorite(recipe.id);
                           }}
                           className="absolute top-3 right-3 bg-white/80 backdrop-blur-md rounded-full p-2 shadow-sm"
-                          style={{
-                            transform:
-                              animatingId === recipe.id
-                                ? "scale(1.1)"
-                                : "scale(1)",
-                            transition: "transform 0.18s ease-out",
-                          }}
                         >
                           <Icon
                             icon={isFavorite ? HeartSolid : HeartOutline}
-                            className={`${
+                            className={
                               isFavorite
                                 ? "text-[var(--color-accent)]"
                                 : "text-gray-500"
-                            } transition`}
+                            }
                           />
                         </button>
                       </div>
@@ -455,12 +466,10 @@ export default function Home() {
                                 icon={UserIcon}
                                 size={view === "grid" ? 14 : 16}
                               />
-                              <span>
-                                {recipe.servings}{" "}
-                                {recipe.servings === 1 ? "pers." : "pers."}
-                              </span>
+                              <span>{recipe.servings} pers.</span>
                             </div>
                           )}
+
                           {view === "list" && recipe.category && (
                             <div className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-lg">
                               {recipe.category}
@@ -476,113 +485,6 @@ export default function Home() {
           )}
         </div>
       </main>
-
-      <SwipeableSheet
-        open={isIngredientSheetOpen}
-        onClose={() => setIsIngredientSheetOpen(false)}
-        title="Welke ingrediënten heb je nog in huis?"
-        height="auto"
-        maxHeight="60dvh"
-        overflowVisible
-      >
-        <div
-          className="px-6 space-y-3 pt-2"
-          style={{
-            paddingBottom: "calc(7rem + env(safe-area-inset-bottom))",
-          }}
-        >
-          <textarea
-            value={ingredientInput}
-            onChange={(e) => setIngredientInput(e.target.value)}
-            placeholder="Bijv: paprika, ui, zoete aardappel, rijst"
-            rows={3}
-            disabled={generating}
-            className={clsx(
-              styles.input.default,
-              "transition-all duration-200",
-              generating && "opacity-60 bg-gray-50 cursor-not-allowed",
-            )}
-          />
-
-          {/* Aantal + Categorie naast elkaar */}
-          <div className="flex gap-4">
-            {/* Aantal */}
-            <div className="flex flex-col gap-2 w-16">
-              <label className="block text-sm font-medium">Porties</label>
-
-              <div className="relative">
-                <select
-                  value={selectedServings}
-                  onChange={(e) => setSelectedServings(Number(e.target.value))}
-                  className={clsx(
-                    styles.dropdown.trigger,
-                    "appearance-none cursor-pointer text-center",
-                  )}
-                >
-                  {[1, 2, 3, 4, 5, 6].map((num) => (
-                    <option key={num} value={num}>
-                      {num}
-                    </option>
-                  ))}
-                </select>
-
-                <Icon
-                  icon={ChevronDownIcon}
-                  size={20}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                />
-              </div>
-            </div>
-
-            {/* Categorie */}
-            <div className="flex flex-col gap-2 flex-1">
-              <label className="block text-sm font-medium">Categorie</label>
-
-              <div className="relative">
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className={clsx(
-                    styles.dropdown.trigger,
-                    "appearance-none cursor-pointer",
-                  )}
-                >
-                  {["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"].map(
-                    (cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ),
-                  )}
-                </select>
-
-                <Icon
-                  icon={ChevronDownIcon}
-                  size={20}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                />
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={handleGenerate}
-            disabled={generating}
-            className={clsx(
-              styles.button.primary,
-              "h-[58px] mt-6 relative flex items-center justify-center mx-auto transition-all duration-300",
-              generating ? "w-[58px] !px-0 bg-gray-200" : "w-full",
-            )}
-          >
-            {/* Tekst */}
-            {!generating && <span className="absolute">Genereer recept</span>}
-
-            {/* Spinner */}
-            {generating && (
-              <ArrowPathIcon className="w-6 h-6 animate-spin absolute text-gray-400" />
-            )}
-          </button>
-        </div>
-      </SwipeableSheet>
     </>
   );
 }

@@ -3,7 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --header-height: calc(5rem + env(safe-area-inset-top));
+  --header-height: calc(4rem + env(safe-area-inset-top));
 }
 
 @theme {
