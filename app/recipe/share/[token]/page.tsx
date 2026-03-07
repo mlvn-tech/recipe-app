@@ -6,6 +6,8 @@ import { supabase } from "@/lib/supabase";
 import Header from "@/components/Header";
 import { formatTitle } from "@/lib/utils";
 import Card from "@/components/Card";
+import { toast } from "sonner";
+
 import {
   ClockIcon,
   UserIcon,
@@ -54,7 +56,8 @@ export default function SharedRecipePage() {
   }, [token]);
 
   const handleSave = async () => {
-    setSaving(true);
+    toast.success("Recept toegevoegd aan jouw recepten!");
+    router.push("/");
 
     const {
       data: { user },
@@ -100,7 +103,10 @@ export default function SharedRecipePage() {
   return (
     <>
       <Header title="Gedeeld recept" />
-      <main className="min-h-dvh bg-[var(--color-bg)] pb-32">
+      <main
+        style={{ paddingTop: "calc(4rem + env(safe-area-inset-top))" }}
+        className="min-h-dvh bg-[var(--color-bg)] pb-32"
+      >
         {recipe.image_url && (
           <div className="relative w-full h-72">
             <img
@@ -198,14 +204,10 @@ export default function SharedRecipePage() {
       <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-50">
         <button
           onClick={handleSave}
-          disabled={saving || saved}
+          disabled={saving}
           className={styles.button.save}
         >
-          {saved
-            ? "Opgeslagen!"
-            : saving
-              ? "Opslaan..."
-              : "Voeg toe aan mijn recepten"}
+          {saving ? "Opslaan..." : "Recept opslaan"}
         </button>
       </div>
     </>
