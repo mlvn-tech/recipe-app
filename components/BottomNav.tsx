@@ -117,18 +117,13 @@ export default function BottomNav() {
                   className="flex flex-col items-center justify-center w-full"
                 >
                   <div
-                    className={`transition-all duration-200 ${
+                    className={`transition-transform duration-200 ${
                       isRotated ? "rotate-45" : "rotate-0"
                     }`}
                     style={{
                       transformOrigin: "center",
                       width: "24px",
                       height: "24px",
-                      willChange: "transform",
-                      WebkitTransform: isRotated
-                        ? "rotate(45deg)"
-                        : "rotate(0deg)",
-                      WebkitTransition: "transform 0.2s ease",
                     }}
                   >
                     <Icon
@@ -142,7 +137,7 @@ export default function BottomNav() {
                     />
                   </div>
                   <span
-                    className={`text-xs mt-1 transition-colors ${
+                    className={`text-xs mt-1 transition-colors h-4 ${
                       isActive ? "text-[var(--color-accent)]" : "text-gray-500"
                     }`}
                   >
