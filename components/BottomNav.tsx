@@ -78,7 +78,7 @@ export default function BottomNav() {
               >
                 <div
                   className={clsx(
-                    "absolute bottom-15 flex flex-col gap-2 items-center w-35 z-[130] transition-all duration-200 ease-out",
+                    "absolute bottom-20 flex flex-col gap-2 items-center w-36 z-[130] transition-all duration-200 ease-out",
                     createMenuOpen
                       ? "opacity-100 translate-y-0 pointer-events-auto"
                       : "opacity-0 translate-y-4 pointer-events-none",
@@ -91,7 +91,7 @@ export default function BottomNav() {
                     }}
                     className="floating-blur bg-white/90 w-full px-4 py-3 rounded-full shadow text-sm font-medium flex items-center justify-center gap-2"
                   >
-                    ✨ AI genereren
+                    ✨ Koken met AI
                   </button>
 
                   <button

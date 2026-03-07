@@ -8,11 +8,9 @@ import {
   UserIcon,
   ArrowPathIcon,
   ChevronDownIcon,
-  BeakerIcon,
   HeartIcon as HeartOutline,
   Squares2X2Icon,
   Bars3Icon,
-  SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import Icon from "@/components/icons";
@@ -263,18 +261,7 @@ export default function Home() {
   return (
     <>
       {/* Header */}
-      <Header
-        title="Mijn recepten"
-        showBack={false}
-        rightContent={
-          <button
-            onClick={() => setIsIngredientSheetOpen(true)}
-            // className="text-gray-500 p-3 rounded-full bg-gray-100 border border-gray-100 flex items-center justify-center active:scale-95 transition"
-          >
-            <Icon icon={SparklesIcon} size={26} className="text-white/80" />
-          </button>
-        }
-      />
+      <Header title="Mijn recepten" showBack={false} />
 
       <main
         style={{ paddingTop: "var(--header-height)" }}

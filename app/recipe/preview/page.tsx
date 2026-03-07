@@ -14,10 +14,21 @@ import Card from "@/components/Card";
 import { styles } from "@/lib/styles";
 import { formatTitle } from "@/lib/utils";
 
+type AIRecipe = {
+  title: string;
+  ingredients: string[];
+  steps: string[];
+  cooking_time: number;
+  servings: number;
+  category: string;
+  originalIngredients?: string[];
+};
+
 export default function PreviewPage() {
   const router = useRouter();
 
-  const [preview, setPreview] = useState<any | null>(null);
+  const [preview, setPreview] = useState<AIRecipe | null>(null);
+  const [aiLoading, setAiLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
   const [savingOverlay, setSavingOverlay] = useState(false);
@@ -28,14 +39,71 @@ export default function PreviewPage() {
   // 🔥 Load preview uit localStorage
   useEffect(() => {
     const stored = localStorage.getItem("ai_preview");
+
     if (!stored) {
       router.push("/");
       return;
     }
 
-    setPreview(JSON.parse(stored));
-  }, [router]);
+    const parsed = JSON.parse(stored);
 
+    setPreview(parsed);
+
+    // kleine delay zodat skeleton zichtbaar is
+    const timer = setTimeout(() => {
+      setAiLoading(false);
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [router]);
+  if (aiLoading) {
+    return (
+      <>
+        <Header title="Recept preview" />
+
+        <main className="min-h-dvh bg-[var(--color-bg)] pt-20 pb-24 px-4">
+          <div className="max-w-3xl mx-auto space-y-6 animate-pulse">
+            {/* hero */}
+            <div className="h-52 bg-gray-200 rounded-2xl" />
+
+            {/* titel */}
+            <div className="space-y-2">
+              <div className="h-8 w-2/3 bg-gray-200 rounded" />
+
+              <div className="flex gap-4">
+                <div className="h-4 w-20 bg-gray-200 rounded" />
+                <div className="h-4 w-20 bg-gray-200 rounded" />
+                <div className="h-6 w-24 bg-gray-200 rounded-lg" />
+              </div>
+            </div>
+
+            {/* ingrediënten */}
+            <Card className="p-6 space-y-3">
+              <div className="h-4 w-32 bg-gray-200 rounded" />
+
+              <div className="space-y-2">
+                <div className="h-3 w-full bg-gray-200 rounded" />
+                <div className="h-3 w-5/6 bg-gray-200 rounded" />
+                <div className="h-3 w-4/6 bg-gray-200 rounded" />
+              </div>
+            </Card>
+
+            {/* stappen */}
+            <Card className="p-6 space-y-3">
+              <div className="h-4 w-32 bg-gray-200 rounded" />
+
+              <div className="space-y-3">
+                <div className="h-3 w-full bg-gray-200 rounded" />
+                <div className="h-3 w-5/6 bg-gray-200 rounded" />
+                <div className="h-3 w-4/6 bg-gray-200 rounded" />
+                <div className="h-3 w-3/4 bg-gray-200 rounded" />
+              </div>
+            </Card>
+          </div>
+        </main>
+      </>
+    );
+  }
   if (!preview) {
     return (
       <main
@@ -61,6 +129,20 @@ export default function PreviewPage() {
 
       const userId = session?.user?.id;
 
+      // 🔹 household ophalen
+      const { data: membership } = await supabase
+        .from("household_members")
+        .select("household_id")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      const householdId = membership?.household_id;
+
+      if (!householdId) {
+        alert("Geen huishouden gevonden");
+        return;
+      }
+
       if (!userId) {
         alert("Geen gebruiker gevonden");
         return;
@@ -77,6 +159,7 @@ export default function PreviewPage() {
           servings: Number(preview.servings) || 2,
           category: preview.category || "Diner",
           user_id: userId,
+          household_id: householdId,
         })
         .select()
         .single();
@@ -186,12 +269,29 @@ export default function PreviewPage() {
       <Header title="Recept preview" onBack={() => router.push("/")} />
       <main className="min-h-dvh bg-[var(--color-bg)] pt-20 pb-24 px-4">
         <div className="max-w-3xl mx-auto space-y-6">
+          <p className="text-sm text-gray-400 animate-pulse text-center">
+            AI genereert een recept...
+          </p>
           {/* Hero placeholder */}
           <div className="h-52 bg-gray-200 rounded-2xl" />
 
           {/* Titel + meta */}
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold">{formatTitle(preview.title)}</h1>
+            <h1
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={(e) => {
+                if (!preview) return;
+
+                setPreview({
+                  ...preview,
+                  title: e.currentTarget.innerText,
+                });
+              }}
+              className="text-3xl font-bold leading-tight outline-none"
+            >
+              {preview.title}
+            </h1>
 
             <div className="flex items-center gap-4 text-sm text-gray-600">
               <div className="flex items-center gap-1">
@@ -219,8 +319,24 @@ export default function PreviewPage() {
           <Card className="p-6 space-y-3">
             <h2 className="font-semibold">Ingrediënten</h2>
             <ul className="space-y-2 text-sm">
-              {preview.ingredients.map((item: string, i: number) => (
-                <li key={i}>• {item}</li>
+              {preview.ingredients.map((item, i) => (
+                <li key={i}>
+                  <input
+                    value={item}
+                    onChange={(e) => {
+                      if (!preview) return;
+
+                      const updated = [...preview.ingredients];
+                      updated[i] = e.target.value;
+
+                      setPreview({
+                        ...preview,
+                        ingredients: updated,
+                      });
+                    }}
+                    className="w-full text-sm bg-transparent outline-none focus:bg-gray-50 rounded"
+                  />
+                </li>
               ))}
             </ul>
           </Card>
@@ -229,11 +345,27 @@ export default function PreviewPage() {
           <Card className="p-6 space-y-3">
             <h2 className="font-semibold">Bereiding</h2>
             <ol className="space-y-3 text-sm">
-              {preview.steps.map((step: string, i: number) => (
-                <li key={i}>
-                  <span className="font-medium mr-2">{i + 1}.</span>
-                  {step}
-                </li>
+              {preview.steps.map((step, i) => (
+                <div key={i} className="flex gap-2">
+                  <span className="font-medium">{i + 1}.</span>
+
+                  <textarea
+                    value={step}
+                    onChange={(e) => {
+                      if (!preview) return;
+
+                      const updated = [...preview.steps];
+                      updated[i] = e.target.value;
+
+                      setPreview({
+                        ...preview,
+                        steps: updated,
+                      });
+                    }}
+                    className="w-full text-sm bg-transparent outline-none focus:bg-gray-50 rounded"
+                    rows={2}
+                  />
+                </div>
               ))}
             </ol>
           </Card>
@@ -285,7 +417,6 @@ export default function PreviewPage() {
           </div>
         </div>
       )}
-      ``
     </>
   );
 }
