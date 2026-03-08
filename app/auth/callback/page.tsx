@@ -9,7 +9,6 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const handleAuth = async () => {
-      // Laat Supabase de hash verwerken
       const { data } = await supabase.auth.getSession();
 
       if (!data.session) {
