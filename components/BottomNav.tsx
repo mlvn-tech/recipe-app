@@ -71,7 +71,7 @@ export default function BottomNav() {
               >
                 <div
                   className={clsx(
-                    "absolute flex flex-col gap-2 items-center w-36 z-[130] transition-all duration-200 ease-out",
+                    "absolute flex flex-col gap-2 items-center w-40 z-[130] transition-all duration-200 ease-out",
                     createMenuOpen
                       ? "opacity-100 translate-y-0 pointer-events-auto"
                       : "opacity-0 translate-y-4 pointer-events-none",
@@ -85,13 +85,16 @@ export default function BottomNav() {
                       setCreateMenuOpen(false);
                       router.push("/ai");
                     }}
-                    className="shadow-[0_8px_30px_rgba(0,0,0,0.12)] floating-blur bg-white/95 w-full px-4 py-4 rounded-full shadow text-sm font-medium flex items-center justify-center gap-2"
+                    className="shadow-[0_8px_30px_rgba(0,0,0,0.12)] floating-blur bg-white/95 w-full px-4 py-4 rounded-full text-sm font-medium flex items-center gap-3"
                   >
-                    <WandSparkles
-                      size={16}
-                      className="text-[var(--color-purple-400)]"
-                    />
-                    Koken met AI
+                    <span className="w-5 flex justify-center shrink-0">
+                      <WandSparkles
+                        size={16}
+                        className="text-[var(--color-purple-400)]"
+                      />
+                    </span>
+
+                    <span className="whitespace-nowrap">Koken met AI</span>
                   </button>
 
                   <button
@@ -99,13 +102,13 @@ export default function BottomNav() {
                       setCreateMenuOpen(false);
                       router.push("/new");
                     }}
-                    className="shadow-[0_8px_30px_rgba(0,0,0,0.12)] floating-blur bg-white/95 w-full px-4 py-4 rounded-full shadow text-sm font-medium flex items-center justify-center gap-2"
+                    className="shadow-[0_8px_30px_rgba(0,0,0,0.12)] floating-blur bg-white/95 w-full px-4 py-4 rounded-full text-sm font-medium flex items-center gap-3"
                   >
-                    <PenLine
-                      size={16}
-                      className="text-[var(--color-purple-400)]"
-                    />
-                    Zelf maken
+                    <span className="w-5 flex justify-center shrink-0">
+                      <PenLine size={16} className="text-gray-500" />
+                    </span>
+
+                    <span className="whitespace-nowrap">Zelf maken</span>
                   </button>
                 </div>
 

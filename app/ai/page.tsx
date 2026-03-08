@@ -71,11 +71,20 @@ export default function AIPage() {
         style={{ paddingTop: "var(--header-height)" }}
       >
         <div className="max-w-4xl mx-auto px-4 space-y-6 pt-4">
+          {/* AI illustratie */}
+          <div className="flex justify-center">
+            <img
+              src="/ai-cooking.png"
+              alt="AI cooking"
+              className="w-36 h-auto"
+            />
+          </div>
+
           <Card className="space-y-5">
             {/* Intro */}
             <div className="space-y-2 text-center mb-6">
               <h2 className="text-lg font-semibold">Wat heb je nog in huis?</h2>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-[var(--color-text-secondary)]">
                 Vul jouw ingrediënten in en wij doen de rest
               </p>
             </div>
@@ -163,7 +172,7 @@ export default function AIPage() {
               disabled={generating}
               className={clsx(
                 styles.button.primary,
-                "h-[58px] mt-6 relative flex items-center justify-center mx-auto transition-all duration-300",
+                "h-[58px] bg-purple-400 mt-6 relative flex items-center justify-center mx-auto transition-all duration-300",
                 generating ? "w-[58px] !px-0 bg-gray-200" : "w-full",
               )}
             >
