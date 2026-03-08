@@ -366,71 +366,73 @@ export default function RecipeDetail() {
           </>
         )}
       </main>
-
-      <SwipeableSheet
-        open={ingredientsOpen && showFloating}
-        onClose={() => setIngredientsOpen(false)}
-        title="Ingrediënten"
-        height="auto"
-        maxHeight="60dvh"
-        overflowVisible={false}
-        overlay={false}
-      >
-        <div
-          className="px-6 space-y-3 pt-2"
-          style={{
-            paddingBottom: "calc(5rem + env(safe-area-inset-bottom))",
-          }}
+      {recipe && (
+        <SwipeableSheet
+          open={ingredientsOpen && showFloating}
+          onClose={() => setIngredientsOpen(false)}
+          title="Ingrediënten"
+          height="auto"
+          maxHeight="60dvh"
+          overflowVisible={false}
+          overlay={false}
         >
-          <ul className="space-y-3">
-            {recipe.ingredients?.map((item: string, index: number) => {
-              const trimmed = item.trim();
-              const isTitle = trimmed.startsWith("#");
+          <div
+            className="px-6 space-y-3 pt-2"
+            style={{
+              paddingBottom: "calc(5rem + env(safe-area-inset-bottom))",
+            }}
+          >
+            <ul className="space-y-3">
+              {recipe.ingredients?.map((item: string, index: number) => {
+                const trimmed = item.trim();
+                const isTitle = trimmed.startsWith("#");
 
-              if (isTitle) {
+                if (isTitle) {
+                  return (
+                    <li
+                      key={index}
+                      className="pt-4 pb-1 font-semibold text-gray-900"
+                    >
+                      {trimmed.replace(/^#\s*/, "")}
+                    </li>
+                  );
+                }
+
                 return (
-                  <li
-                    key={index}
-                    className="pt-4 pb-1 font-semibold text-gray-900"
-                  >
-                    {trimmed.replace(/^#\s*/, "")}
+                  <li key={index} className="flex items-start gap-3">
+                    <span className="mt-2.5 h-1.5 w-1.5 rounded-full bg-gray-400 shrink-0" />
+                    <span>{trimmed.replace(/^-\s*/, "")}</span>
                   </li>
                 );
-              }
-
-              return (
-                <li key={index} className="flex items-start gap-3">
-                  <span className="mt-2.5 h-1.5 w-1.5 rounded-full bg-gray-400 shrink-0" />
-                  <span>{trimmed.replace(/^-\s*/, "")}</span>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      </SwipeableSheet>
-
-      <div
-        className={`fixed left-1/2 -translate-x-1/2 z-40 transition-all duration-300 ${
-          showFloating && !ingredientsOpen && !createMenuOpen
-            ? "opacity-100"
-            : "opacity-0 pointer-events-none"
-        }`}
-        style={{ bottom: "calc(5rem + env(safe-area-inset-bottom))" }}
-      >
-        <button
-          onClick={() => setIngredientsOpen(!ingredientsOpen)}
-          className={clsx(styles.button.floatingFrosted, "px-6 py-5")}
+              })}
+            </ul>
+          </div>
+        </SwipeableSheet>
+      )}
+      {recipe && (
+        <div
+          className={`fixed left-1/2 -translate-x-1/2 z-40 transition-all duration-300 ${
+            showFloating && !ingredientsOpen && !createMenuOpen
+              ? "opacity-100"
+              : "opacity-0 pointer-events-none"
+          }`}
+          style={{ bottom: "calc(5rem + env(safe-area-inset-bottom))" }}
         >
-          Ingrediënten
-          <Icon
-            icon={ChevronDownIcon}
-            size={16}
-            className={`text-gray-400 transition-transform duration-300 ${
-              ingredientsOpen ? "rotate-180" : ""
-            }`}
-          />
-        </button>
-      </div>
+          <button
+            onClick={() => setIngredientsOpen(!ingredientsOpen)}
+            className={clsx(styles.button.floatingFrosted, "px-6 py-5")}
+          >
+            Ingrediënten
+            <Icon
+              icon={ChevronDownIcon}
+              size={16}
+              className={`text-gray-400 transition-transform duration-300 ${
+                ingredientsOpen ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+        </div>
+      )}
     </>
   );
 }
