@@ -4,7 +4,11 @@ import { useState } from "react";
 import Header from "@/components/Header";
 import { styles } from "@/lib/styles";
 import clsx from "clsx";
-import { ArrowPathIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowPathIcon,
+  ChevronDownIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import Icon from "@/components/icons";
 import { useRouter } from "next/navigation";
 import Card from "@/components/Card";
@@ -62,7 +66,7 @@ export default function AIPage() {
 
   return (
     <>
-      <Header title="Koken met AI" />
+      <Header title="Koken met AI" showBack={false} />
 
       <main
         className="min-h-dvh bg-[var(--color-bg)]"

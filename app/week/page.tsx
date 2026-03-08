@@ -349,7 +349,7 @@ export default function WeekPage() {
       <Header title="Weekplanner" showBack={false} />
 
       <main
-        className="min-h-dvh bg-[var(--color-bg)] pb-24"
+        className="min-h-screen bg-[var(--color-bg)] pb-24"
         style={{
           paddingBottom: "calc(10rem + env(safe-area-inset-bottom))",
           paddingTop: "var(--header-height)",
@@ -363,7 +363,9 @@ export default function WeekPage() {
                   <h2 className="capitalize font-semibold text-lg">
                     {day.label}
                   </h2>
-                  <p className="text-sm text-gray-400">{day.shortDate}</p>
+                  <p className="text-sm text-[var(--color-text-secondary)]">
+                    {day.shortDate}
+                  </p>
                 </div>
                 <button
                   onClick={() => setActiveDay(index)}
@@ -376,7 +378,7 @@ export default function WeekPage() {
 
               {weekPlan[index].length === 0 ? (
                 <div className="text-sm text-gray-400">
-                  Nog geen recepten gepland.
+                  Nog geen recepten gepland
                 </div>
               ) : (
                 <div className="space-y-2">

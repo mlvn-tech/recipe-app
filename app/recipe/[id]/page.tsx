@@ -268,9 +268,9 @@ export default function RecipeDetail() {
                       <Icon
                         icon={ClockIcon}
                         size={18}
-                        className="text-[#6B7280]"
+                        className="text-[var(--color-text-secondary)]"
                       />
-                      <span>{recipe.cooking_time} min</span>
+                      <span>{recipe.cooking_time} min.</span>
                     </div>
                   )}
                   {recipe.servings && (
@@ -278,16 +278,13 @@ export default function RecipeDetail() {
                       <Icon
                         icon={UserIcon}
                         size={18}
-                        className="text-[#6B7280]"
+                        className="text-[var(--color-text-secondary)]"
                       />
-                      <span>
-                        {recipe.servings}{" "}
-                        {recipe.servings === 1 ? "persoon" : "personen"}
-                      </span>
+                      <span>{recipe.servings} pers.</span>
                     </div>
                   )}
                   {recipe.category && (
-                    <span className="px-3 py-1 border border-gray-300 rounded-lg capitalize">
+                    <span className="text-[var(--color-text-secondary)] px-3 py-1 border border-gray-300 rounded-lg capitalize">
                       {recipe.category}
                     </span>
                   )}

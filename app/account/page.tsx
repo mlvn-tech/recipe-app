@@ -122,13 +122,15 @@ export default function AccountPage() {
               <div className="space-y-2">
                 {user?.email ? (
                   <>
-                    <p className="text-sm text-gray-500">{user.email}</p>
+                    <p className="text-sm text-[var(--color-text-secondary)]">
+                      {user.email}
+                    </p>
 
                     <button
                       onClick={handleLogout}
-                      className="text-sm text-gray-500 underline"
+                      className="text-sm text-[var(--color-accent)]"
                     >
-                      Uitloggen
+                      Log uit
                     </button>
                   </>
                 ) : (
@@ -147,7 +149,7 @@ export default function AccountPage() {
                   <h2 className="text-lg font-semibold">
                     Samen recepten verzamelen?
                   </h2>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-[var(--color-text-secondary)] mt-1">
                     Laat iemand de QR-code scannen of verstuur een uitnodiging
                   </p>
                 </div>
@@ -183,7 +185,7 @@ export default function AccountPage() {
               <div className="space-y-4 text-center">
                 <h2 className="text-lg font-semibold">Nog geen huishouden</h2>
 
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-[var(--color-text-secondary)]">
                   Maak een huishouden aan om recepten te delen.
                 </p>
 

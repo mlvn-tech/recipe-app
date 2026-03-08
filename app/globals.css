@@ -4,7 +4,9 @@
   --background: #ffffff;
   --foreground: #171717;
   --header-height: calc(4rem + env(safe-area-inset-top));
+  --color-text-secondary: #6B7280;
 }
+
 
 @theme {
   --color-bg: #F8F8F8;

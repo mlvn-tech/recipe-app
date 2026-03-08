@@ -468,7 +468,7 @@ export default function Home() {
                           }`}
                         >
                           {recipe.cooking_time && (
-                            <div className="flex items-center gap-1">
+                            <div className="text-[var(--color-text-secondary)] flex items-center gap-1">
                               <Icon
                                 icon={ClockIcon}
                                 size={view === "grid" ? 14 : 16}
@@ -478,7 +478,7 @@ export default function Home() {
                           )}
 
                           {recipe.servings && (
-                            <div className="flex items-center gap-1">
+                            <div className="text-[var(--color-text-secondary)] flex items-center gap-1">
                               <Icon
                                 icon={UserIcon}
                                 size={view === "grid" ? 14 : 16}
@@ -488,7 +488,7 @@ export default function Home() {
                           )}
 
                           {view === "list" && recipe.category && (
-                            <div className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-lg">
+                            <div className="text-[var(--color-text-secondary)] inline-block px-2 py-1 text-xs border border-gray-200 rounded-lg">
                               {recipe.category}
                             </div>
                           )}
