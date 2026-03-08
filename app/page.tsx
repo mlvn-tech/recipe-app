@@ -338,10 +338,10 @@ export default function Home() {
               />
             </div>
 
-            <div className="flex bg-white/80 border border-gray-200 backdrop-blur-md rounded-full p-1">
+            <div className="flex items-center bg-white/80 border border-gray-200 backdrop-blur-md rounded-full p-1">
               <button
                 onClick={() => setView("list")}
-                className={`p-2 rounded-full transition ${
+                className={`w-9 h-9 flex items-center justify-center rounded-full transition ${
                   view === "list"
                     ? "bg-white shadow-sm text-gray-700"
                     : "text-gray-400"
@@ -352,7 +352,7 @@ export default function Home() {
 
               <button
                 onClick={() => setView("grid")}
-                className={`p-2 rounded-full transition ${
+                className={`w-9 h-9 flex items-center justify-center rounded-full transition ${
                   view === "grid"
                     ? "bg-white shadow-sm text-gray-700"
                     : "text-gray-400"
