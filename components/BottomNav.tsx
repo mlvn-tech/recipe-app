@@ -5,7 +5,15 @@ import { useEffect, useState } from "react";
 import { useUI } from "@/components/UIContext";
 import clsx from "clsx";
 
-import { Utensils, CalendarDays, PlusCircle, User } from "lucide-react";
+import {
+  Utensils,
+  CalendarDays,
+  PlusCircle,
+  User,
+  PenLine,
+  WandSparkles,
+} from "lucide-react";
+
 import Icon from "@/components/icons";
 
 export default function BottomNav() {
@@ -79,7 +87,11 @@ export default function BottomNav() {
                     }}
                     className="shadow-[0_8px_30px_rgba(0,0,0,0.12)] floating-blur bg-white/95 w-full px-4 py-4 rounded-full shadow text-sm font-medium flex items-center justify-center gap-2"
                   >
-                    ✨ Koken met AI
+                    <WandSparkles
+                      size={16}
+                      className="text-[var(--color-purple-400)]"
+                    />
+                    Koken met AI
                   </button>
 
                   <button
@@ -89,7 +101,11 @@ export default function BottomNav() {
                     }}
                     className="shadow-[0_8px_30px_rgba(0,0,0,0.12)] floating-blur bg-white/95 w-full px-4 py-4 rounded-full shadow text-sm font-medium flex items-center justify-center gap-2"
                   >
-                    ✍️ Zelf maken
+                    <PenLine
+                      size={16}
+                      className="text-[var(--color-purple-400)]"
+                    />
+                    Zelf maken
                   </button>
                 </div>
 

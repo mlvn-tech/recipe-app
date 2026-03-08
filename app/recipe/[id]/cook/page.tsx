@@ -6,7 +6,7 @@ import { useEffect, useState, useRef } from "react";
 import { supabase } from "../../../../lib/supabase";
 import { useParams, useRouter } from "next/navigation";
 
-import { List, Clock, X } from "lucide-react";
+import { List, Clock, X, AlarmClock } from "lucide-react";
 
 import Icon from "@/components/icons";
 import SwipeableSheet from "@/components/SwipeableSheet";
@@ -110,7 +110,13 @@ export default function CookMode() {
       toast.custom(
         (t) => (
           <div className="floating-blur flex items-center gap-4 bg-white/70 shadow-[0_8px_30px_rgba(0,0,0,0.12)] rounded-full text-sm font-semibold text-gray-500 whitespace-nowrap px-4 py-3 w-fit mx-auto">
-            <span className="pl-1">Timer klaar ⏰</span>
+            <span className="pl-1">
+              Timer klaar
+              <AlarmClock
+                size={16}
+                className="text-[var(--color-text-secondary)]"
+              />
+            </span>
 
             <button
               onClick={() => {
