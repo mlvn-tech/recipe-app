@@ -217,7 +217,7 @@ export default function RecipeDetail() {
 
       <main
         style={{ paddingTop: "calc(4rem + env(safe-area-inset-top))" }}
-        className="min-h-dvh bg-[var(--color-bg)] pb-32"
+        className="min-h-screen bg-[var(--color-bg)] pb-32"
       >
         {recipe.image_url && (
           <div className="relative w-full h-72">
