@@ -233,8 +233,6 @@ export default function RecipeDetail() {
                   alt={recipe.title}
                   className="w-full h-full object-cover"
                 />
-
-                {/* ❤️ FAVORITE BUTTON */}
                 <button
                   onClick={toggleFavorite}
                   className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-md rounded-full p-3 shadow-md"
