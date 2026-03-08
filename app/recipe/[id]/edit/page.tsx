@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import { supabase } from "../../../../lib/supabase";
 import { useParams, useRouter } from "next/navigation";
 import Header from "@/components/Header";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { ChevronDown } from "lucide-react";
 import Icon from "@/components/icons";
 import { toast } from "sonner";
 import Card from "@/components/Card";
@@ -374,7 +374,7 @@ export default function EditRecipe() {
                   </select>
 
                   <Icon
-                    icon={ChevronDownIcon}
+                    icon={ChevronDown}
                     size={20}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
                   />
@@ -406,7 +406,7 @@ export default function EditRecipe() {
                   </select>
 
                   <Icon
-                    icon={ChevronDownIcon}
+                    icon={ChevronDown}
                     size={20}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
                   />

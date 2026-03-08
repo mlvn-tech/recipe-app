@@ -5,13 +5,9 @@ import clsx from "clsx";
 import { useMemo, useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Card from "@/components/Card";
-import {
-  PlusIcon,
-  XMarkIcon,
-  ChevronDownIcon,
-  CheckIcon,
-  ShoppingBagIcon,
-} from "@heroicons/react/24/outline";
+
+import { Plus, X, ChevronDown, Check, ShoppingBag } from "lucide-react";
+
 import Icon from "@/components/icons";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
@@ -371,7 +367,7 @@ export default function WeekPage() {
                   onClick={() => setActiveDay(index)}
                   className="flex items-center gap-1 text-sm text-[var(--color-accent)]"
                 >
-                  <Icon icon={PlusIcon} size={18} />
+                  <Icon icon={Plus} size={18} />
                   Voeg toe
                 </button>
               </div>
@@ -408,7 +404,7 @@ export default function WeekPage() {
                         onClick={() => removeFromDay(index, recipe.id)}
                         className="text-gray-400 hover:text-red-500 shrink-0"
                       >
-                        <Icon icon={XMarkIcon} size={16} />
+                        <Icon icon={X} size={16} />
                       </button>
                     </div>
                   ))}
@@ -434,7 +430,7 @@ export default function WeekPage() {
           className={clsx(styles.button.floatingFrosted, "px-6 py-5")}
         >
           {weekLabel}
-          <Icon icon={ChevronDownIcon} size={20} className="text-gray-400" />
+          <Icon icon={ChevronDown} size={20} className="text-gray-400" />
         </button>
 
         <div className="relative">
@@ -445,7 +441,7 @@ export default function WeekPage() {
               "w-15 h-15 justify-center",
             )}
           >
-            <Icon icon={ShoppingBagIcon} size={24} className="text-gray-500" />
+            <Icon icon={ShoppingBag} size={24} className="text-gray-500" />
           </button>
           {shoppingCount > 0 && (
             <div className="absolute -top-1 -right-1 h-6 w-6 bg-[var(--color-brand)] rounded-full flex items-center justify-center">
@@ -604,7 +600,7 @@ export default function WeekPage() {
                     }`}
                   >
                     {isSelected && (
-                      <Icon icon={CheckIcon} size={16} className="text-white" />
+                      <Icon icon={Check} size={16} className="text-white" />
                     )}
                   </div>
                 </button>

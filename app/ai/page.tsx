@@ -4,11 +4,9 @@ import { useState } from "react";
 import Header from "@/components/Header";
 import { styles } from "@/lib/styles";
 import clsx from "clsx";
-import {
-  ArrowPathIcon,
-  ChevronDownIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+
+import { RefreshCw, ChevronDown } from "lucide-react";
+
 import Icon from "@/components/icons";
 import { useRouter } from "next/navigation";
 import Card from "@/components/Card";
@@ -121,7 +119,7 @@ export default function AIPage() {
                   </select>
 
                   <Icon
-                    icon={ChevronDownIcon}
+                    icon={ChevronDown}
                     size={20}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
                   />
@@ -151,7 +149,7 @@ export default function AIPage() {
                   </select>
 
                   <Icon
-                    icon={ChevronDownIcon}
+                    icon={ChevronDown}
                     size={20}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
                   />
@@ -172,7 +170,7 @@ export default function AIPage() {
               {!generating && <span className="absolute">Genereer recept</span>}
 
               {generating && (
-                <ArrowPathIcon className="w-6 h-6 animate-spin absolute text-gray-400" />
+                <RefreshCw className="w-6 h-6 animate-spin absolute text-gray-400" />
               )}
             </button>
           </Card>

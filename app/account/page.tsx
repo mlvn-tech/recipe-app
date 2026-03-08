@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { QRCodeCanvas } from "qrcode.react";
 import Header from "@/components/Header";
 import Card from "@/components/Card";
-import { ShareIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
+import { Share, Copy } from "lucide-react";
 
 export default function AccountPage() {
   const [user, setUser] = useState<any>(null);
@@ -163,7 +163,8 @@ export default function AccountPage() {
                     onClick={handleShare}
                     className="flex flex-col items-center text-gray-600 active:scale-95 transition"
                   >
-                    <ShareIcon className="w-6 h-6 mb-1" />
+                    <Share size={24} className="mb-1 text-gray-600" />
+
                     <span className="text-xs">Deel</span>
                   </button>
 
@@ -171,7 +172,8 @@ export default function AccountPage() {
                     onClick={handleCopy}
                     className="flex flex-col items-center text-gray-600 active:scale-95 transition"
                   >
-                    <ClipboardDocumentIcon className="w-6 h-6 mb-1" />
+                    <Copy size={24} className="mb-1 text-gray-600" />
+
                     <span className="text-xs">Kopieer</span>
                   </button>
                 </div>

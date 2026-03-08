@@ -1,4 +1,4 @@
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { Search } from "lucide-react";
 import Icon from "@/components/icons";
 
 type Props = {
@@ -18,7 +18,7 @@ export default function SearchInput({
     <div className="relative group w-full">
       <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
         <Icon
-          icon={MagnifyingGlassIcon}
+          icon={Search}
           size={22}
           className="text-gray-400 transition-colors duration-200 group-focus-within:text-gray-500"
         />

@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase";
 import Header from "@/components/Header";
 import Card from "@/components/Card";
 import { useRouter } from "next/navigation";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { ChevronDown } from "lucide-react";
 import Icon from "@/components/icons";
 import { toast } from "sonner";
 
@@ -170,7 +170,7 @@ export default function NewRecipe() {
 
       <main
         style={{ paddingTop: "var(--header-height)" }}
-        className="min-h-dvh bg-[var(--color-bg)] pb-32"
+        className="min-h-screen bg-[var(--color-bg)] pb-32"
       >
         <div className="px-4 max-w-4xl mx-auto space-y-4 pt-4">
           {/* Afbeelding */}
@@ -271,7 +271,7 @@ export default function NewRecipe() {
                   </select>
 
                   <Icon
-                    icon={ChevronDownIcon}
+                    icon={ChevronDown}
                     size={20}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
                   />
@@ -301,7 +301,7 @@ export default function NewRecipe() {
                   </select>
 
                   <Icon
-                    icon={ChevronDownIcon}
+                    icon={ChevronDown}
                     size={20}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
                   />

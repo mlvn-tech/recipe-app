@@ -4,11 +4,7 @@ import Header from "@/components/Header";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import {
-  ArrowPathIcon,
-  ClockIcon,
-  UserIcon,
-} from "@heroicons/react/24/outline";
+import { RefreshCw, Clock, User } from "lucide-react";
 import Icon from "@/components/icons";
 import Card from "@/components/Card";
 import { styles } from "@/lib/styles";
@@ -295,12 +291,12 @@ export default function PreviewPage() {
 
             <div className="flex items-center gap-4 text-sm text-gray-600">
               <div className="flex items-center gap-1">
-                <Icon icon={ClockIcon} size={16} />
+                <Icon icon={Clock} size={16} />
                 <span>{preview.cooking_time} min</span>
               </div>
 
               <div className="flex items-center gap-1">
-                <Icon icon={UserIcon} size={16} />
+                <Icon icon={User} size={16} />
                 <span>
                   {preview.servings}{" "}
                   {preview.servings === 1 ? "persoon" : "personen"}
@@ -378,7 +374,7 @@ export default function PreviewPage() {
               className="h-[58px] w-full border border-gray-300 rounded-full py-3 text-md font-semibold flex items-center justify-center"
             >
               {regenerating ? (
-                <Icon icon={ArrowPathIcon} size={18} className="animate-spin" />
+                <Icon icon={RefreshCw} size={18} className="animate-spin" />
               ) : attempt >= maxAttempts ? (
                 "Geen alternatieven meer"
               ) : (
@@ -406,7 +402,7 @@ export default function PreviewPage() {
 
           {/* Modal Card */}
           <div className="relative bg-white rounded-xl px-8 py-8 shadow-xl flex flex-col items-center gap-6 animate-fade-in">
-            <ArrowPathIcon className="w-6 h-6 animate-spin text-[var(--color-accent)]" />
+            <RefreshCw className="w-6 h-6 animate-spin text-[var(--color-accent)]" />
 
             <div className="text-center space-y-2">
               <p className="text-base font-semibold text-gray-900">

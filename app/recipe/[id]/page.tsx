@@ -5,18 +5,18 @@ import clsx from "clsx";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "../../../lib/supabase";
 import { useParams, useRouter } from "next/navigation";
+
 import {
-  UserIcon,
-  PencilSquareIcon,
-  ChevronDownIcon,
-  ClockIcon,
-  PlayCircleIcon,
-  ShareIcon,
-  HeartIcon as HeartOutline,
-} from "@heroicons/react/24/outline";
-import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
+  User,
+  PenSquare,
+  ChevronDown,
+  Clock,
+  Share,
+  Heart,
+  PlayCircle,
+} from "lucide-react";
+
 import Icon from "@/components/icons";
-import { CookingPot, PlayCircle, PlayIcon } from "lucide-react";
 import Header from "@/components/Header";
 import Card from "@/components/Card";
 import SwipeableSheet from "@/components/SwipeableSheet";
@@ -203,10 +203,10 @@ export default function RecipeDetail() {
         rightContent={
           <div className="flex items-center gap-6">
             <button onClick={handleShare}>
-              <Icon icon={ShareIcon} className="text-white/80" />
+              <Icon icon={Share} className="text-white/80" />
             </button>
             <button onClick={() => router.push(`/recipe/${recipe.id}/edit`)}>
-              <Icon icon={PencilSquareIcon} className="text-white/80" />
+              <Icon icon={PenSquare} className="text-white/80" />
             </button>
           </div>
         }
@@ -242,12 +242,8 @@ export default function RecipeDetail() {
                   }}
                 >
                   <Icon
-                    icon={isFavorite ? HeartSolid : HeartOutline}
-                    className={`${
-                      isFavorite
-                        ? "text-[var(--color-accent)]"
-                        : "text-[#6B7280]"
-                    } transition`}
+                    icon={Heart}
+                    className={`${isFavorite ? "text-[var(--color-accent)] fill-[var(--color-accent)]" : "text-[#6B7280]"} transition`}
                   />
                 </button>
               </div>
@@ -266,7 +262,7 @@ export default function RecipeDetail() {
                   {recipe.cooking_time && (
                     <div className="flex items-center gap-1">
                       <Icon
-                        icon={ClockIcon}
+                        icon={Clock}
                         size={18}
                         className="text-[var(--color-text-secondary)]"
                       />
@@ -276,7 +272,7 @@ export default function RecipeDetail() {
                   {recipe.servings && (
                     <div className="flex items-center gap-1">
                       <Icon
-                        icon={UserIcon}
+                        icon={User}
                         size={18}
                         className="text-[var(--color-text-secondary)]"
                       />
@@ -421,8 +417,8 @@ export default function RecipeDetail() {
           >
             Ingrediënten
             <Icon
-              icon={ChevronDownIcon}
-              size={16}
+              icon={ChevronDown}
+              size={20}
               className={`text-gray-400 transition-transform duration-300 ${
                 ingredientsOpen ? "rotate-180" : ""
               }`}

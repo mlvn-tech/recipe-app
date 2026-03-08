@@ -3,17 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "../lib/supabase";
-import {
-  ClockIcon,
-  UserIcon,
-  ArrowPathIcon,
-  ChevronDownIcon,
-  HeartIcon as HeartOutline,
-  Squares2X2Icon,
-  Bars3Icon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/24/outline";
-import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
+
+import { Clock, User, Heart, LayoutGrid, List, Search } from "lucide-react";
+
 import Icon from "@/components/icons";
 import Link from "next/link";
 import Card from "@/components/Card";
@@ -332,7 +324,7 @@ export default function Home() {
             <div className="relative group flex-1">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
                 <Icon
-                  icon={MagnifyingGlassIcon}
+                  icon={Search}
                   size={22}
                   className="text-gray-400 transition-colors duration-200 group-focus-within:text-gray-500"
                 />
@@ -355,7 +347,7 @@ export default function Home() {
                     : "text-gray-400"
                 }`}
               >
-                <Bars3Icon className="w-5 h-5" />
+                <List className="w-5 h-5" />
               </button>
 
               <button
@@ -366,7 +358,7 @@ export default function Home() {
                     : "text-gray-400"
                 }`}
               >
-                <Squares2X2Icon className="w-5 h-5" />
+                <LayoutGrid className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -437,10 +429,10 @@ export default function Home() {
                           className="absolute top-3 right-3 bg-white/80 backdrop-blur-md rounded-full p-2 shadow-sm"
                         >
                           <Icon
-                            icon={isFavorite ? HeartSolid : HeartOutline}
+                            icon={Heart}
                             className={
                               isFavorite
-                                ? "text-[var(--color-accent)]"
+                                ? "text-[var(--color-accent)] fill-[var(--color-accent)]"
                                 : "text-gray-500"
                             }
                           />
@@ -470,7 +462,7 @@ export default function Home() {
                           {recipe.cooking_time && (
                             <div className="text-[var(--color-text-secondary)] flex items-center gap-1">
                               <Icon
-                                icon={ClockIcon}
+                                icon={Clock}
                                 size={view === "grid" ? 14 : 16}
                               />
                               <span>{recipe.cooking_time} min.</span>
@@ -480,7 +472,7 @@ export default function Home() {
                           {recipe.servings && (
                             <div className="text-[var(--color-text-secondary)] flex items-center gap-1">
                               <Icon
-                                icon={UserIcon}
+                                icon={User}
                                 size={view === "grid" ? 14 : 16}
                               />
                               <span>{recipe.servings} pers.</span>

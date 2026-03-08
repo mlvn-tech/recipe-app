@@ -5,17 +5,7 @@ import { useEffect, useState } from "react";
 import { useUI } from "@/components/UIContext";
 import clsx from "clsx";
 
-import {
-  HomeIcon,
-  CalendarDaysIcon,
-  PlusCircleIcon,
-  UserIcon,
-} from "@heroicons/react/24/outline";
-import {
-  HomeIcon as HomeIconSolid,
-  CalendarDaysIcon as CalendarDaysIconSolid,
-  UserIcon as UserIconSolid,
-} from "@heroicons/react/24/solid";
+import { Utensils, CalendarDays, PlusCircle, User } from "lucide-react";
 import Icon from "@/components/icons";
 
 export default function BottomNav() {
@@ -26,29 +16,19 @@ export default function BottomNav() {
 
   const items = [
     {
-      label: "Home",
+      label: "Recepten",
       href: "/",
-      icon: HomeIcon,
-      iconActive: HomeIconSolid,
+      icon: Utensils,
+      iconActive: Utensils,
     },
     {
       label: "Week",
       href: "/week",
-      icon: CalendarDaysIcon,
-      iconActive: CalendarDaysIconSolid,
+      icon: CalendarDays,
+      iconActive: CalendarDays,
     },
-    {
-      label: "Nieuw",
-      href: "/new",
-      icon: PlusCircleIcon,
-      iconActive: PlusCircleIcon,
-    },
-    {
-      label: "Account",
-      href: "/account",
-      icon: UserIcon,
-      iconActive: UserIconSolid,
-    },
+    { label: "Nieuw", href: "/new", icon: PlusCircle, iconActive: PlusCircle },
+    { label: "Account", href: "/account", icon: User, iconActive: User },
   ];
 
   return (
@@ -67,6 +47,7 @@ export default function BottomNav() {
                 pathname === "/recipe/preview"
               : !createMenuOpen &&
                 (pathname === item.href ||
+                  (item.href === "/" && pathname.startsWith("/recipe")) ||
                   (item.href === "/week" && pathname.startsWith("/shopping")));
 
           const isRotated = item.label === "Nieuw" && createMenuOpen;
@@ -129,6 +110,7 @@ export default function BottomNav() {
                     <Icon
                       icon={IconComponent}
                       size={24}
+                      strokeWidth={2}
                       className={`transition-colors duration-200 ${
                         isActive
                           ? "text-[var(--color-accent)]"
@@ -169,10 +151,12 @@ export default function BottomNav() {
               <Icon
                 icon={IconComponent}
                 size={24}
-                className={`transition-colors ${
+                strokeWidth={2}
+                className={`transition-colors duration-200 ${
                   isActive ? "text-[var(--color-accent)]" : "text-gray-500"
                 }`}
               />
+
               <span
                 className={`text-xs mt-1 transition-colors ${
                   isActive ? "text-[var(--color-accent)]" : "text-gray-500"

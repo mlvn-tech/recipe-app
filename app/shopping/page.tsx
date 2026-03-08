@@ -6,12 +6,9 @@ import { Suspense, useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import Header from "@/components/Header";
 import Card from "@/components/Card";
-import {
-  PlusIcon,
-  TrashIcon,
-  CheckIcon,
-  ArrowPathIcon,
-} from "@heroicons/react/24/outline";
+
+import { Plus, Trash2, Check, RefreshCw } from "lucide-react";
+
 import Icon from "@/components/icons";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -111,7 +108,7 @@ function SwipeableItem({
         }}
       >
         {progress > 0.5 && (
-          <Icon icon={TrashIcon} size={16} className="text-white shrink-0" />
+          <Icon icon={Trash2} size={16} className="text-white shrink-0" />
         )}
       </div>
 
@@ -365,7 +362,7 @@ function ShoppingPageContent() {
                   className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-600 active:scale-95 transition shadow-sm"
                 >
                   <Icon
-                    icon={ArrowPathIcon}
+                    icon={RefreshCw}
                     size={16}
                     className={`text-gray-400 ${loadingWeek ? "animate-spin" : ""}`}
                   />
@@ -402,7 +399,7 @@ function ShoppingPageContent() {
                     className="h-5 w-5 shrink-0 flex items-center justify-center"
                   >
                     <Icon
-                      icon={PlusIcon}
+                      icon={Plus}
                       size={16}
                       className="text-gray-400 hover:text-gray-500 transition"
                     />
@@ -441,7 +438,7 @@ function ShoppingPageContent() {
                               >
                                 {isJustChecked && (
                                   <Icon
-                                    icon={CheckIcon}
+                                    icon={Check}
                                     size={12}
                                     className="text-white"
                                   />
@@ -508,7 +505,7 @@ function ShoppingPageContent() {
                                   className="h-5 w-5 rounded-md border-2 border-[var(--color-accent)] bg-[var(--color-accent)] flex items-center justify-center shrink-0 transition"
                                 >
                                   <Icon
-                                    icon={CheckIcon}
+                                    icon={Check}
                                     size={12}
                                     className="text-white"
                                   />

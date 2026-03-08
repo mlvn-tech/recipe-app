@@ -5,11 +5,9 @@ import clsx from "clsx";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "../../../../lib/supabase";
 import { useParams, useRouter } from "next/navigation";
-import {
-  ListBulletIcon,
-  ClockIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+
+import { List, Clock, X } from "lucide-react";
+
 import Icon from "@/components/icons";
 import SwipeableSheet from "@/components/SwipeableSheet";
 import { toast } from "sonner";
@@ -212,7 +210,7 @@ export default function CookMode() {
             onClick={() => router.push(`/recipe/${id}`)}
             className="flex items-center justify-center text-gray-500 hover:text-gray-700 transition"
           >
-            <XMarkIcon className="w-6 h-6" />
+            <X className="w-6 h-6" />
           </button>
 
           {/* Center – Title */}
@@ -226,7 +224,7 @@ export default function CookMode() {
               onClick={() => setIngredientsOpen(true)}
               className="flex items-center justify-center text-gray-500 hover:text-[var(--color-accent)] transition"
             >
-              <ListBulletIcon className="w-6 h-6" />
+              <List className="w-6 h-6" />
             </button>
 
             <button
@@ -245,7 +243,7 @@ export default function CookMode() {
               }}
               className="flex items-center text-gray-500 hover:text-[var(--color-accent)] transition"
             >
-              <ClockIcon
+              <Clock
                 className={clsx(
                   "w-6 h-6 transition-colors duration-200",
                   timerSeconds !== null

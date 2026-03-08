@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { ReactNode } from "react";
-import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { ChevronLeft, X } from "lucide-react";
 import Icon from "@/components/icons";
 
 type HeaderProps = {
@@ -45,13 +45,13 @@ export default function Header({
         <div className="w-8 flex justify-start">
           {showBack && !showClose && (
             <button onClick={handleBack}>
-              <Icon icon={ChevronLeftIcon} className="text-white/80" />
+              <Icon icon={ChevronLeft} className="text-white/80" />
             </button>
           )}
 
           {showClose && (
             <button onClick={handleBack}>
-              <Icon icon={XMarkIcon} className="text-white/80" />
+              <Icon icon={X} className="text-white/80" />
             </button>
           )}
         </div>
@@ -59,7 +59,7 @@ export default function Header({
         {/* Center */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
           {title && (
-            <h2 className="text-base font-semibold leading-tight truncate max-w-[200px] !text-white">
+            <h2 className="text-base font-semibold leading-tight truncate max-w-[190px] !text-white">
               {title}
             </h2>
           )}
