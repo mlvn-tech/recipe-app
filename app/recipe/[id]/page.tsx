@@ -186,17 +186,14 @@ export default function RecipeDetail() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [recipe]);
 
-  if (loading) return <p className="p-8">Laden...</p>;
-  if (!recipe) return <p className="p-8">Recept niet gevonden.</p>;
-
-  const formattedDate = new Date(recipe.created_at).toLocaleDateString(
-    "nl-NL",
-    {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    },
-  );
+  // Nieuw:
+  const formattedDate = recipe
+    ? new Date(recipe.created_at).toLocaleDateString("nl-NL", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : "";
 
   return (
     <>
@@ -219,133 +216,157 @@ export default function RecipeDetail() {
         style={{ paddingTop: "calc(4rem + env(safe-area-inset-top))" }}
         className="min-h-screen bg-[var(--color-bg)] pb-32"
       >
-        {recipe.image_url && (
-          <div className="relative w-full h-72">
-            <img
-              src={recipe.image_url}
-              alt={recipe.title}
-              className="w-full h-full object-cover"
-            />
-
-            {/* ❤️ FAVORITE BUTTON */}
-            <button
-              onClick={toggleFavorite}
-              className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-md rounded-full p-3 shadow-md"
-              style={{
-                transform: animating ? "scale(1.1)" : "scale(1)",
-                transition: "transform 0.18s ease-out",
-              }}
-            >
-              <Icon
-                icon={isFavorite ? HeartSolid : HeartOutline}
-                className={`${
-                  isFavorite ? "text-[var(--color-accent)]" : "text-[#6B7280]"
-                } transition`}
-              />
-            </button>
+        {loading ? (
+          <div className="px-4 pt-4 space-y-4">
+            <div className="h-72 bg-gray-200 animate-pulse" />
+            <div className="h-8 bg-gray-200 rounded animate-pulse w-2/3" />
+            <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2" />
           </div>
-        )}
+        ) : !recipe ? (
+          <p className="p-8">Recept niet gevonden.</p>
+        ) : (
+          <>
+            {recipe.image_url && (
+              <div className="relative w-full h-72">
+                <img
+                  src={recipe.image_url}
+                  alt={recipe.title}
+                  className="w-full h-full object-cover"
+                />
 
-        <div className="px-4 pt-4 pb-16 space-y-4 rounded-xl">
-          <div>
-            <p className="text-xs text-[#6B7280] tracking-wide py-2">
-              Toegevoegd op {formattedDate}
-            </p>
-            <h1 ref={titleRef} className="text-3xl font-bold">
-              {formatTitle(recipe.title)}
-            </h1>
-
-            <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-[#6B7280]">
-              {recipe.cooking_time && (
-                <div className="flex items-center gap-1">
-                  <Icon icon={ClockIcon} size={18} className="text-[#6B7280]" />
-                  <span>{recipe.cooking_time} min</span>
-                </div>
-              )}
-              {recipe.servings && (
-                <div className="flex items-center gap-1">
-                  <Icon icon={UserIcon} size={18} className="text-[#6B7280]" />
-                  <span>
-                    {recipe.servings}{" "}
-                    {recipe.servings === 1 ? "persoon" : "personen"}
-                  </span>
-                </div>
-              )}
-              {recipe.category && (
-                <span className="px-3 py-1 border border-gray-300 rounded-lg capitalize">
-                  {recipe.category}
-                </span>
-              )}
-            </div>
-          </div>
-
-          <Card>
-            <h2 className="font-semibold mb-4 text-lg">Ingrediënten</h2>
-            <ul className="space-y-3">
-              {recipe.ingredients?.map((item: string, index: number) => {
-                const trimmed = item.trim();
-                const isTitle = trimmed.startsWith("#");
-
-                if (isTitle) {
-                  return (
-                    <li key={index} className="pt-2">
-                      {index !== 0 && (
-                        <div className="border-t border-gray-100 mb-4" />
-                      )}
-                      <h3 className="font-semibold text-[#6B7280] tracking-tight">
-                        {trimmed.replace(/^#\s*/, "")}
-                      </h3>
-                    </li>
-                  );
-                }
-
-                return (
-                  <li key={index} className="flex items-start gap-3">
-                    <span className="mt-2.5 h-1 w-1 rounded-full bg-gray-400 shrink-0" />
-                    <span>{trimmed.replace(/^-\s*/, "")}</span>
-                  </li>
-                );
-              })}
-            </ul>
-            <div ref={ingredientsEndRef} className="h-1" />
-          </Card>
-
-          <Card>
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-lg leading-none">Bereiding</h2>
-              <button
-                onClick={() => router.push(`/recipe/${recipe.id}/cook`)}
-                className="flex items-center gap-2 text-sm text-[var(--color-accent)] font-medium"
-              >
-                <PlayCircle size={22} />
-                Start met koken
-              </button>
-            </div>
-
-            <ol className="space-y-0">
-              {recipe.steps?.map((step: string, index: number) => (
-                <li
-                  key={index}
-                  className="flex gap-1 py-4 border-b border-gray-100 last:border-none"
+                {/* ❤️ FAVORITE BUTTON */}
+                <button
+                  onClick={toggleFavorite}
+                  className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-md rounded-full p-3 shadow-md"
+                  style={{
+                    transform: animating ? "scale(1.1)" : "scale(1)",
+                    transition: "transform 0.18s ease-out",
+                  }}
                 >
-                  <span className="text-gray-400 font-semibold min-w-[24px]">
-                    {index + 1}.
-                  </span>
-                  <span>{step}</span>
-                </li>
-              ))}
-            </ol>
-          </Card>
+                  <Icon
+                    icon={isFavorite ? HeartSolid : HeartOutline}
+                    className={`${
+                      isFavorite
+                        ? "text-[var(--color-accent)]"
+                        : "text-[#6B7280]"
+                    } transition`}
+                  />
+                </button>
+              </div>
+            )}
 
-          {recipe.notes && (
-            <Card>
-              <h2 className="font-semibold mb-4 text-lg min-h-[30px]">
-                Notities
-              </h2>
-              <p className="whitespace-pre-line">{recipe.notes}</p>
-            </Card>
-          )}
-        </div>
+            <div className="px-4 pt-4 pb-16 space-y-4 rounded-xl">
+              <div>
+                <p className="text-xs text-[#6B7280] tracking-wide py-2">
+                  Toegevoegd op {formattedDate}
+                </p>
+                <h1 ref={titleRef} className="text-3xl font-bold">
+                  {formatTitle(recipe.title)}
+                </h1>
+
+                <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-[#6B7280]">
+                  {recipe.cooking_time && (
+                    <div className="flex items-center gap-1">
+                      <Icon
+                        icon={ClockIcon}
+                        size={18}
+                        className="text-[#6B7280]"
+                      />
+                      <span>{recipe.cooking_time} min</span>
+                    </div>
+                  )}
+                  {recipe.servings && (
+                    <div className="flex items-center gap-1">
+                      <Icon
+                        icon={UserIcon}
+                        size={18}
+                        className="text-[#6B7280]"
+                      />
+                      <span>
+                        {recipe.servings}{" "}
+                        {recipe.servings === 1 ? "persoon" : "personen"}
+                      </span>
+                    </div>
+                  )}
+                  {recipe.category && (
+                    <span className="px-3 py-1 border border-gray-300 rounded-lg capitalize">
+                      {recipe.category}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <Card>
+                <h2 className="font-semibold mb-4 text-lg">Ingrediënten</h2>
+                <ul className="space-y-3">
+                  {recipe.ingredients?.map((item: string, index: number) => {
+                    const trimmed = item.trim();
+                    const isTitle = trimmed.startsWith("#");
+
+                    if (isTitle) {
+                      return (
+                        <li key={index} className="pt-2">
+                          {index !== 0 && (
+                            <div className="border-t border-gray-100 mb-4" />
+                          )}
+                          <h3 className="font-semibold text-[#6B7280] tracking-tight">
+                            {trimmed.replace(/^#\s*/, "")}
+                          </h3>
+                        </li>
+                      );
+                    }
+
+                    return (
+                      <li key={index} className="flex items-start gap-3">
+                        <span className="mt-2.5 h-1 w-1 rounded-full bg-gray-400 shrink-0" />
+                        <span>{trimmed.replace(/^-\s*/, "")}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <div ref={ingredientsEndRef} className="h-1" />
+              </Card>
+
+              <Card>
+                <div className="flex items-center justify-between">
+                  <h2 className="font-semibold text-lg leading-none">
+                    Bereiding
+                  </h2>
+                  <button
+                    onClick={() => router.push(`/recipe/${recipe.id}/cook`)}
+                    className="flex items-center gap-2 text-sm text-[var(--color-accent)] font-medium"
+                  >
+                    <PlayCircle size={22} />
+                    Start met koken
+                  </button>
+                </div>
+
+                <ol className="space-y-0">
+                  {recipe.steps?.map((step: string, index: number) => (
+                    <li
+                      key={index}
+                      className="flex gap-1 py-4 border-b border-gray-100 last:border-none"
+                    >
+                      <span className="text-gray-400 font-semibold min-w-[24px]">
+                        {index + 1}.
+                      </span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </Card>
+
+              {recipe.notes && (
+                <Card>
+                  <h2 className="font-semibold mb-4 text-lg min-h-[30px]">
+                    Notities
+                  </h2>
+                  <p className="whitespace-pre-line">{recipe.notes}</p>
+                </Card>
+              )}
+            </div>
+          </>
+        )}
       </main>
 
       <SwipeableSheet
