@@ -348,180 +348,187 @@ function ShoppingPageContent() {
       />
 
       <main
-        style={{
-          paddingTop: "var(--header-height)",
-        }}
+        style={{ paddingTop: "var(--header-height)" }}
         className="min-h-screen bg-[var(--color-bg)] pb-24"
       >
         <div className="px-4 max-w-4xl mx-auto space-y-4 pt-4">
-          {weekStart && (
-            <button
-              onClick={loadFromWeek}
-              disabled={loadingWeek}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-600 active:scale-95 transition shadow-sm"
-            >
-              <Icon
-                icon={ArrowPathIcon}
-                size={16}
-                className={`text-gray-400 ${loadingWeek ? "animate-spin" : ""}`}
-              />
-              {loadingWeek
-                ? "Laden..."
-                : "Laad ingrediënten vanuit weekplanner"}
-            </button>
-          )}
-
-          <Card className="p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-gray-800">Te kopen</h3>
-              {items.length > 0 && (
+          {loading ? (
+            <div className="bg-white rounded-xl p-5 animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-1/3 mb-4" />
+              <div className="h-4 bg-gray-200 rounded w-2/3 mb-3" />
+              <div className="h-4 bg-gray-200 rounded w-1/2" />
+            </div>
+          ) : (
+            <>
+              {weekStart && (
                 <button
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        "Weet je zeker dat je alle boodschappen wilt verwijderen?",
-                      )
-                    ) {
-                      clearAll();
-                    }
-                  }}
-                  className="text-xs text-red-400 hover:text-red-500 transition"
+                  onClick={loadFromWeek}
+                  disabled={loadingWeek}
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-600 active:scale-95 transition shadow-sm"
                 >
-                  Verwijder alles
+                  <Icon
+                    icon={ArrowPathIcon}
+                    size={16}
+                    className={`text-gray-400 ${loadingWeek ? "animate-spin" : ""}`}
+                  />
+                  {loadingWeek
+                    ? "Laden..."
+                    : "Laad ingrediënten vanuit weekplanner"}
                 </button>
               )}
-            </div>
 
-            {/* Toevoeg-rij */}
-            <li className="flex items-center gap-3 pb-4 mb-4 border-b border-gray-100 list-none">
-              <button
-                onClick={addItem}
-                className="h-5 w-5 shrink-0 flex items-center justify-center"
-              >
-                <Icon
-                  icon={PlusIcon}
-                  size={16}
-                  className="text-gray-400 hover:text-gray-500 transition"
-                />
-              </button>
-              <input
-                type="text"
-                placeholder="Voeg item toe..."
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addItem()}
-                onBlur={() => addItem()}
-                inputMode="text"
-                enterKeyHint="done"
-                className="flex-1 text-sm bg-transparent focus:outline-none placeholder:text-gray-400 min-w-0"
-              />
-            </li>
-
-            {/* Boodschappen lijst */}
-            <ul>
-              {visibleUnchecked.map((item) => {
-                const isJustChecked = justChecked.has(item.id);
-                return (
-                  <AnimatedItem
-                    key={item.id}
-                    visible={!removingIds.has(item.id)}
-                  >
-                    <li className="pb-4">
-                      <SwipeableItem onDelete={() => deleteItem(item.id)}>
-                        <div className="relative flex items-center gap-3 py-1">
-                          <button
-                            onClick={() => toggleChecked(item)}
-                            className={`h-5 w-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-200 ${
-                              isJustChecked
-                                ? "border-[var(--color-accent)] bg-[var(--color-accent)]"
-                                : "border-gray-300"
-                            }`}
-                          >
-                            {isJustChecked && (
-                              <Icon
-                                icon={CheckIcon}
-                                size={12}
-                                className="text-white"
-                              />
-                            )}
-                          </button>
-
-                          <textarea
-                            value={item.name}
-                            onChange={(e) => updateName(item, e.target.value)}
-                            rows={1}
-                            className={`flex-1 text-sm bg-transparent border-b border-transparent focus:outline-none transition-all duration-200 resize-none overflow-hidden min-w-0 ${
-                              isJustChecked ? "text-gray-400 line-through" : ""
-                            }`}
-                            onInput={(e) => {
-                              const el = e.target as HTMLTextAreaElement;
-                              el.style.height = "auto";
-                              el.style.height = el.scrollHeight + "px";
-                            }}
-                          />
-                        </div>
-                      </SwipeableItem>
-                    </li>
-                  </AnimatedItem>
-                );
-              })}
-            </ul>
-
-            {/* Afgevinkte items */}
-            {checkedItems.length > 0 && (
-              <>
-                <div className="flex items-center justify-between mt-2 mb-4 pt-6 border-t border-gray-100">
-                  <p className="text-sm text-gray-400 font-semibold">
-                    Afgevinkte boodschappen
-                  </p>
-                  <button
-                    onClick={() => {
-                      if (
-                        window.confirm(
-                          "Weet je zeker dat je alle afgevinkte boodschappen wilt verwijderen?",
-                        )
-                      ) {
-                        clearChecked();
-                      }
-                    }}
-                    className="text-xs text-red-400 hover:text-red-500 transition"
-                  >
-                    Verwijder alles
-                  </button>
+              <Card className="p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-gray-800">Te kopen</h3>
+                  {items.length > 0 && (
+                    <button
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            "Weet je zeker dat je alle boodschappen wilt verwijderen?",
+                          )
+                        ) {
+                          clearAll();
+                        }
+                      }}
+                      className="text-xs text-red-400 hover:text-red-500 transition"
+                    >
+                      Verwijder alles
+                    </button>
+                  )}
                 </div>
 
-                <ul>
-                  {checkedItems.map((item) => (
-                    <AnimatedItem
-                      key={item.id}
-                      visible={!removingIds.has(item.id)}
-                    >
-                      <li className="pb-4">
-                        <SwipeableItem onDelete={() => deleteItem(item.id)}>
-                          <div className="flex items-center gap-3 py-1">
-                            <button
-                              onClick={() => toggleChecked(item)}
-                              className="h-5 w-5 rounded-md border-2 border-[var(--color-accent)] bg-[var(--color-accent)] flex items-center justify-center shrink-0 transition"
-                            >
-                              <Icon
-                                icon={CheckIcon}
-                                size={12}
-                                className="text-white"
-                              />
-                            </button>
+                <li className="flex items-center gap-3 pb-4 mb-4 border-b border-gray-100 list-none">
+                  <button
+                    onClick={addItem}
+                    className="h-5 w-5 shrink-0 flex items-center justify-center"
+                  >
+                    <Icon
+                      icon={PlusIcon}
+                      size={16}
+                      className="text-gray-400 hover:text-gray-500 transition"
+                    />
+                  </button>
+                  <input
+                    type="text"
+                    placeholder="Voeg item toe..."
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && addItem()}
+                    onBlur={() => addItem()}
+                    inputMode="text"
+                    enterKeyHint="done"
+                    className="flex-1 text-sm bg-transparent focus:outline-none placeholder:text-gray-400 min-w-0"
+                  />
+                </li>
 
-                            <span className="flex-1 text-sm text-gray-400 line-through">
-                              {item.name}
-                            </span>
-                          </div>
-                        </SwipeableItem>
-                      </li>
-                    </AnimatedItem>
-                  ))}
+                <ul>
+                  {visibleUnchecked.map((item) => {
+                    const isJustChecked = justChecked.has(item.id);
+                    return (
+                      <AnimatedItem
+                        key={item.id}
+                        visible={!removingIds.has(item.id)}
+                      >
+                        <li className="pb-4">
+                          <SwipeableItem onDelete={() => deleteItem(item.id)}>
+                            <div className="relative flex items-center gap-3 py-1">
+                              <button
+                                onClick={() => toggleChecked(item)}
+                                className={`h-5 w-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-200 ${
+                                  isJustChecked
+                                    ? "border-[var(--color-accent)] bg-[var(--color-accent)]"
+                                    : "border-gray-300"
+                                }`}
+                              >
+                                {isJustChecked && (
+                                  <Icon
+                                    icon={CheckIcon}
+                                    size={12}
+                                    className="text-white"
+                                  />
+                                )}
+                              </button>
+                              <textarea
+                                value={item.name}
+                                onChange={(e) =>
+                                  updateName(item, e.target.value)
+                                }
+                                rows={1}
+                                className={`flex-1 text-sm bg-transparent border-b border-transparent focus:outline-none transition-all duration-200 resize-none overflow-hidden min-w-0 ${
+                                  isJustChecked
+                                    ? "text-gray-400 line-through"
+                                    : ""
+                                }`}
+                                onInput={(e) => {
+                                  const el = e.target as HTMLTextAreaElement;
+                                  el.style.height = "auto";
+                                  el.style.height = el.scrollHeight + "px";
+                                }}
+                              />
+                            </div>
+                          </SwipeableItem>
+                        </li>
+                      </AnimatedItem>
+                    );
+                  })}
                 </ul>
-              </>
-            )}
-          </Card>
+
+                {checkedItems.length > 0 && (
+                  <>
+                    <div className="flex items-center justify-between mt-2 mb-4 pt-6 border-t border-gray-100">
+                      <p className="text-sm text-gray-400 font-semibold">
+                        Afgevinkte boodschappen
+                      </p>
+                      <button
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              "Weet je zeker dat je alle afgevinkte boodschappen wilt verwijderen?",
+                            )
+                          ) {
+                            clearChecked();
+                          }
+                        }}
+                        className="text-xs text-red-400 hover:text-red-500 transition"
+                      >
+                        Verwijder alles
+                      </button>
+                    </div>
+
+                    <ul>
+                      {checkedItems.map((item) => (
+                        <AnimatedItem
+                          key={item.id}
+                          visible={!removingIds.has(item.id)}
+                        >
+                          <li className="pb-4">
+                            <SwipeableItem onDelete={() => deleteItem(item.id)}>
+                              <div className="flex items-center gap-3 py-1">
+                                <button
+                                  onClick={() => toggleChecked(item)}
+                                  className="h-5 w-5 rounded-md border-2 border-[var(--color-accent)] bg-[var(--color-accent)] flex items-center justify-center shrink-0 transition"
+                                >
+                                  <Icon
+                                    icon={CheckIcon}
+                                    size={12}
+                                    className="text-white"
+                                  />
+                                </button>
+                                <span className="flex-1 text-sm text-gray-400 line-through">
+                                  {item.name}
+                                </span>
+                              </div>
+                            </SwipeableItem>
+                          </li>
+                        </AnimatedItem>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </Card>
+            </>
+          )}
         </div>
       </main>
     </>
