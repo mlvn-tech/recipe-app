@@ -56,11 +56,13 @@ export default function LoginPage() {
         <Card className="p-5">
           <div className="flex flex-col gap-4">
             <h1 className="text-lg font-semibold text-center">Inloggen</h1>
-            <p className="text-sm text-center text-[var(--color-text-secondary)]">
-              Vul het e-mailadres in waar we de inlogcode naartoe mogen sturen
-            </p>
+
             {!sent ? (
               <>
+                <p className="text-sm text-center text-[var(--color-text-secondary)]">
+                  Vul het e-mailadres in waar we de inlogcode naartoe mogen
+                  sturen
+                </p>
                 <input
                   type="email"
                   placeholder="E-mailadres"
@@ -78,11 +80,14 @@ export default function LoginPage() {
               </>
             ) : (
               <>
-                <p className="text-sm text-center text-[var(--color-text-secondary)]">
-                  Vul de 6-cijferige code in die we naar{" "}
+                <p className="text-sm text-center text-gray-500">
+                  Vul de 6-cijferige code in die we naar
+                  <br />
                   <strong>{email}</strong>
+                  <br />
                   hebben gestuurd
                 </p>
+
                 <input
                   type="text"
                   inputMode="numeric"
