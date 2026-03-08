@@ -12,9 +12,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     pathname.startsWith("/recipe/share");
 
   return (
-    <div className="min-h-[100svh]">
+    <>
       {children}
       {!hideNav && <BottomNav />}
-    </div>
+    </>
   );
 }
