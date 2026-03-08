@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "../lib/supabase";
 import {
   ClockIcon,
@@ -52,6 +52,9 @@ export default function Home() {
 
   const [favorites, setFavorites] = useState<string[]>([]);
   const [animatingId, setAnimatingId] = useState<string | null>(null);
+
+  const [isSticky, setIsSticky] = useState(false);
+  const stickyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (generating) {
@@ -248,6 +251,16 @@ export default function Home() {
     }) ?? [];
 
   useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsSticky(!entry.isIntersecting),
+      { threshold: 0 },
+    );
+
+    if (stickyRef.current) observer.observe(stickyRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
     if (recipes !== null && filteredRecipes.length === 0) {
       setHighlightCreate(true);
 
@@ -307,8 +320,12 @@ export default function Home() {
         </div>
 
         {/* 🔹 Sticky search + toggle */}
+        <div ref={stickyRef} className="h-0" />
+
         <div
-          className="sticky z-40 bg-[var(--color-bg)]/80 backdrop-blur-md pt-4"
+          className={`sticky z-40 bg-[var(--color-bg)] transition-shadow duration-200 pt-4 ${
+            isSticky ? "shadow-[0_1px_0_0_#e5e7eb]" : ""
+          }`}
           style={{ top: "var(--header-height)" }}
         >
           <div className="px-4 max-w-4xl mx-auto flex gap-3 pb-4">
@@ -325,7 +342,7 @@ export default function Home() {
                 placeholder="Wat gaan we eten?"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-full bg-white/80 border border-gray-200 backdrop-blur-md p-3 pl-12 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-gray-300 transition"
+                className="w-full rounded-full bg-white/80 border border-gray-200 backdrop-blur-md p-3 pl-12 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-gray-300transition"
               />
             </div>
 

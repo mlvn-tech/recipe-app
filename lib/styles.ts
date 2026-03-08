@@ -6,7 +6,7 @@ export const styles = {
     danger: "text-gray-300 hover:text-red-400 transition",
     floating: "bg-white border border-gray-200 shadow-md rounded-full active:scale-95 transition",
     floatingFrosted: "floating-blur flex items-center gap-2 bg-white/70 shadow-[0_8px_30px_rgba(0,0,0,0.12)] rounded-full text-sm font-semibold text-gray-500 whitespace-nowrap active:scale-95 transition",
-    save: "bg-[var(--color-accent)]/95 border border-[var(--color-accent)]/95 text-white px-8 py-4 rounded-full shadow-lg text-md font-semibold active:scale-95 transition",
+    save: "bg-[var(--color-accent)]/95 border border-[var(--color-accent)]/95 text-white px-8 py-4 rounded-full text-md font-semibold active:scale-95 transition",
     delete: "w-full border-2 border-red-300 bg-red-50 text-red-500 py-4 rounded-full text-md font-semibold",
 
   },

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter, useSearchParams } from "next/navigation";
+import { styles } from "@/lib/styles";
+import Card from "@/components/Card";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -33,32 +35,36 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6">
+    <main className="min-h-screen flex items-center justify-center px-6 min-h-dvh bg-[var(--color-bg)] pb-28">
       <div className="w-full max-w-sm space-y-6 pt-4">
-        <h1 className="text-xl font-semibold text-center">Inloggen</h1>
+        <Card className="p-5">
+          <div className="flex flex-col gap-4">
+            <h1 className="text-lg font-semibold text-center">Inloggen</h1>
 
-        {sent ? (
-          <p className="text-sm text-center text-gray-500">
-            Check je e-mail om in te loggen.
-          </p>
-        ) : (
-          <>
-            <input
-              type="email"
-              placeholder="E-mailadres"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border rounded-xl px-4 py-3 text-sm"
-            />
+            {sent ? (
+              <p className="text-sm text-center text-gray-500">
+                Open de Magic Link in je e-mail om in te kunnen loggen
+              </p>
+            ) : (
+              <>
+                <input
+                  type="email"
+                  placeholder="E-mailadres"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={styles.input.default}
+                />
 
-            <button
-              onClick={handleLogin}
-              className="w-full bg-black text-white rounded-xl py-3 text-sm"
-            >
-              Verstuur magic link
-            </button>
-          </>
-        )}
+                <button
+                  onClick={handleLogin}
+                  className={`${styles.button.save} w-full`}
+                >
+                  Verstuur Magic Link
+                </button>
+              </>
+            )}
+          </div>
+        </Card>
       </div>
     </main>
   );
