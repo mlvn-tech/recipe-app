@@ -221,7 +221,7 @@ function ShoppingPageContent() {
 
     const unique = [
       ...new Set(allIngredients.map((i) => i.trim().toLowerCase())),
-    ];
+    ].filter((i) => !i.startsWith("#"));
 
     const existingNames = items.map((i) => i.name.toLowerCase());
 
