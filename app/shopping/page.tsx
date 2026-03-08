@@ -337,8 +337,6 @@ function ShoppingPageContent() {
   const visibleUnchecked = items.filter((i) => !i.checked);
   const checkedItems = items.filter((i) => i.checked);
 
-  if (loading) return <p className="p-8">Laden...</p>;
-
   return (
     <>
       <Header
