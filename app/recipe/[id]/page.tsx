@@ -426,7 +426,7 @@ export default function RecipeDetail() {
         ) : (
           <>
             {recipe.image_url && (
-              <div className="relative w-full h-100">
+              <div className="relative w-full h-120">
                 <img
                   src={recipe.image_url}
                   alt={recipe.title}
@@ -468,7 +468,7 @@ export default function RecipeDetail() {
                 >
                   {formatTitle(recipe.title)}
                 </h1>
-                {(recipe.is_ai || recipe.category) && (
+                {/* {(recipe.is_ai || recipe.category) && (
                   <div className="flex justify-center gap-2 mt-2">
                     {recipe.is_ai && (
                       <div className="flex items-center gap-1 px-3 py-1 rounded-lg border border-[rgb(var(--color-secondaccent)/0.40)] text-[rgb(var(--color-secondaccent))] text-xs">
@@ -483,7 +483,7 @@ export default function RecipeDetail() {
                       </div>
                     )}
                   </div>
-                )}
+                )} */}
                 {/* metadata */}
                 <div className="flex items-center justify-center gap-6 text-sm text-[var(--color-text-secondary)]">
                   {recipe.cooking_time && (
