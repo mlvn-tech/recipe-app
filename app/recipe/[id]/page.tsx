@@ -2,7 +2,7 @@
 import { styles } from "@/lib/styles";
 import clsx from "clsx";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { supabase } from "../../../lib/supabase";
 import { useParams, useRouter } from "next/navigation";
 
@@ -15,6 +15,9 @@ import {
   Heart,
   PlayCircle,
   WandSparkles,
+  CalendarPlus,
+  Plus,
+  Check,
 } from "lucide-react";
 
 import Icon from "@/components/icons";
@@ -37,6 +40,124 @@ export default function RecipeDetail() {
   const [ingredientsOpen, setIngredientsOpen] = useState(false);
   const [headerTitle, setHeaderTitle] = useState("Recept");
   const { createMenuOpen } = useUI();
+  const [plannerOpen, setPlannerOpen] = useState(false);
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [isWeekPickerOpen, setIsWeekPickerOpen] = useState(false);
+
+  const [plannedDays, setPlannedDays] = useState<number[]>([]);
+  const [weekPlan, setWeekPlan] = useState<Record<number, any[]>>({
+    0: [],
+    1: [],
+    2: [],
+    3: [],
+    4: [],
+    5: [],
+    6: [],
+  });
+
+  const handlePlan = async (day: string) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user || !recipe) return;
+
+    await supabase.from("week_planner").insert({
+      recipe_id: recipe.id,
+      user_id: user.id,
+      day: day,
+    });
+
+    setPlannerOpen(false);
+  };
+
+  const baseDate = useMemo(() => {
+    const date = new Date();
+    date.setDate(date.getDate() + weekOffset * 7);
+    return date;
+  }, [weekOffset]);
+
+  const weekStartDate = useMemo(() => {
+    const start = new Date(baseDate);
+    start.setDate(baseDate.getDate() - baseDate.getDay() + 1);
+    start.setHours(0, 0, 0, 0);
+    return start.toISOString().split("T")[0];
+  }, [baseDate]);
+
+  const weekData = useMemo(() => {
+    const start = new Date(baseDate);
+    start.setDate(baseDate.getDate() - baseDate.getDay() + 1);
+
+    return Array.from({ length: 7 }).map((_, i) => {
+      const date = new Date(start);
+      date.setDate(start.getDate() + i);
+
+      return {
+        label: date.toLocaleDateString("nl-NL", { weekday: "long" }),
+        shortDate: date.toLocaleDateString("nl-NL", {
+          day: "numeric",
+          month: "short",
+        }),
+        index: i,
+      };
+    });
+  }, [baseDate]);
+
+  const handlePlanDay = async (dayIndex: number) => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const userId = session?.user?.id;
+    if (!userId || !recipe) return;
+
+    const { data: membership } = await supabase
+      .from("household_members")
+      .select("household_id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    const householdId = membership?.household_id;
+    if (!householdId) return;
+
+    const alreadyPlanned = plannedDays.includes(dayIndex);
+
+    if (alreadyPlanned) {
+      const { error } = await supabase
+        .from("week_plans")
+        .delete()
+        .eq("week_start", weekStartDate)
+        .eq("day_index", dayIndex)
+        .eq("recipe_id", recipe.id)
+        .eq("household_id", householdId);
+
+      if (!error) {
+        setWeekPlan((prev) => ({
+          ...prev,
+          [dayIndex]: prev[dayIndex].filter((r) => r.id !== recipe.id),
+        }));
+
+        setPlannedDays((prev) => prev.filter((d) => d !== dayIndex));
+      }
+    } else {
+      const { error } = await supabase.from("week_plans").insert({
+        week_start: weekStartDate,
+        day_index: dayIndex,
+        recipe_id: recipe.id,
+        user_id: userId,
+        household_id: householdId,
+      });
+
+      if (!error) {
+        setWeekPlan((prev) => ({
+          ...prev,
+          [dayIndex]: [...prev[dayIndex], recipe],
+        }));
+
+        setPlannedDays((prev) => [...prev, dayIndex]);
+      }
+    }
+  };
 
   // ✅ FAVORITES STATE
   const [isFavorite, setIsFavorite] = useState(false);
@@ -119,7 +240,6 @@ export default function RecipeDetail() {
 
     if (!user || !id) return;
 
-    // Check of er al een token bestaat
     const { data: existing } = await supabase
       .from("shared_recipes")
       .select("token")
@@ -187,14 +307,89 @@ export default function RecipeDetail() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [recipe]);
 
-  // Nieuw:
   const formattedDate = recipe
     ? new Date(recipe.created_at).toLocaleDateString("nl-NL", {
         day: "numeric",
-        month: "long",
+        month: "numeric",
         year: "numeric",
       })
     : "";
+
+  useEffect(() => {
+    const fetchWeekPlan = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const userId = session?.user?.id;
+      if (!userId) return;
+
+      const { data: membership } = await supabase
+        .from("household_members")
+        .select("household_id")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      const householdId = membership?.household_id;
+      if (!householdId) return;
+
+      const { data } = await supabase
+        .from("week_plans")
+        .select("day_index, recipes(*)")
+        .eq("week_start", weekStartDate)
+        .eq("household_id", householdId);
+
+      const grouped: Record<number, any[]> = {
+        0: [],
+        1: [],
+        2: [],
+        3: [],
+        4: [],
+        5: [],
+        6: [],
+      };
+
+      const planned: number[] = [];
+
+      data?.forEach((item: any) => {
+        if (item.recipes) {
+          grouped[item.day_index].push(item.recipes);
+
+          if (item.recipes.id === recipe?.id) {
+            planned.push(item.day_index);
+          }
+        }
+      });
+
+      setWeekPlan(grouped);
+      setPlannedDays(planned);
+    };
+
+    fetchWeekPlan();
+  }, [weekStartDate, recipe]);
+
+  const weekLabel = useMemo(() => {
+    const start = new Date(baseDate);
+    start.setDate(baseDate.getDate() - baseDate.getDay() + 1);
+
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+
+    return `${start.toLocaleDateString("nl-NL", {
+      day: "numeric",
+      month: "short",
+    })} t/m ${end.toLocaleDateString("nl-NL", {
+      day: "numeric",
+      month: "short",
+    })}`;
+  }, [baseDate]);
+
+  const weekOptions = [
+    { label: "Deze week", offset: 0 },
+    { label: "Volgende week", offset: 1 },
+    { label: "Over 2 weken", offset: 2 },
+    { label: "Over 3 weken", offset: 3 },
+  ];
 
   return (
     <>
@@ -258,9 +453,19 @@ export default function RecipeDetail() {
 
             <div className="px-4 pt-4 pb-16 space-y-4 rounded-xl">
               <div>
-                <p className="text-xs text-[#6B7280] tracking-wide py-2">
-                  Toegevoegd op {formattedDate}
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-[#6B7280] tracking-wide">
+                    Toegevoegd op {formattedDate}
+                  </p>
+
+                  <button
+                    onClick={() => setPlannerOpen(true)}
+                    className="flex items-center gap-1 px-3 py-2 rounded-full border border-gray-300 text-xs font-medium active:scale-95 transition"
+                  >
+                    <CalendarPlus size={16} />
+                    Plan recept
+                  </button>
+                </div>
                 <h1 ref={titleRef} className="text-3xl font-bold">
                   {formatTitle(recipe.title)}
                 </h1>
@@ -421,6 +626,128 @@ export default function RecipeDetail() {
           </div>
         </SwipeableSheet>
       )}
+
+      <SwipeableSheet
+        open={plannerOpen}
+        onClose={() => setPlannerOpen(false)}
+        title="Plan in week"
+        height="auto"
+        maxHeight="90dvh"
+      >
+        <div
+          className="px-4 space-y-2 pt-2"
+          style={{
+            paddingBottom: "calc(5rem + env(safe-area-inset-bottom))",
+          }}
+        >
+          {/* Week picker */}
+          <div className="relative mb-3">
+            <button
+              onClick={() => setIsWeekPickerOpen((prev) => !prev)}
+              className="w-full flex items-center justify-between"
+            >
+              <span className="px-4 text-sm text-[var(--color-text-secondary)] font-semibold">
+                {weekLabel}
+              </span>
+              <div className="ml-auto flex items-center px-4 gap-1 text-sm text-[var(--color-text-secondary)] font-semibold">
+                {weekOptions.find((w) => w.offset === weekOffset)?.label ??
+                  "Deze week"}
+                <Icon
+                  icon={ChevronDown}
+                  size={16}
+                  className={`text-gray-500 transition-transform duration-200 ${isWeekPickerOpen ? "rotate-180" : ""}`}
+                />
+              </div>
+            </button>
+
+            {isWeekPickerOpen && (
+              <div className="absolute top-8 left-0 right-0 bg-white rounded-xl shadow-lg border border-gray-100 z-10 overflow-hidden">
+                {weekOptions.map((option) => {
+                  const start = new Date();
+                  start.setDate(start.getDate() + option.offset * 7);
+                  start.setDate(start.getDate() - start.getDay() + 1);
+                  const end = new Date(start);
+                  end.setDate(start.getDate() + 6);
+                  const range = `${start.toLocaleDateString("nl-NL", { day: "numeric", month: "short" })} – ${end.toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}`;
+
+                  return (
+                    <button
+                      key={option.offset}
+                      onClick={() => {
+                        setWeekOffset(option.offset);
+                        setIsWeekPickerOpen(false);
+                      }}
+                      className={clsx(
+                        "w-full text-left px-4 py-3 text-sm transition",
+                        weekOffset === option.offset
+                          ? "text-[var(--color-accent)] font-medium"
+                          : "text-gray-700 hover:bg-gray-50",
+                      )}
+                    >
+                      <div>{option.label}</div>
+                      <div className="text-xs text-gray-400">{range}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Dag knoppen */}
+          {weekData.map((day) => {
+            const recipesForDay = weekPlan[day.index] || [];
+
+            return (
+              <button
+                key={day.index}
+                onClick={() => handlePlanDay(day.index)}
+                className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-all duration-300"
+              >
+                <div className="flex flex-col text-left min-w-0 overflow-hidden transition-all duration-300">
+                  <span className="text-[var(--color-text-secondary)] capitalize text-sm font-medium">
+                    {day.label}
+                  </span>
+                  {/* <span className="text-xs text-gray-400">{day.shortDate}</span> */}
+                  <div
+                    className={clsx(
+                      "overflow-hidden transition-all duration-300",
+                      recipesForDay.length > 0
+                        ? "max-h-12 opacity-100 mt-1"
+                        : "max-h-0 opacity-0",
+                    )}
+                  >
+                    <span className="text-xs text-gray-800 truncate max-w-[220px] block">
+                      {recipesForDay.map((r: any) => r.title).join(", ")}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-center shrink-0">
+                  <div
+                    style={{
+                      transform: plannedDays.includes(day.index)
+                        ? "scale(1) rotate(360deg)"
+                        : "scale(1) rotate(270deg)",
+                      transition: "transform 0.3s ease, color 0.2s ease",
+                    }}
+                    className={clsx(
+                      plannedDays.includes(day.index)
+                        ? "text-[var(--color-accent)]"
+                        : "text-[var(--color-accent)]",
+                    )}
+                  >
+                    <Icon
+                      icon={plannedDays.includes(day.index) ? Check : Plus}
+                      size={16}
+                    />
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </SwipeableSheet>
+
       {recipe && (
         <div
           className={`fixed left-1/2 -translate-x-1/2 z-40 transition-all duration-300 ${

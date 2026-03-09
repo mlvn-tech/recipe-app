@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 type Props = {
   open: boolean;
   onClose: () => void;
-  title: string;
+  title: React.ReactNode;
   children: React.ReactNode;
   height?: string;
   maxHeight?: string;
