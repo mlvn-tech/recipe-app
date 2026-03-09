@@ -393,23 +393,26 @@ export default function RecipeDetail() {
 
   return (
     <>
-      <Header
+      {/* <Header
         title={headerTitle}
         onBack={() => router.replace("/")}
-        rightContent={
-          <div className="flex items-center gap-6">
-            <button onClick={handleShare}>
-              <Icon icon={Share} className="text-white/80" />
-            </button>
-            <button onClick={() => router.push(`/recipe/${recipe.id}/edit`)}>
-              <Icon icon={PenSquare} className="text-white/80" />
-            </button>
-          </div>
-        }
-      />
+        // rightContent={
+        //   <div className="flex items-center gap-6">
+        //     <button onClick={setPlannerOpen}>
+        //       <Icon icon={CalendarPlus} className="text-white/80" />
+        //     </button>
+        //     <button onClick={handleShare}>
+        //       <Icon icon={Share} className="text-white/80" />
+        //     </button>
+        //     <button onClick={() => router.push(`/recipe/${recipe.id}/edit`)}>
+        //       <Icon icon={PenSquare} className="text-white/80" />
+        //     </button>
+        //   </div>
+        // }
+      /> */}
 
       <main
-        style={{ paddingTop: "calc(4rem + env(safe-area-inset-top))" }}
+        // style={{ paddingTop: "calc(4rem + env(safe-area-inset-top))" }}
         className="min-h-screen bg-[var(--color-bg)] pb-32"
       >
         {loading ? (
@@ -423,7 +426,7 @@ export default function RecipeDetail() {
         ) : (
           <>
             {recipe.image_url && (
-              <div className="relative w-full h-72">
+              <div className="relative w-full h-100">
                 <img
                   src={recipe.image_url}
                   alt={recipe.title}
@@ -452,62 +455,84 @@ export default function RecipeDetail() {
             )}
 
             <div className="px-4 pt-4 pb-16 space-y-4 rounded-xl">
-              <div>
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-[#6B7280] tracking-wide">
-                    Toegevoegd op {formattedDate}
-                  </p>
+              <div className="px-6 pt-4 pb-4 space-y-6 text-center">
+                {/* datum
+                <p className="text-xs text-[var(--color-text-secondary)] tracking-wide">
+                  Toegevoegd op {formattedDate}
+                </p> */}
 
-                  <button
-                    onClick={() => setPlannerOpen(true)}
-                    className="flex items-center gap-1 px-3 py-2 rounded-full border border-gray-300 text-xs font-medium active:scale-95 transition"
-                  >
-                    <CalendarPlus size={16} />
-                    Plan recept
-                  </button>
-                </div>
-                <h1 ref={titleRef} className="text-3xl font-bold">
+                {/* titel */}
+                <h1
+                  ref={titleRef}
+                  className="text-2xl font-semibold leading-tight max-w-[28rem] mx-auto"
+                >
                   {formatTitle(recipe.title)}
                 </h1>
+                {(recipe.is_ai || recipe.category) && (
+                  <div className="flex justify-center gap-2 mt-2">
+                    {recipe.is_ai && (
+                      <div className="flex items-center gap-1 px-3 py-1 rounded-lg border border-[rgb(var(--color-secondaccent)/0.40)] text-[rgb(var(--color-secondaccent))] text-xs">
+                        <Icon icon={WandSparkles} size={14} />
+                        AI gegenereerd
+                      </div>
+                    )}
 
-                <div className="flex flex-wrap items-center gap-3 mt-3 text-sm text-[var(--color-text-secondary)]">
+                    {recipe.category && (
+                      <div className="px-3 py-1 rounded-lg border border-gray-300 text-gray-600 text-xs capitalize">
+                        {recipe.category}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {/* metadata */}
+                <div className="flex items-center justify-center gap-6 text-sm text-[var(--color-text-secondary)]">
                   {recipe.cooking_time && (
                     <div className="flex items-center gap-1">
-                      <Icon
-                        icon={Clock}
-                        size={18}
-                        className="text-[var(--color-text-secondary)]"
-                      />
-                      <span>{recipe.cooking_time} min.</span>
+                      <Icon icon={Clock} size={18} />
+                      <span>{recipe.cooking_time} minuten</span>
                     </div>
                   )}
+
                   {recipe.servings && (
                     <div className="flex items-center gap-1">
-                      <Icon
-                        icon={User}
-                        size={18}
-                        className="text-[var(--color-text-secondary)]"
-                      />
-                      <span>{recipe.servings} pers.</span>
+                      <Icon icon={User} size={18} />
+                      <span>{recipe.servings} personen</span>
                     </div>
                   )}
-                  {recipe.category && (
-                    <span className="text-[var(--color-text-secondary)] px-3 py-1 border border-gray-300 rounded-lg capitalize">
-                      {recipe.category}
-                    </span>
-                  )}
-                  {recipe.is_ai && (
-                    <div className="px-3 py-1 rounded-lg border border-[rgb(var(--color-secondaccent)/0.40)] text-[rgb(var(--color-secondaccent))]">
-                      <div className="flex items-center gap-1">
-                        <Icon
-                          icon={WandSparkles}
-                          size={14}
-                          className="text-[var(--color-text-secondaccent)]"
-                        />
-                        AI
-                      </div>
+
+                  {/* {recipe.is_ai && (
+                    <div className="flex items-center gap-1 px-2 py-1 text-[rgb(var(--color-secondaccent))] rounded-lg border border-[rgb(var(--color-secondaccent)/0.30)]">
+                      <Icon icon={WandSparkles} size={16} />
+                      <span>AI</span>
                     </div>
-                  )}
+                  )} */}
+                </div>
+
+                {/* acties */}
+                <div className="flex items-center justify-center gap-4">
+                  <button
+                    onClick={() => setPlannerOpen(true)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 text-sm font-medium active:scale-95 transition"
+                  >
+                    <CalendarPlus size={18} />
+                    Plan
+                  </button>
+
+                  <button
+                    onClick={handleShare}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 text-sm font-medium active:scale-95 transition"
+                  >
+                    <Share size={18} />
+                    Deel
+                  </button>
+
+                  <button
+                    onClick={() => router.push(`/recipe/${recipe.id}/edit`)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 text-sm font-medium active:scale-95 transition"
+                  >
+                    <PenSquare size={18} />
+                    Bewerk
+                  </button>
                 </div>
               </div>
 
