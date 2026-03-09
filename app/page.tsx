@@ -493,7 +493,7 @@ export default function Home() {
                               {recipe.category}
                             </div>
                           )}
-                          {recipe.is_ai && (
+                          {view === "list" && recipe.is_ai && (
                             <div className="inline-block px-2 py-1 text-xs rounded-lg border border-[rgb(var(--color-secondaccent)/0.30)] text-[rgb(var(--color-secondaccent))]">
                               <div className="flex items-center gap-1">
                                 <Icon
