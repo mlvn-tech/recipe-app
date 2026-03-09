@@ -8,9 +8,13 @@ import Header from "@/components/Header";
 import Card from "@/components/Card";
 import { Share, Copy } from "lucide-react";
 
+import { generateInviteCode } from "@/lib/generateInviteCode";
+
 export default function AccountPage() {
   const [user, setUser] = useState<any>(null);
   const [householdId, setHouseholdId] = useState<string | null>(null);
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -20,6 +24,7 @@ export default function AccountPage() {
       if (error || !data?.user) {
         setUser(null);
         setHouseholdId(null);
+        setInviteCode(null);
         return;
       }
 
@@ -28,14 +33,16 @@ export default function AccountPage() {
 
       const { data: membership } = await supabase
         .from("household_members")
-        .select("household_id")
+        .select("household_id, households(invite_code)")
         .eq("user_id", currentUser.id)
         .maybeSingle();
 
       if (membership) {
         setHouseholdId(membership.household_id);
+        setInviteCode((membership.households as any)?.invite_code ?? null);
       } else {
         setHouseholdId(null);
+        setInviteCode(null);
       }
     };
 
@@ -46,6 +53,7 @@ export default function AccountPage() {
     await supabase.auth.signOut();
     setUser(null);
     setHouseholdId(null);
+    setInviteCode(null);
     router.replace("/login");
   };
 
@@ -57,9 +65,14 @@ export default function AccountPage() {
   const handleCreateHousehold = async () => {
     if (!user) return;
 
+    const inviteCode = generateInviteCode();
+
     const { data: household, error } = await supabase
       .from("households")
-      .insert({ name: "Ons huishouden" })
+      .insert({
+        name: "Ons huishouden",
+        invite_code: inviteCode,
+      })
       .select()
       .single();
 
@@ -74,32 +87,32 @@ export default function AccountPage() {
     });
 
     setHouseholdId(household.id);
+    setInviteCode(household.invite_code);
   };
 
   const handleCopy = async () => {
-    if (!inviteLink) return;
+    if (!inviteCode) return;
 
     try {
-      await navigator.clipboard.writeText(inviteLink);
-      alert("Invite link gekopieerd!");
+      await navigator.clipboard.writeText(inviteCode);
+      alert("Invite code gekopieerd!");
     } catch (err) {
       console.error("Copy failed", err);
     }
   };
 
   const handleShare = async () => {
-    if (!inviteLink) return;
+    if (!inviteCode) return;
 
     try {
       if (navigator.share) {
         await navigator.share({
           title: "Word lid van mijn huishouden",
-          text: "Scan of open deze link om recepten te delen 🍳",
-          url: inviteLink,
+          text: `Gebruik deze code om mijn huishouden te joinen: ${inviteCode}`,
         });
       } else {
-        await navigator.clipboard.writeText(inviteLink);
-        alert("Link gekopieerd!");
+        await navigator.clipboard.writeText(inviteCode);
+        alert("Invite code gekopieerd!");
       }
     } catch (err: any) {
       if (err.name !== "AbortError") {
@@ -141,6 +154,7 @@ export default function AccountPage() {
               </div>
             </div>
           </Card>
+
           {/* CASE 1: User heeft household */}
           {user?.email && householdId && (
             <Card>
@@ -155,7 +169,12 @@ export default function AccountPage() {
                 </div>
 
                 <div className="bg-white p-4 rounded-2xl shadow-sm">
-                  <QRCodeCanvas value={inviteLink} size={200} />
+                  <QRCodeCanvas value={inviteCode ?? ""} size={200} />
+                </div>
+
+                {/* Invite code zichtbaar */}
+                <div className="text-2xl tracking-widest font-semibold">
+                  {inviteCode}
                 </div>
 
                 <div className="flex gap-10">
@@ -164,7 +183,6 @@ export default function AccountPage() {
                     className="flex flex-col items-center text-gray-600 active:scale-95 transition"
                   >
                     <Share size={24} className="mb-1 text-gray-600" />
-
                     <span className="text-xs">Deel</span>
                   </button>
 
@@ -173,7 +191,6 @@ export default function AccountPage() {
                     className="flex flex-col items-center text-gray-600 active:scale-95 transition"
                   >
                     <Copy size={24} className="mb-1 text-gray-600" />
-
                     <span className="text-xs">Kopieer</span>
                   </button>
                 </div>

@@ -235,15 +235,21 @@ export default function RecipeDetail() {
                 />
                 <button
                   onClick={toggleFavorite}
-                  className="absolute bottom-4 right-4 bg-white/80 backdrop-blur-md rounded-full p-3 shadow-md"
-                  style={{
-                    transform: animating ? "scale(1.1)" : "scale(1)",
-                    transition: "transform 0.18s ease-out",
-                  }}
+                  className="absolute bottom-4 right-4 bg-white/85 backdrop-blur-md rounded-full p-2 shadow-md"
+                  // style={{
+                  //   transform: animating ? "scale(1.1)" : "scale(1)",
+                  //   transition: "transform 0.18s ease-out",
+                  // }}
                 >
                   <Icon
                     icon={Heart}
-                    className={`${isFavorite ? "text-[var(--color-accent)] fill-[var(--color-accent)]" : "text-[#6B7280]"} transition`}
+                    size={28}
+                    strokeWidth={1.5}
+                    className={
+                      isFavorite
+                        ? "text-[var(--color-accent)] fill-[var(--color-accent)]"
+                        : "text-gray-500"
+                    }
                   />
                 </button>
               </div>
@@ -283,6 +289,11 @@ export default function RecipeDetail() {
                     <span className="text-[var(--color-text-secondary)] px-3 py-1 border border-gray-300 rounded-lg capitalize">
                       {recipe.category}
                     </span>
+                  )}
+                  {recipe.is_ai && (
+                    <div className="inline-flex items-center gap-1 px-3 py-1 text-xs rounded-lg border border-[rgb(var(--color-secondaccent)/0.35)] text-[rgb(var(--color-secondaccent))]">
+                      AI
+                    </div>
                   )}
                 </div>
               </div>

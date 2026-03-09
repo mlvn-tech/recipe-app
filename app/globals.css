@@ -5,10 +5,7 @@
   --foreground: #171717;
   --header-height: calc(4rem + env(safe-area-inset-top));
   --color-text-secondary: #6B7280;
-}
 
-
-@theme {
   --color-bg: #F8F8F8;
   /* Teal */
   --color-brand: #2F5D67;
@@ -16,9 +13,11 @@
   --color-brand: #EFA30A; */
   /* Oranje-geel */
   --color-accent: #F4A261;
-  --color-secondaccent: #b782fe;
+  --color-secondaccent: 168 139 254;
   --color-danger: #ef4444;
 }
+
+
 
 @theme inline {
   --color-background: var(--background);

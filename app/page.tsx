@@ -426,10 +426,11 @@ export default function Home() {
                             e.stopPropagation();
                             handleFavorite(recipe.id);
                           }}
-                          className="absolute top-3 right-3 bg-white/80 backdrop-blur-md rounded-full p-2 shadow-sm"
+                          className="absolute top-3 right-3 bg-white/85 backdrop-blur-md rounded-full p-2 shadow-sm"
                         >
                           <Icon
                             icon={Heart}
+                            strokeWidth={1.5}
                             className={
                               isFavorite
                                 ? "text-[var(--color-accent)] fill-[var(--color-accent)]"
@@ -482,6 +483,11 @@ export default function Home() {
                           {view === "list" && recipe.category && (
                             <div className="text-[var(--color-text-secondary)] inline-block px-2 py-1 text-xs border border-gray-200 rounded-lg">
                               {recipe.category}
+                            </div>
+                          )}
+                          {recipe.is_ai && (
+                            <div className="inline-block px-2 py-1 text-xs rounded-lg border border-[rgb(var(--color-secondaccent)/0.25)] text-[rgb(var(--color-secondaccent))]">
+                              AI
                             </div>
                           )}
                         </div>

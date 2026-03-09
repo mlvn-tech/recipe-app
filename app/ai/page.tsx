@@ -76,7 +76,7 @@ export default function AIPage() {
             <img
               src="/ai-cooking.png"
               alt="AI cooking"
-              className="w-36 h-auto"
+              className="w-30 h-auto"
             />
           </div>
 
@@ -172,14 +172,16 @@ export default function AIPage() {
               disabled={generating}
               className={clsx(
                 styles.button.primary,
-                "h-[58px] bg-purple-400 mt-6 relative flex items-center justify-center mx-auto transition-all duration-300",
-                generating ? "w-[58px] !px-0 bg-gray-200" : "w-full",
+                "h-[58px] mt-6 relative flex items-center justify-center mx-auto transition-all duration-300",
+                generating
+                  ? "w-[58px] !px-0 bg-[var(--color-secondaccent)]"
+                  : "w-full",
               )}
             >
               {!generating && <span className="absolute">Genereer recept</span>}
 
               {generating && (
-                <RefreshCw className="w-6 h-6 animate-spin absolute text-gray-400" />
+                <RefreshCw className="w-6 h-6 animate-spin absolute text-white" />
               )}
             </button>
           </Card>

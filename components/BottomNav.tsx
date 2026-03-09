@@ -55,7 +55,9 @@ export default function BottomNav() {
                 pathname === "/recipe/preview"
               : !createMenuOpen &&
                 (pathname === item.href ||
-                  (item.href === "/" && pathname.startsWith("/recipe")) ||
+                  (item.href === "/" &&
+                    pathname.startsWith("/recipe") &&
+                    pathname !== "/recipe/preview") ||
                   (item.href === "/week" && pathname.startsWith("/shopping")));
 
           const isRotated = item.label === "Nieuw" && createMenuOpen;
@@ -71,7 +73,7 @@ export default function BottomNav() {
               >
                 <div
                   className={clsx(
-                    "absolute flex flex-col gap-2 items-center w-40 z-[130] transition-all duration-200 ease-out",
+                    "absolute flex flex-col gap-3 items-center w-40 z-[130] transition-all duration-200 ease-out",
                     createMenuOpen
                       ? "opacity-100 translate-y-0 pointer-events-auto"
                       : "opacity-0 translate-y-4 pointer-events-none",
@@ -90,7 +92,7 @@ export default function BottomNav() {
                     <span className="w-5 flex justify-center shrink-0">
                       <WandSparkles
                         size={16}
-                        className="text-[var(--color-purple-400)]"
+                        className="text-[rgb(var(--color-secondaccent))]"
                       />
                     </span>
 

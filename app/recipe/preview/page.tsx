@@ -156,6 +156,7 @@ export default function PreviewPage() {
           category: preview.category || "Diner",
           user_id: userId,
           household_id: householdId,
+          is_ai: true,
         })
         .select()
         .single();
@@ -265,9 +266,9 @@ export default function PreviewPage() {
       <Header title="Recept preview" onBack={() => router.push("/")} />
       <main className="min-h-dvh bg-[var(--color-bg)] pt-20 pb-24 px-4">
         <div className="max-w-3xl mx-auto space-y-6">
-          <p className="text-sm text-gray-400 animate-pulse text-center">
+          {/* <p className="text-sm text-gray-400 animate-pulse text-center">
             AI genereert een recept...
-          </p>
+          </p> */}
           {/* Hero placeholder */}
           <div className="h-52 bg-gray-200 rounded-2xl" />
 
@@ -289,17 +290,17 @@ export default function PreviewPage() {
               {preview.title}
             </h1>
 
-            <div className="flex items-center gap-4 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
               <div className="flex items-center gap-1">
                 <Icon icon={Clock} size={16} />
-                <span>{preview.cooking_time} min</span>
+                <span>{preview.cooking_time} min.</span>
               </div>
 
               <div className="flex items-center gap-1">
                 <Icon icon={User} size={16} />
                 <span>
-                  {preview.servings}{" "}
-                  {preview.servings === 1 ? "persoon" : "personen"}
+                  {preview.servings}
+                  {" pers."}
                 </span>
               </div>
 
@@ -308,6 +309,9 @@ export default function PreviewPage() {
                   {preview.category}
                 </div>
               )}
+              <div className="px-3 py-1 text-xs rounded-lg border border-[rgb(var(--color-secondaccent)/0.35)] text-[rgb(var(--color-secondaccent))] flex items-center gap-1">
+                AI
+              </div>
             </div>
           </div>
 
@@ -371,10 +375,10 @@ export default function PreviewPage() {
             <button
               onClick={handleRegenerate}
               disabled={regenerating || attempt >= maxAttempts}
-              className="h-[58px] w-full border border-gray-300 rounded-full py-3 text-md font-semibold flex items-center justify-center"
+              className="h-[58px] w-full border-2 border-[rgb(var(--color-secondaccent)/0.50)] text-[rgb(var(--color-secondaccent))] rounded-full py-3 text-md font-semibold flex items-center justify-center"
             >
               {regenerating ? (
-                <Icon icon={RefreshCw} size={18} className="animate-spin" />
+                <Icon icon={RefreshCw} size={24} className="animate-spin" />
               ) : attempt >= maxAttempts ? (
                 "Geen alternatieven meer"
               ) : (
@@ -402,7 +406,7 @@ export default function PreviewPage() {
 
           {/* Modal Card */}
           <div className="relative bg-white rounded-xl px-8 py-8 shadow-xl flex flex-col items-center gap-6 animate-fade-in">
-            <RefreshCw className="w-6 h-6 animate-spin text-[var(--color-accent)]" />
+            <RefreshCw className="w-6 h-6 animate-spin text-[rgb(var(--color-secondaccent))]" />
 
             <div className="text-center space-y-2">
               <p className="text-base font-semibold text-gray-900">
