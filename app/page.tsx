@@ -4,7 +4,15 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "../lib/supabase";
 
-import { Clock, User, Heart, LayoutGrid, List, Search } from "lucide-react";
+import {
+  Clock,
+  User,
+  Heart,
+  LayoutGrid,
+  List,
+  Search,
+  WandSparkles,
+} from "lucide-react";
 
 import Icon from "@/components/icons";
 import Link from "next/link";
@@ -486,8 +494,15 @@ export default function Home() {
                             </div>
                           )}
                           {recipe.is_ai && (
-                            <div className="inline-block px-2 py-1 text-xs rounded-lg border border-[rgb(var(--color-secondaccent)/0.25)] text-[rgb(var(--color-secondaccent))]">
-                              AI
+                            <div className="inline-block px-2 py-1 text-xs rounded-lg border border-[rgb(var(--color-secondaccent)/0.30)] text-[rgb(var(--color-secondaccent))]">
+                              <div className="flex items-center gap-1">
+                                <Icon
+                                  icon={WandSparkles}
+                                  size={12}
+                                  className="text-[var(--color-text-secondaccent)]"
+                                />
+                                AI
+                              </div>
                             </div>
                           )}
                         </div>

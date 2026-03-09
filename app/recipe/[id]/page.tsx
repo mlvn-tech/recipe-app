@@ -14,6 +14,7 @@ import {
   Share,
   Heart,
   PlayCircle,
+  WandSparkles,
 } from "lucide-react";
 
 import Icon from "@/components/icons";
@@ -264,7 +265,7 @@ export default function RecipeDetail() {
                   {formatTitle(recipe.title)}
                 </h1>
 
-                <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-[#6B7280]">
+                <div className="flex flex-wrap items-center gap-3 mt-3 text-sm text-[var(--color-text-secondary)]">
                   {recipe.cooking_time && (
                     <div className="flex items-center gap-1">
                       <Icon
@@ -291,8 +292,15 @@ export default function RecipeDetail() {
                     </span>
                   )}
                   {recipe.is_ai && (
-                    <div className="inline-flex items-center gap-1 px-3 py-1 text-xs rounded-lg border border-[rgb(var(--color-secondaccent)/0.35)] text-[rgb(var(--color-secondaccent))]">
-                      AI
+                    <div className="px-3 py-1 rounded-lg border border-[rgb(var(--color-secondaccent)/0.40)] text-[rgb(var(--color-secondaccent))]">
+                      <div className="flex items-center gap-1">
+                        <Icon
+                          icon={WandSparkles}
+                          size={14}
+                          className="text-[var(--color-text-secondaccent)]"
+                        />
+                        AI
+                      </div>
                     </div>
                   )}
                 </div>

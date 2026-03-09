@@ -33,7 +33,7 @@ export default function AccountPage() {
 
       const { data: membership } = await supabase
         .from("household_members")
-        .select("household_id, households(invite_code)")
+        .select("household_id, households:households(invite_code)")
         .eq("user_id", currentUser.id)
         .maybeSingle();
 
@@ -43,6 +43,15 @@ export default function AccountPage() {
       } else {
         setHouseholdId(null);
         setInviteCode(null);
+      }
+      // Als huishouden bestaat maar geen invite code heeft, genereer er een
+      if (membership && !(membership.households as any)?.invite_code) {
+        const newCode = generateInviteCode();
+        await supabase
+          .from("households")
+          .update({ invite_code: newCode })
+          .eq("id", membership.household_id);
+        setInviteCode(newCode);
       }
     };
 
@@ -65,13 +74,13 @@ export default function AccountPage() {
   const handleCreateHousehold = async () => {
     if (!user) return;
 
-    const inviteCode = generateInviteCode();
+    const newCode = generateInviteCode();
 
     const { data: household, error } = await supabase
       .from("households")
       .insert({
         name: "Ons huishouden",
-        invite_code: inviteCode,
+        invite_code: newCode,
       })
       .select()
       .single();
@@ -87,7 +96,7 @@ export default function AccountPage() {
     });
 
     setHouseholdId(household.id);
-    setInviteCode(household.invite_code);
+    setInviteCode(newCode);
   };
 
   const handleCopy = async () => {
@@ -120,6 +129,10 @@ export default function AccountPage() {
       }
     }
   };
+
+  console.log("user:", user);
+  console.log("householdId:", householdId);
+  console.log("inviteCode:", inviteCode);
 
   return (
     <>
@@ -169,7 +182,7 @@ export default function AccountPage() {
                 </div>
 
                 <div className="bg-white p-4 rounded-2xl shadow-sm">
-                  <QRCodeCanvas value={inviteCode ?? ""} size={200} />
+                  <QRCodeCanvas value={inviteCode ?? ""} size={110} />
                 </div>
 
                 {/* Invite code zichtbaar */}
@@ -205,15 +218,25 @@ export default function AccountPage() {
                 <h2 className="text-lg font-semibold">Nog geen huishouden</h2>
 
                 <p className="text-sm text-[var(--color-text-secondary)]">
-                  Maak een huishouden aan om recepten te delen.
+                  Maak een huishouden aan of voeg je bij een bestaand
+                  huishouden.
                 </p>
 
-                <button
-                  onClick={handleCreateHousehold}
-                  className="px-4 py-2 rounded-xl bg-[var(--color-primary)] text-white"
-                >
-                  Maak huishouden aan
-                </button>
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={handleCreateHousehold}
+                    className="px-4 py-2 rounded-xl bg-[var(--color-primary)] text-white"
+                  >
+                    Maak huishouden aan
+                  </button>
+
+                  <button
+                    onClick={() => router.push("/join")}
+                    className="px-4 py-2 rounded-xl border border-gray-300"
+                  >
+                    Join met code
+                  </button>
+                </div>
               </div>
             </Card>
           )}
