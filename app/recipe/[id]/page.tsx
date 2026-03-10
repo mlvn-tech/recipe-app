@@ -401,7 +401,7 @@ export default function RecipeDetail() {
       {/* Scroll header */}
       <div
         className={clsx(
-          "fixed top-0 left-0 right-0 z-40 transition-all duration-300",
+          "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top transition-all duration-300",
           showHeader
             ? "opacity-100 translate-y-0"
             : "opacity-0 -translate-y-full pointer-events-none",
@@ -454,7 +454,7 @@ export default function RecipeDetail() {
         ) : (
           <>
             {recipe.image_url && (
-              <div className="relative w-full h-[54vh]">
+              <div className="relative w-full h-[60vh]">
                 <img
                   src={recipe.image_url}
                   alt={recipe.title}
@@ -462,7 +462,7 @@ export default function RecipeDetail() {
                 />
                 <button
                   onClick={() => router.replace("/")}
-                  className="absolute top-4 left-4 text-white drop-shadow-md"
+                  className="absolute text-white left-4 top-[calc(env(safe-area-inset-top)+8px)]"
                 >
                   <Icon icon={ChevronLeft} size={36} />
                 </button>
@@ -489,7 +489,7 @@ export default function RecipeDetail() {
             )}
 
             <div className="px-4 pt-4 pb-16 space-y-4 rounded-xl">
-              <div className="px-6 pt-4 pb-4 space-y-6 text-center">
+              <div className="px-6 pt-4 space-y-5 text-center">
                 {/* datum
                 <p className="text-xs text-[var(--color-text-secondary)] tracking-wide">
                   Toegevoegd op {formattedDate}
@@ -546,21 +546,21 @@ export default function RecipeDetail() {
                 <div className="flex items-center justify-center gap-8 pt-2">
                   <button
                     onClick={() => setPlannerOpen(true)}
-                    className="text-gray-700 active:scale-90 transition"
+                    className="text-gray-500 active:scale-90 transition"
                   >
                     <CalendarPlus size={24} />
                   </button>
 
                   <button
                     onClick={handleShare}
-                    className="text-gray-700 active:scale-90 transition"
+                    className="text-gray-500 active:scale-90 transition"
                   >
                     <Share size={24} />
                   </button>
 
                   <button
                     onClick={() => router.push(`/recipe/${recipe.id}/edit`)}
-                    className="text-gray-700 active:scale-90 transition"
+                    className="text-gray-500 active:scale-90 transition"
                   >
                     <PenSquare size={24} />
                   </button>
