@@ -10,6 +10,7 @@ import {
   User,
   PenSquare,
   ChevronDown,
+  ChevronLeft,
   Clock,
   Share,
   Heart,
@@ -32,13 +33,15 @@ export default function RecipeDetail() {
   const idParam = params.id;
   const id = Array.isArray(idParam) ? idParam[0] : idParam;
 
+  const [showHeader, setShowHeader] = useState(false);
+
   const router = useRouter();
 
   const [recipe, setRecipe] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showFloating, setShowFloating] = useState(false);
   const [ingredientsOpen, setIngredientsOpen] = useState(false);
-  const [headerTitle, setHeaderTitle] = useState("Recept");
+  const headerTitle = recipe ? formatTitle(recipe.title) : "Recept";
   const { createMenuOpen } = useUI();
   const [plannerOpen, setPlannerOpen] = useState(false);
   const [weekOffset, setWeekOffset] = useState(0);
@@ -159,6 +162,25 @@ export default function RecipeDetail() {
     }
   };
 
+  useEffect(() => {
+    const handleScrollHeader = () => {
+      if (!heroEndRef.current) return;
+
+      const rect = heroEndRef.current.getBoundingClientRect();
+
+      if (rect.top <= 80) {
+        setShowHeader(true);
+      } else {
+        setShowHeader(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScrollHeader);
+    handleScrollHeader();
+
+    return () => window.removeEventListener("scroll", handleScrollHeader);
+  }, []);
+
   // ✅ FAVORITES STATE
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -166,6 +188,7 @@ export default function RecipeDetail() {
 
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const ingredientsEndRef = useRef<HTMLDivElement | null>(null);
+  const heroEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -272,24 +295,6 @@ export default function RecipeDetail() {
   };
 
   useEffect(() => {
-    if (!titleRef.current || !recipe) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setHeaderTitle("Recept");
-        } else {
-          setHeaderTitle(formatTitle(recipe.title));
-        }
-      },
-      { threshold: 0, rootMargin: "-70px 0px 0px 0px" },
-    );
-
-    observer.observe(titleRef.current);
-    return () => observer.disconnect();
-  }, [recipe]);
-
-  useEffect(() => {
     const handleScroll = () => {
       if (!ingredientsEndRef.current) return;
       const rect = ingredientsEndRef.current.getBoundingClientRect();
@@ -393,23 +398,46 @@ export default function RecipeDetail() {
 
   return (
     <>
-      {/* <Header
-        title={headerTitle}
-        onBack={() => router.replace("/")}
-        // rightContent={
-        //   <div className="flex items-center gap-6">
-        //     <button onClick={setPlannerOpen}>
-        //       <Icon icon={CalendarPlus} className="text-white/80" />
-        //     </button>
-        //     <button onClick={handleShare}>
-        //       <Icon icon={Share} className="text-white/80" />
-        //     </button>
-        //     <button onClick={() => router.push(`/recipe/${recipe.id}/edit`)}>
-        //       <Icon icon={PenSquare} className="text-white/80" />
-        //     </button>
-        //   </div>
-        // }
-      /> */}
+      {/* Scroll header */}
+      <div
+        className={clsx(
+          "fixed top-0 left-0 right-0 z-40 transition-all duration-300",
+          showHeader
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 -translate-y-full pointer-events-none",
+        )}
+      >
+        <div className="relative bg-white/90 backdrop-blur-md border-b border-gray-100 h-14 flex items-center justify-between px-4">
+          {/* Back */}
+          <button onClick={() => router.replace("/")}>
+            <Icon icon={ChevronLeft} size={22} />
+          </button>
+
+          {/* Titel gecentreerd */}
+          <span className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold truncate max-w-[60%] text-center">
+            {formatTitle(recipe?.title)}
+          </span>
+
+          {/* Rechter acties */}
+          <div className="flex items-center gap-4">
+            <button onClick={() => setPlannerOpen(true)}>
+              <Icon icon={CalendarPlus} size={20} className="text-gray-600" />
+            </button>
+
+            <button onClick={toggleFavorite}>
+              <Icon
+                icon={Heart}
+                size={20}
+                className={
+                  isFavorite
+                    ? "text-[var(--color-accent)] fill-[var(--color-accent)]"
+                    : "text-gray-600"
+                }
+              />
+            </button>
+          </div>
+        </div>
+      </div>
 
       <main
         // style={{ paddingTop: "calc(4rem + env(safe-area-inset-top))" }}
@@ -426,15 +454,21 @@ export default function RecipeDetail() {
         ) : (
           <>
             {recipe.image_url && (
-              <div className="relative w-full h-120">
+              <div className="relative w-full h-[54vh]">
                 <img
                   src={recipe.image_url}
                   alt={recipe.title}
                   className="w-full h-full object-cover"
                 />
                 <button
+                  onClick={() => router.replace("/")}
+                  className="absolute top-4 left-4 text-white drop-shadow-md"
+                >
+                  <Icon icon={ChevronLeft} size={36} />
+                </button>
+                <button
                   onClick={toggleFavorite}
-                  className="absolute bottom-4 right-4 bg-white/85 backdrop-blur-md rounded-full p-2 shadow-md"
+                  className="absolute bottom-4 right-4 bg-black/25 backdrop-blur-md rounded-full p-2 shadow-md"
                   // style={{
                   //   transform: animating ? "scale(1.1)" : "scale(1)",
                   //   transition: "transform 0.18s ease-out",
@@ -447,7 +481,7 @@ export default function RecipeDetail() {
                     className={
                       isFavorite
                         ? "text-[var(--color-accent)] fill-[var(--color-accent)]"
-                        : "text-gray-500"
+                        : "text-white"
                     }
                   />
                 </button>
@@ -468,7 +502,7 @@ export default function RecipeDetail() {
                 >
                   {formatTitle(recipe.title)}
                 </h1>
-                {/* {(recipe.is_ai || recipe.category) && (
+                {(recipe.is_ai || recipe.category) && (
                   <div className="flex justify-center gap-2 mt-2">
                     {recipe.is_ai && (
                       <div className="flex items-center gap-1 px-3 py-1 rounded-lg border border-[rgb(var(--color-secondaccent)/0.40)] text-[rgb(var(--color-secondaccent))] text-xs">
@@ -483,7 +517,7 @@ export default function RecipeDetail() {
                       </div>
                     )}
                   </div>
-                )} */}
+                )}
                 {/* metadata */}
                 <div className="flex items-center justify-center gap-6 text-sm text-[var(--color-text-secondary)]">
                   {recipe.cooking_time && (
@@ -509,31 +543,29 @@ export default function RecipeDetail() {
                 </div>
 
                 {/* acties */}
-                <div className="flex items-center justify-center gap-4">
+                <div className="flex items-center justify-center gap-8 pt-2">
                   <button
                     onClick={() => setPlannerOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 text-sm font-medium active:scale-95 transition"
+                    className="text-gray-700 active:scale-90 transition"
                   >
-                    <CalendarPlus size={18} />
-                    Plan
+                    <CalendarPlus size={24} />
                   </button>
 
                   <button
                     onClick={handleShare}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 text-sm font-medium active:scale-95 transition"
+                    className="text-gray-700 active:scale-90 transition"
                   >
-                    <Share size={18} />
-                    Deel
+                    <Share size={24} />
                   </button>
 
                   <button
                     onClick={() => router.push(`/recipe/${recipe.id}/edit`)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 text-sm font-medium active:scale-95 transition"
+                    className="text-gray-700 active:scale-90 transition"
                   >
-                    <PenSquare size={18} />
-                    Bewerk
+                    <PenSquare size={24} />
                   </button>
                 </div>
+                <div ref={heroEndRef} className="h-1" />
               </div>
 
               <Card>
