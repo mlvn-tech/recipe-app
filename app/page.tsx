@@ -251,7 +251,7 @@ export default function Home() {
     light?: boolean;
   }) => (
     <div
-      className={`flex items-center gap-2 flex-wrap text-xs ${light ? "text-white/80" : "text-gray-400"}`}
+      className={`flex items-center gap-2 flex-wrap text-xs ${light ? "text-white/80" : "text-[var(--color-text-secondary)]"}`}
     >
       {recipe.cooking_time && (
         <div className="flex items-center gap-1">
@@ -290,9 +290,9 @@ export default function Home() {
         className="relative px-5 pb-8"
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 2rem)" }}
       >
-        <p className="text-[15px] font-medium text-[#F4A261] mb-1 tracking-wide">
+        <p className="text-[15px] font-medium text-[var(--color-accent)] mb-1 tracking-wide">
           {greeting}
-          {userName ? `, ${userName}` : ""}
+          {userName ? ` ${userName}` : ""}
         </p>
         <h1 className="text-[2rem] font-bold text-gray-900 leading-tight tracking-tight">
           Wat staat er
@@ -308,7 +308,7 @@ export default function Home() {
             Gepland voor vandaag
           </h3>
           <Link href={`/recipe/${todayRecipe.id}`}>
-            <div className="relative rounded-3xl overflow-hidden bg-white border border-[#EAE8E3]">
+            <div className="relative rounded-3xl overflow-hidden bg-white border border-gray-200">
               {todayRecipe.image_url ? (
                 <div className="relative w-full h-44">
                   <img
@@ -347,13 +347,11 @@ export default function Home() {
           )}
         </h3>
 
-        <div className="flex items-center bg-white border border-[#EAE8E3] rounded-full p-1">
+        <div className="flex items-center bg-white border border-gray-200 rounded-full p-1">
           <button
             onClick={() => setView("list")}
             className={`w-6 h-6 flex items-center justify-center rounded-full transition ${
-              view === "list"
-                ? "bg-[var(--color-accent)] text-white"
-                : "text-gray-400"
+              view === "list" ? "bg-gray-800 text-white" : "text-gray-400"
             }`}
           >
             <List size={16} />
@@ -361,9 +359,7 @@ export default function Home() {
           <button
             onClick={() => setView("grid")}
             className={`w-6 h-6 flex items-center justify-center rounded-full transition ${
-              view === "grid"
-                ? "bg-[var(--color-accent)] text-white"
-                : "text-gray-400"
+              view === "grid" ? "bg-gray-800 text-white" : "text-gray-400"
             }`}
           >
             <LayoutGrid size={16} />
@@ -378,7 +374,7 @@ export default function Home() {
             {[...Array(3)].map((_, i) => (
               <div
                 key={i}
-                className="bg-white rounded-3xl overflow-hidden animate-pulse border border-[#EAE8E3]"
+                className="bg-white rounded-3xl overflow-hidden animate-pulse border border-gray-200"
               >
                 <div className="h-44 bg-gray-100" />
                 <div className="p-4 space-y-2">
@@ -437,7 +433,7 @@ export default function Home() {
                           strokeWidth={1.5}
                           className={
                             isFavorite
-                              ? "text-[#F4A261] fill-[#F4A261]"
+                              ? "text-[var(--color-accent)] fill-[var(--color-accent)]"
                               : "text-gray-400"
                           }
                         />
@@ -482,7 +478,7 @@ export default function Home() {
                             strokeWidth={1.5}
                             className={
                               isFavorite
-                                ? "text-[#F4A261] fill-[#F4A261]"
+                                ? "text-[var(--color-accent)] fill-[var(--color-accent)]"
                                 : "text-gray-500"
                             }
                           />

@@ -24,7 +24,9 @@ export default function SearchPage() {
     const fetchRecipes = async () => {
       const {
         data: { user },
+        error,
       } = await supabase.auth.getUser();
+      console.log("user:", user, "error:", error);
       if (!user) {
         setRecipes([]);
         return;
@@ -55,6 +57,12 @@ export default function SearchPage() {
     };
 
     fetchRecipes();
+
+    const { data: listener } = supabase.auth.onAuthStateChange(() => {
+      fetchRecipes();
+    });
+
+    return () => listener.subscription.unsubscribe();
   }, []);
 
   const toggleFavorite = async (e: React.MouseEvent, recipeId: string) => {
@@ -138,7 +146,7 @@ export default function SearchPage() {
           <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
             <Search
               size={18}
-              className="text-gray-400 transition-colors group-focus-within:text-gray-600"
+              className="text-gray-400 transition-colors group-focus-within:text-[var(--color-accent)]"
             />
           </div>
           <input
@@ -147,7 +155,7 @@ export default function SearchPage() {
             placeholder="Recept, ingrediënt, categorie..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-full bg-white border border-[#EAE8E3] p-3 pl-11 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-[#D4D0C8] transition"
+            className="w-full rounded-full bg-white border border-gray-200 p-3 pl-11 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-gray-300 transition"
           />
           {search.length > 0 && (
             <button
@@ -212,9 +220,9 @@ export default function SearchPage() {
             {[...Array(4)].map((_, i) => (
               <div
                 key={i}
-                className="flex gap-3 items-center bg-white border border-[#EAE8E3] rounded-2xl p-3 animate-pulse"
+                className="flex gap-3 items-center bg-white border border-gray-200 rounded-3xl p-3 animate-pulse"
               >
-                <div className="w-16 h-16 rounded-xl bg-gray-100 shrink-0" />
+                <div className="w-16 h-16 rounded-lg bg-gray-100 shrink-0" />
                 <div className="flex-1 space-y-2">
                   <div className="h-4 bg-gray-100 rounded w-2/3" />
                   <div className="h-3 bg-gray-100 rounded w-1/3" />
@@ -239,9 +247,9 @@ export default function SearchPage() {
         {/* Resultaten lijst */}
         {showResults && filteredRecipes.length > 0 && (
           <>
-            <p className="text-xs text-gray-400 mb-3">
+            {/* <p className="text-xs text-gray-400 mb-3">
               {filteredRecipes.length} recepten
-            </p>
+            </p> */}
             <div className="flex flex-col gap-3">
               {filteredRecipes.map((recipe) => {
                 const isFavorite = favorites.includes(recipe.id);
@@ -249,8 +257,23 @@ export default function SearchPage() {
                   <Link
                     key={recipe.id}
                     href={`/recipe/${recipe.id}`}
-                    className="flex gap-3 items-center bg-white border border-[#EAE8E3] rounded-2xl p-3 active:scale-[0.99] transition"
+                    className="relative flex gap-3 items-center bg-white border border-gray-200 rounded-3xl p-3 active:scale-[0.99] transition"
                   >
+                    {/* Favorite — rechtsboven */}
+                    <button
+                      onClick={(e) => toggleFavorite(e, recipe.id)}
+                      className="absolute top-3.5 right-3.5"
+                    >
+                      <Heart
+                        size={14}
+                        strokeWidth={1.5}
+                        className={
+                          isFavorite
+                            ? "text-[var(--color-accent)] fill-[var(--color-accent)]"
+                            : "text-gray-500"
+                        }
+                      />
+                    </button>
                     {/* Thumbnail */}
                     <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 shrink-0">
                       {recipe.image_url && (
@@ -264,10 +287,10 @@ export default function SearchPage() {
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <h2 className="text-sm font-semibold leading-snug line-clamp-2 mb-1">
+                      <h2 className="text-sm font-semibold leading-snug max-w-[180] line-clamp-2 mb-1">
                         {formatTitle(recipe.title)}
                       </h2>
-                      <div className="flex items-center gap-2 text-xs text-gray-400 flex-wrap">
+                      <div className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)] flex-wrap">
                         {recipe.cooking_time && (
                           <div className="flex items-center gap-1">
                             <Clock size={11} />
@@ -281,7 +304,7 @@ export default function SearchPage() {
                           </div>
                         )}
                         {recipe.category && (
-                          <span className="px-2 py-0.5 bg-gray-100 rounded-lg text-gray-500">
+                          <span className="px-2 py-0.5 bg-gray-100 rounded-lg border border-gray-100 text-gray-500">
                             {recipe.category}
                           </span>
                         )}
@@ -295,10 +318,10 @@ export default function SearchPage() {
                     </div>
 
                     {/* Favorite */}
-                    <button
+                    {/* <button
                       onClick={(e) => toggleFavorite(e, recipe.id)}
                       className="shrink-0 p-1.5"
-                    >
+                     >
                       <Heart
                         size={16}
                         strokeWidth={1.5}
@@ -308,7 +331,7 @@ export default function SearchPage() {
                             : "text-gray-300"
                         }
                       />
-                    </button>
+                    </button> */}
                   </Link>
                 );
               })}
