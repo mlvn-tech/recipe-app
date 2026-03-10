@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 
 import Icon from "@/components/icons";
-import Header from "@/components/Header";
+import HeroHeader from "@/components/HeroHeader";
 import Card from "@/components/Card";
 import SwipeableSheet from "@/components/SwipeableSheet";
 import { formatTitle } from "@/lib/utils";
@@ -34,6 +34,7 @@ export default function RecipeDetail() {
   const id = Array.isArray(idParam) ? idParam[0] : idParam;
 
   const [showHeader, setShowHeader] = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(false);
 
   const router = useRouter();
 
@@ -179,6 +180,21 @@ export default function RecipeDetail() {
     handleScrollHeader();
 
     return () => window.removeEventListener("scroll", handleScrollHeader);
+  }, []);
+
+  useEffect(() => {
+    const handleScrollStart = () => {
+      if (window.scrollY > 10) {
+        setHasScrolled(true);
+      } else {
+        setHasScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScrollStart);
+    handleScrollStart();
+
+    return () => window.removeEventListener("scroll", handleScrollStart);
   }, []);
 
   // ✅ FAVORITES STATE
@@ -398,35 +414,18 @@ export default function RecipeDetail() {
 
   return (
     <>
-      {/* Scroll header */}
-      <div
-        className={clsx(
-          "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top transition-all duration-300",
-          showHeader
-            ? "opacity-100 translate-y-0"
-            : "opacity-0 -translate-y-full pointer-events-none",
-        )}
-      >
-        <div className="relative bg-white/90 backdrop-blur-md border-b border-gray-100 h-14 flex items-center justify-between px-4">
-          {/* Back */}
-          <button onClick={() => router.replace("/")}>
-            <Icon icon={ChevronLeft} size={22} />
-          </button>
-
-          {/* Titel gecentreerd */}
-          <span className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold truncate max-w-[60%] text-center">
-            {formatTitle(recipe?.title)}
-          </span>
-
-          {/* Rechter acties */}
-          <div className="flex items-center gap-4">
+      <HeroHeader
+        title={formatTitle(recipe?.title || "")}
+        heroRef={heroEndRef}
+        onBack={() => router.back()}
+        rightContent={
+          <>
             <button onClick={() => setPlannerOpen(true)}>
-              <Icon icon={CalendarPlus} size={20} className="text-gray-600" />
+              <CalendarPlus size={20} />
             </button>
 
             <button onClick={toggleFavorite}>
-              <Icon
-                icon={Heart}
+              <Heart
                 size={20}
                 className={
                   isFavorite
@@ -435,10 +434,22 @@ export default function RecipeDetail() {
                 }
               />
             </button>
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
 
+      {/* Floating chevron over hero image */}
+      <button
+        onClick={() => router.replace("/")}
+        className={clsx(
+          "absolute z-30 text-white left-4 top-[calc(env(safe-area-inset-top)+8px)] transition-all duration-200",
+          hasScrolled
+            ? "opacity-0 -translate-y-2 pointer-events-none"
+            : "opacity-100 translate-y-0",
+        )}
+      >
+        <Icon icon={ChevronLeft} size={36} />
+      </button>
       <main
         // style={{ paddingTop: "calc(4rem + env(safe-area-inset-top))" }}
         className="min-h-screen bg-[var(--color-bg)] pb-32"
@@ -454,34 +465,25 @@ export default function RecipeDetail() {
         ) : (
           <>
             {recipe.image_url && (
-              <div className="relative w-full h-[60vh]">
+              <div className="relative w-full h-[52vh]">
                 <img
                   src={recipe.image_url}
                   alt={recipe.title}
                   className="w-full h-full object-cover"
                 />
-                <button
-                  onClick={() => router.replace("/")}
-                  className="absolute text-white left-4 top-[calc(env(safe-area-inset-top)+8px)]"
-                >
-                  <Icon icon={ChevronLeft} size={36} />
-                </button>
+
                 <button
                   onClick={toggleFavorite}
-                  className="absolute bottom-4 right-4 bg-black/25 backdrop-blur-md rounded-full p-2 shadow-md"
-                  // style={{
-                  //   transform: animating ? "scale(1.1)" : "scale(1)",
-                  //   transition: "transform 0.18s ease-out",
-                  // }}
+                  className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md rounded-full p-2 shadow-md"
                 >
                   <Icon
                     icon={Heart}
-                    size={28}
+                    size={22}
                     strokeWidth={1.5}
                     className={
                       isFavorite
                         ? "text-[var(--color-accent)] fill-[var(--color-accent)]"
-                        : "text-white"
+                        : "text-gray-500"
                     }
                   />
                 </button>
@@ -502,22 +504,7 @@ export default function RecipeDetail() {
                 >
                   {formatTitle(recipe.title)}
                 </h1>
-                {(recipe.is_ai || recipe.category) && (
-                  <div className="flex justify-center gap-2 mt-2">
-                    {recipe.is_ai && (
-                      <div className="flex items-center gap-1 px-3 py-1 rounded-lg border border-[rgb(var(--color-secondaccent)/0.40)] text-[rgb(var(--color-secondaccent))] text-xs">
-                        <Icon icon={WandSparkles} size={14} />
-                        AI gegenereerd
-                      </div>
-                    )}
 
-                    {recipe.category && (
-                      <div className="px-3 py-1 rounded-lg border border-gray-300 text-gray-600 text-xs capitalize">
-                        {recipe.category}
-                      </div>
-                    )}
-                  </div>
-                )}
                 {/* metadata */}
                 <div className="flex items-center justify-center gap-6 text-sm text-[var(--color-text-secondary)]">
                   {recipe.cooking_time && (
@@ -541,28 +528,42 @@ export default function RecipeDetail() {
                     </div>
                   )} */}
                 </div>
+                {(recipe.is_ai || recipe.category) && (
+                  <div className="flex justify-center gap-2 mt-2">
+                    {recipe.is_ai && (
+                      <div className="flex items-center gap-1 px-3 py-1 rounded-lg border border-[rgb(var(--color-secondaccent)/0.40)] text-[rgb(var(--color-secondaccent))] text-xs">
+                        <Icon icon={WandSparkles} size={14} />
+                        AI gegenereerd
+                      </div>
+                    )}
 
+                    {recipe.category && (
+                      <div className="px-3 py-1 rounded-lg border border-gray-300 text-gray-600 text-xs capitalize">
+                        {recipe.category}
+                      </div>
+                    )}
+                  </div>
+                )}
                 {/* acties */}
-                <div className="flex items-center justify-center gap-8 pt-2">
-                  <button
-                    onClick={() => setPlannerOpen(true)}
-                    className="text-gray-500 active:scale-90 transition"
-                  >
-                    <CalendarPlus size={24} />
-                  </button>
-
+                <div className="flex items-center justify-center gap-8">
                   <button
                     onClick={handleShare}
-                    className="text-gray-500 active:scale-90 transition"
+                    className="text-[var(--color-text-secondary)] active:scale-90 transition"
                   >
-                    <Share size={24} />
+                    <Share size={20} />
                   </button>
 
                   <button
                     onClick={() => router.push(`/recipe/${recipe.id}/edit`)}
-                    className="text-gray-500 active:scale-90 transition"
+                    className="text-[var(--color-text-secondary)] active:scale-90 transition"
                   >
-                    <PenSquare size={24} />
+                    <PenSquare size={20} />
+                  </button>
+                  <button
+                    onClick={() => setPlannerOpen(true)}
+                    className="text-[var(--color-text-secondary)] active:scale-90 transition"
+                  >
+                    <CalendarPlus size={20} />
                   </button>
                 </div>
                 <div ref={heroEndRef} className="h-1" />
