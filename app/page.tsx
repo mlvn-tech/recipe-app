@@ -67,6 +67,14 @@ export default function Home() {
     }
   }, [generating]);
 
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const handleFavorite = (id: string) => {
     toggleFavorite(id);
     setAnimatingId(id);
@@ -284,10 +292,12 @@ export default function Home() {
   );
 
   return (
-    <main className="min-h-dvh bg-[var(--color-bg)] pb-32">
-      {/* Frosted glass overlay achter native UI */}
+    <main className="px-4 min-h-dvh bg-[var(--color-bg)] pb-32">
+      {/* Frosted glass — alleen zichtbaar na scrollen */}
       <div
-        className="fixed top-0 left-0 right-0 z-50 pointer-events-none"
+        className={`fixed top-0 left-0 right-0 z-50 pointer-events-none transition-opacity duration-300 ${
+          scrolled ? "opacity-100" : "opacity-0"
+        }`}
         style={{
           height: "env(safe-area-inset-top)",
           backdropFilter: "blur(20px)",
@@ -298,7 +308,7 @@ export default function Home() {
 
       {/* ── Hero greeting ── */}
       <div
-        className="relative px-5 pb-8"
+        className="relative pb-8"
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 2rem)" }}
       >
         <p className="text-[15px] font-medium text-[var(--color-accent)] mb-1 tracking-wide">
@@ -314,8 +324,8 @@ export default function Home() {
 
       {/* ── Gepland voor vandaag ── */}
       {todayRecipe && (
-        <div className="px-5 mb-8">
-          <h3 className="text-xs font-semibold text-gray-400 mb-3">
+        <div className="mb-8">
+          <h3 className="text-sm font-semibold text-gray-400 mb-3">
             Gepland voor vandaag
           </h3>
           <Link href={`/recipe/${todayRecipe.id}`}>
@@ -348,8 +358,8 @@ export default function Home() {
         </div>
       )}
       {/* ── Recepten header + toggle ── */}
-      <div className="px-5 flex items-end justify-between mb-3">
-        <h3 className="text-xs font-semibold text-gray-900">
+      <div className="flex items-end justify-between mb-3">
+        <h3 className="text-sm font-semibold text-gray-900">
           {activeCategory === "Alles" ? "Alle recepten" : activeCategory}
           {recipes !== null && (
             <span className="ml-2 text-xs font-semibold text-gray-400">
@@ -361,24 +371,24 @@ export default function Home() {
         <div className="flex items-center bg-white border border-gray-200 rounded-full p-1">
           <button
             onClick={() => setView("list")}
-            className={`w-6 h-6 flex items-center justify-center rounded-full transition ${
+            className={`w-8 h-8 flex items-center justify-center rounded-full transition ${
               view === "list" ? "bg-gray-800 text-white" : "text-gray-400"
             }`}
           >
-            <List size={16} />
+            <List size={18} />
           </button>
           <button
             onClick={() => setView("grid")}
-            className={`w-6 h-6 flex items-center justify-center rounded-full transition ${
+            className={`w-8 h-8 flex items-center justify-center rounded-full transition ${
               view === "grid" ? "bg-gray-800 text-white" : "text-gray-400"
             }`}
           >
-            <LayoutGrid size={16} />
+            <LayoutGrid size={18} />
           </button>
         </div>
       </div>
 
-      <div className="px-5">
+      <div className="">
         {/* Skeleton */}
         {recipes === null && (
           <div className="flex flex-col gap-4">
@@ -416,49 +426,47 @@ export default function Home() {
 
               if (view === "grid") {
                 return (
-                  <Card>
-                    <Link
-                      key={recipe.id}
-                      href={`/recipe/${recipe.id}`}
-                      className="block verflow-hidden active:scale-[0.98] transition"
-                    >
-                      <div className="aspect-[4/3] relative">
-                        {recipe.image_url ? (
-                          <img
-                            src={recipe.image_url}
-                            alt={recipe.title}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gray-100" />
-                        )}
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleFavorite(recipe.id);
-                          }}
-                          className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-1.5"
-                        >
-                          <Heart
-                            size={14}
-                            strokeWidth={1.5}
-                            className={
-                              isFavorite
-                                ? "text-[var(--color-accent)] fill-[var(--color-accent)]"
-                                : "text-gray-400"
-                            }
-                          />
-                        </button>
-                      </div>
-                      <div className="p-3">
-                        <h2 className="text-sm font-semibold leading-snug line-clamp-2 min-h-[2.5rem] mb-1.5">
-                          {formatTitle(recipe.title)}
-                        </h2>
-                        <RecipeMeta recipe={recipe} />
-                      </div>
-                    </Link>
-                  </Card>
+                  <Link
+                    key={recipe.id}
+                    href={`/recipe/${recipe.id}`}
+                    className="block overflow-hidden active:scale-[0.98] transition rounded-3xl border border-gray-200"
+                  >
+                    <div className="aspect-[4/3] relative">
+                      {recipe.image_url ? (
+                        <img
+                          src={recipe.image_url}
+                          alt={recipe.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-100" />
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleFavorite(recipe.id);
+                        }}
+                        className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-1.5"
+                      >
+                        <Heart
+                          size={14}
+                          strokeWidth={1.5}
+                          className={
+                            isFavorite
+                              ? "text-[var(--color-accent)] fill-[var(--color-accent)]"
+                              : "text-gray-400"
+                          }
+                        />
+                      </button>
+                    </div>
+                    <div className="p-3">
+                      <h2 className="text-sm font-semibold leading-snug line-clamp-2 min-h-[2.5rem] mb-1.5">
+                        {formatTitle(recipe.title)}
+                      </h2>
+                      <RecipeMeta recipe={recipe} />
+                    </div>
+                  </Link>
                 );
               }
 

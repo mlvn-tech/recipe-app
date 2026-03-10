@@ -134,14 +134,14 @@ export default function SearchPage() {
   const showResults = true;
 
   return (
-    <main
-      className="min-h-dvh bg-[var(--color-bg)] pb-32"
-      style={{ paddingTop: "calc(env(safe-area-inset-top) + 1rem)" }}
-    >
+    <main className="min-h-dvh bg-[var(--color-bg)] pb-32">
       {/* Zoekbalk — sticky, direct kind van main */}
       <div
-        className="sticky z-10 bg-[var(--color-bg)]/90 backdrop-blur-md px-5 pt-4 pb-4"
-        style={{ top: "env(safe-area-inset-top)" }}
+        className="px-4 sticky z-10 bg-[var(--color-bg)]/90 backdrop-blur-md pb-4"
+        style={{
+          top: 0,
+          paddingTop: "calc(env(safe-area-inset-top) + 1rem)",
+        }}
       >
         <h1
           className={`font-bold text-gray-900 leading-tight tracking-tight transition-all duration-300 ${
@@ -164,7 +164,7 @@ export default function SearchPage() {
             placeholder="Recept, ingrediënt, categorie..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-full bg-white border border-gray-200 p-3 pl-11 !text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-gray-300 transition"
+            className="w-full rounded-full bg-white border border-gray-200 p-3 pl-11 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-gray-300 transition"
           />
           {search.length > 0 && (
             <button
@@ -178,42 +178,41 @@ export default function SearchPage() {
       </div>
 
       {/* Filters */}
-      <div className="mb-6">
-        <div
-          className="flex gap-2 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth"
-          style={{
-            paddingLeft: "1.25rem",
-            paddingRight: "1.25rem",
-            scrollPaddingLeft: "1.25rem",
-          }}
-        >
-          {finalFilters.map((item) => {
-            const isActive = activeCategory === item.name;
-            return (
-              <button
-                key={item.name}
-                onClick={() => setActiveCategory(item.name)}
-                className={`snap-start flex-shrink-0 px-4 py-2 rounded-xl text-sm whitespace-nowrap border transition font-medium ${
-                  isActive
-                    ? "bg-gray-800 text-white border-gray-800"
-                    : "bg-white text-gray-500 border-gray-200"
-                }`}
-              >
-                {item.name}
 
-                <span
-                  className={`ml-2 text-xs ${isActive ? "opacity-60" : "opacity-40"}`}
-                >
-                  {item.count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+      <div
+        className="flex gap-2 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth mb-6"
+        style={{
+          paddingLeft: "1rem",
+          paddingRight: "1rem",
+          scrollPaddingLeft: "1rem",
+        }}
+      >
+        {finalFilters.map((item) => {
+          const isActive = activeCategory === item.name;
+          return (
+            <button
+              key={item.name}
+              onClick={() => setActiveCategory(item.name)}
+              className={`snap-start flex-shrink-0 px-4 py-2 rounded-xl text-sm whitespace-nowrap border transition font-medium ${
+                isActive
+                  ? "bg-gray-800 text-white border-gray-800"
+                  : "bg-white text-gray-500 border-gray-200"
+              }`}
+            >
+              {item.name}
+
+              <span
+                className={`ml-2 text-xs ${isActive ? "opacity-60" : "opacity-40"}`}
+              >
+                {item.count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Resultaten */}
-      <div className="px-5">
+      <div className="px-4">
         {/* Lege staat — nog niet gezocht */}
         {!showResults && recipes !== null && (
           <div className="pt-8 text-center">
