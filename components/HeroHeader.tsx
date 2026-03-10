@@ -8,7 +8,7 @@ type HeroHeaderProps = {
   title: string;
   onBack: () => void;
   rightContent?: React.ReactNode;
-  heroRef?: RefObject<HTMLDivElement>;
+  heroRef?: RefObject<HTMLDivElement | null>;
 };
 
 export default function HeroHeader({
