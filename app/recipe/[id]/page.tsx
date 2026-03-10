@@ -1,5 +1,4 @@
 "use client";
-import { styles } from "@/lib/styles";
 import clsx from "clsx";
 
 import { useEffect, useState, useRef, useMemo } from "react";
@@ -19,10 +18,10 @@ import {
   CalendarPlus,
   Plus,
   Check,
+  List,
 } from "lucide-react";
 
 import Icon from "@/components/icons";
-import HeroHeader from "@/components/HeroHeader";
 import Card from "@/components/Card";
 import SwipeableSheet from "@/components/SwipeableSheet";
 import { formatTitle } from "@/lib/utils";
@@ -33,16 +32,13 @@ export default function RecipeDetail() {
   const idParam = params.id;
   const id = Array.isArray(idParam) ? idParam[0] : idParam;
 
-  const [showHeader, setShowHeader] = useState(false);
-  const [hasScrolled, setHasScrolled] = useState(false);
-
+  const [isScrolled, setIsScrolled] = useState(false);
   const router = useRouter();
 
   const [recipe, setRecipe] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showFloating, setShowFloating] = useState(false);
   const [ingredientsOpen, setIngredientsOpen] = useState(false);
-  const headerTitle = recipe ? formatTitle(recipe.title) : "Recept";
   const { createMenuOpen } = useUI();
   const [plannerOpen, setPlannerOpen] = useState(false);
   const [weekOffset, setWeekOffset] = useState(0);
@@ -58,22 +54,6 @@ export default function RecipeDetail() {
     5: [],
     6: [],
   });
-
-  const handlePlan = async (day: string) => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user || !recipe) return;
-
-    await supabase.from("week_planner").insert({
-      recipe_id: recipe.id,
-      user_id: user.id,
-      day: day,
-    });
-
-    setPlannerOpen(false);
-  };
 
   const baseDate = useMemo(() => {
     const date = new Date();
@@ -91,11 +71,9 @@ export default function RecipeDetail() {
   const weekData = useMemo(() => {
     const start = new Date(baseDate);
     start.setDate(baseDate.getDate() - baseDate.getDay() + 1);
-
     return Array.from({ length: 7 }).map((_, i) => {
       const date = new Date(start);
       date.setDate(start.getDate() + i);
-
       return {
         label: date.toLocaleDateString("nl-NL", { weekday: "long" }),
         shortDate: date.toLocaleDateString("nl-NL", {
@@ -111,7 +89,6 @@ export default function RecipeDetail() {
     const {
       data: { session },
     } = await supabase.auth.getSession();
-
     const userId = session?.user?.id;
     if (!userId || !recipe) return;
 
@@ -140,7 +117,6 @@ export default function RecipeDetail() {
           ...prev,
           [dayIndex]: prev[dayIndex].filter((r) => r.id !== recipe.id),
         }));
-
         setPlannedDays((prev) => prev.filter((d) => d !== dayIndex));
       }
     } else {
@@ -157,54 +133,45 @@ export default function RecipeDetail() {
           ...prev,
           [dayIndex]: [...prev[dayIndex], recipe],
         }));
-
         setPlannedDays((prev) => [...prev, dayIndex]);
       }
     }
   };
 
-  useEffect(() => {
-    const handleScrollHeader = () => {
-      if (!heroEndRef.current) return;
-
-      const rect = heroEndRef.current.getBoundingClientRect();
-
-      if (rect.top <= 80) {
-        setShowHeader(true);
-      } else {
-        setShowHeader(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScrollHeader);
-    handleScrollHeader();
-
-    return () => window.removeEventListener("scroll", handleScrollHeader);
-  }, []);
-
-  useEffect(() => {
-    const handleScrollStart = () => {
-      if (window.scrollY > 10) {
-        setHasScrolled(true);
-      } else {
-        setHasScrolled(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScrollStart);
-    handleScrollStart();
-
-    return () => window.removeEventListener("scroll", handleScrollStart);
-  }, []);
-
-  // ✅ FAVORITES STATE
   const [isFavorite, setIsFavorite] = useState(false);
-
   const [animating, setAnimating] = useState(false);
 
-  const titleRef = useRef<HTMLHeadingElement | null>(null);
   const ingredientsEndRef = useRef<HTMLDivElement | null>(null);
   const heroEndRef = useRef<HTMLDivElement | null>(null);
+
+  // Scroll detectie voor sticky header (voorbij heroEndRef)
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!heroEndRef.current) return;
+      const rect = heroEndRef.current.getBoundingClientRect();
+      setIsScrolled(rect.top <= 0);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Scroll detectie voor ingrediënten knop
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!ingredientsEndRef.current) return;
+      const rect = ingredientsEndRef.current.getBoundingClientRect();
+      if (rect.bottom <= 64) {
+        setShowFloating(true);
+      } else {
+        setShowFloating(false);
+        setIngredientsOpen(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [recipe]);
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -213,61 +180,47 @@ export default function RecipeDetail() {
         .select("*")
         .eq("id", id)
         .single();
-
       setRecipe(data);
       setLoading(false);
     };
-
     if (id) fetchRecipe();
   }, [id]);
 
-  // ✅ FAVORITES CHECK
   useEffect(() => {
     const checkFavorite = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-
       if (!user || !id) return;
-
       const { data } = await supabase
         .from("favorites")
         .select("id")
         .eq("user_id", user.id)
         .eq("recipe_id", id)
         .maybeSingle();
-
       setIsFavorite(!!data);
     };
-
     if (id) checkFavorite();
   }, [id]);
 
-  // ✅ FAVORITES TOGGLE
   const toggleFavorite = async () => {
     setAnimating(true);
     setTimeout(() => setAnimating(false), 300);
-
     const {
       data: { user },
     } = await supabase.auth.getUser();
-
     if (!user || !id) return;
-
     if (isFavorite) {
       await supabase
         .from("favorites")
         .delete()
         .eq("user_id", user.id)
         .eq("recipe_id", id);
-
       setIsFavorite(false);
     } else {
-      await supabase.from("favorites").insert({
-        user_id: user.id,
-        recipe_id: id,
-      });
-
+      await supabase
+        .from("favorites")
+        .insert({ user_id: user.id, recipe_id: id });
       setIsFavorite(true);
     }
   };
@@ -276,7 +229,6 @@ export default function RecipeDetail() {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-
     if (!user || !id) return;
 
     const { data: existing } = await supabase
@@ -294,14 +246,11 @@ export default function RecipeDetail() {
         .insert({ recipe_id: id, created_by: user.id })
         .select("token")
         .single();
-
       token = created?.token;
     }
 
     if (!token) return;
-
     const url = `${window.location.origin}/recipe/share/${token}`;
-
     if (navigator.share) {
       await navigator.share({ title: recipe.title, url });
     } else {
@@ -311,37 +260,10 @@ export default function RecipeDetail() {
   };
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (!ingredientsEndRef.current) return;
-      const rect = ingredientsEndRef.current.getBoundingClientRect();
-
-      if (rect.bottom <= 64) {
-        setShowFloating(true);
-      } else {
-        setShowFloating(false);
-        setIngredientsOpen(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [recipe]);
-
-  const formattedDate = recipe
-    ? new Date(recipe.created_at).toLocaleDateString("nl-NL", {
-        day: "numeric",
-        month: "numeric",
-        year: "numeric",
-      })
-    : "";
-
-  useEffect(() => {
     const fetchWeekPlan = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-
       const userId = session?.user?.id;
       if (!userId) return;
 
@@ -369,40 +291,27 @@ export default function RecipeDetail() {
         5: [],
         6: [],
       };
-
       const planned: number[] = [];
 
       data?.forEach((item: any) => {
         if (item.recipes) {
           grouped[item.day_index].push(item.recipes);
-
-          if (item.recipes.id === recipe?.id) {
-            planned.push(item.day_index);
-          }
+          if (item.recipes.id === recipe?.id) planned.push(item.day_index);
         }
       });
 
       setWeekPlan(grouped);
       setPlannedDays(planned);
     };
-
     fetchWeekPlan();
   }, [weekStartDate, recipe]);
 
   const weekLabel = useMemo(() => {
     const start = new Date(baseDate);
     start.setDate(baseDate.getDate() - baseDate.getDay() + 1);
-
     const end = new Date(start);
     end.setDate(start.getDate() + 6);
-
-    return `${start.toLocaleDateString("nl-NL", {
-      day: "numeric",
-      month: "short",
-    })} t/m ${end.toLocaleDateString("nl-NL", {
-      day: "numeric",
-      month: "short",
-    })}`;
+    return `${start.toLocaleDateString("nl-NL", { day: "numeric", month: "short" })} t/m ${end.toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}`;
   }, [baseDate]);
 
   const weekOptions = [
@@ -414,46 +323,7 @@ export default function RecipeDetail() {
 
   return (
     <>
-      <HeroHeader
-        title={formatTitle(recipe?.title || "")}
-        heroRef={heroEndRef}
-        onBack={() => router.back()}
-        rightContent={
-          <>
-            <button onClick={() => setPlannerOpen(true)}>
-              <CalendarPlus size={20} />
-            </button>
-
-            <button onClick={toggleFavorite}>
-              <Heart
-                size={20}
-                className={
-                  isFavorite
-                    ? "text-[var(--color-accent)] fill-[var(--color-accent)]"
-                    : "text-gray-600"
-                }
-              />
-            </button>
-          </>
-        }
-      />
-
-      {/* Floating chevron over hero image */}
-      <button
-        onClick={() => router.replace("/")}
-        className={clsx(
-          "absolute z-30 text-white left-4 top-[calc(env(safe-area-inset-top)+8px)] transition-all duration-200",
-          hasScrolled
-            ? "opacity-0 -translate-y-2 pointer-events-none"
-            : "opacity-100 translate-y-0",
-        )}
-      >
-        <Icon icon={ChevronLeft} size={36} />
-      </button>
-      <main
-        // style={{ paddingTop: "calc(4rem + env(safe-area-inset-top))" }}
-        className="min-h-screen bg-[var(--color-bg)] pb-32"
-      >
+      <main className="min-h-screen bg-[var(--color-bg)] pb-12">
         {loading ? (
           <div className="px-4 pt-4 space-y-4">
             <div className="h-72 bg-gray-200 animate-pulse" />
@@ -464,6 +334,7 @@ export default function RecipeDetail() {
           <p className="p-8">Recept niet gevonden.</p>
         ) : (
           <>
+            {/* Hero afbeelding */}
             {recipe.image_url && (
               <div className="relative w-full h-[52vh]">
                 <img
@@ -471,7 +342,14 @@ export default function RecipeDetail() {
                   alt={recipe.title}
                   className="w-full h-full object-cover"
                 />
-
+                {/* Terugknop over de afbeelding */}
+                <button
+                  onClick={() => router.back()}
+                  className="absolute top-[calc(env(safe-area-inset-top)+12px)] left-4 bg-black/30 backdrop-blur-sm rounded-full p-2"
+                >
+                  <Icon icon={ChevronLeft} size={22} className="text-white" />
+                </button>
+                {/* Favoriet knop over de afbeelding */}
                 <button
                   onClick={toggleFavorite}
                   className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md rounded-full p-2 shadow-md"
@@ -490,69 +368,134 @@ export default function RecipeDetail() {
               </div>
             )}
 
-            <div className="px-4 pt-4 pb-16 space-y-4 rounded-3xl">
-              <div className="px-6 pt-4 space-y-5 text-center">
-                {/* datum
-                <p className="text-xs text-[var(--color-text-secondary)] tracking-wide">
-                  Toegevoegd op {formattedDate}
-                </p> */}
+            {/* Sticky header */}
+            <div className="sticky top-0 z-20 h-0 overflow-visible">
+              <div
+                className={clsx(
+                  "px-4 bg-[var(--color-bg)]/90 backdrop-blur-md transition-all duration-300",
+                  isScrolled
+                    ? "opacity-100 translate-y-0 pointer-events-auto"
+                    : "opacity-0 -translate-y-2 pointer-events-none",
+                )}
+                style={{
+                  paddingTop: "calc(env(safe-area-inset-top) + 1rem)",
+                  paddingBottom: "0.75rem",
+                }}
+              >
+                {/* Chevron + terug */}
+                <div className="flex items-center gap-1 -ml-1">
+                  <button
+                    onClick={() => router.back()}
+                    className="text-[var(--color-text-secondary)] active:opacity-70 transition-opacity"
+                  >
+                    <Icon icon={ChevronLeft} size={20} />
+                  </button>
+                  <span className="text-sm text-[var(--color-text-secondary)]">
+                    Recepten
+                  </span>
+                </div>
 
-                {/* titel */}
-                <h1
-                  ref={titleRef}
-                  className="text-2xl font-semibold leading-tight max-w-[28rem] mx-auto"
-                >
+                {/* Titel + icoontjes */}
+                <div className="flex items-center justify-between mt-0.5">
+                  <h2 className="font-bold text-[var(--color-text)] leading-tight tracking-tight transition-all duration-300 text-base mb-2">
+                    {formatTitle(recipe.title)}
+                  </h2>
+                  <div className="flex items-center gap-4 text-gray-600 shrink-0">
+                    <button
+                      onClick={() => setIngredientsOpen(true)}
+                      className={clsx(
+                        "active:opacity-70 transition-all duration-300",
+                        showFloating
+                          ? "opacity-100 translate-x-0"
+                          : "opacity-0 translate-x-2 pointer-events-none",
+                      )}
+                    >
+                      <Icon icon={List} size={20} />
+                    </button>
+                    <button onClick={() => setPlannerOpen(true)}>
+                      <Icon icon={CalendarPlus} size={20} />
+                    </button>
+                    <button onClick={toggleFavorite}>
+                      <Icon
+                        icon={Heart}
+                        size={20}
+                        className={
+                          isFavorite
+                            ? "text-[var(--color-accent)] fill-[var(--color-accent)]"
+                            : "text-gray-600"
+                        }
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="px-4 pb-16 space-y-4">
+              <div className="px-2 space-y-4">
+                <h1 className="pt-12 text-2xl font-bold leading-tight">
                   {formatTitle(recipe.title)}
                 </h1>
 
-                {/* metadata */}
-                <div className="flex items-center justify-center gap-6 text-sm text-[var(--color-text-secondary)]">
+                <div className="flex items-center gap-6 text-sm text-[var(--color-text-secondary)]">
                   {recipe.cooking_time && (
                     <div className="flex items-center gap-1">
                       <Icon icon={Clock} size={18} />
                       <span>{recipe.cooking_time} minuten</span>
                     </div>
                   )}
-
                   {recipe.servings && (
                     <div className="flex items-center gap-1">
                       <Icon icon={User} size={18} />
                       <span>{recipe.servings} personen</span>
                     </div>
                   )}
-
-                  {/* {recipe.is_ai && (
-                    <div className="flex items-center gap-1 px-2 py-1 text-[rgb(var(--color-secondaccent))] rounded-lg border border-[rgb(var(--color-secondaccent)/0.30)]">
-                      <Icon icon={WandSparkles} size={16} />
-                      <span>AI</span>
-                    </div>
-                  )} */}
                 </div>
-                {(recipe.is_ai || recipe.category) && (
-                  <div className="flex justify-center gap-2 mt-2">
-                    {recipe.is_ai && (
-                      <div className="flex items-center gap-1 px-3 py-1 rounded-lg border border-[rgb(var(--color-secondaccent)/0.40)] text-[rgb(var(--color-secondaccent))] text-xs">
-                        <Icon icon={WandSparkles} size={14} />
-                        AI gegenereerd
-                      </div>
-                    )}
 
+                {(recipe.is_ai || recipe.category) && (
+                  <div className="flex gap-2 pb-8">
                     {recipe.category && (
                       <div className="px-3 py-1 rounded-lg border border-gray-300 text-gray-600 text-xs capitalize">
                         {recipe.category}
                       </div>
                     )}
+                    {recipe.is_ai && (
+                      <div className="flex items-center gap-1 px-3 py-1 rounded-lg border border-[rgb(var(--color-secondaccent)/0.40)] text-[rgb(var(--color-secondaccent))] text-xs">
+                        <Icon icon={WandSparkles} size={14} />
+                        AI
+                      </div>
+                    )}
+                    <div className="ml-auto flex items-center gap-6">
+                      <button
+                        onClick={handleShare}
+                        className="text-[var(--color-text-secondary)] active:scale-90 transition"
+                      >
+                        <Share size={20} />
+                      </button>
+                      <button
+                        onClick={() => router.push(`/recipe/${recipe.id}/edit`)}
+                        className="text-[var(--color-text-secondary)] active:scale-90 transition"
+                      >
+                        <PenSquare size={20} />
+                      </button>
+                      <button
+                        onClick={() => setPlannerOpen(true)}
+                        className="text-[var(--color-text-secondary)] active:scale-90 transition"
+                      >
+                        <CalendarPlus size={20} />
+                      </button>
+                    </div>
                   </div>
                 )}
-                {/* acties */}
-                <div className="flex items-center justify-center gap-8">
+
+                {/* <div className="flex items-center gap-8">
                   <button
                     onClick={handleShare}
                     className="text-[var(--color-text-secondary)] active:scale-90 transition"
                   >
                     <Share size={20} />
                   </button>
-
                   <button
                     onClick={() => router.push(`/recipe/${recipe.id}/edit`)}
                     className="text-[var(--color-text-secondary)] active:scale-90 transition"
@@ -565,9 +508,11 @@ export default function RecipeDetail() {
                   >
                     <CalendarPlus size={20} />
                   </button>
-                </div>
-                <div ref={heroEndRef} className="h-1" />
+                </div> */}
               </div>
+
+              {/* Trigger voor sticky header */}
+              <div ref={heroEndRef} className="" />
 
               <Card>
                 <h2 className="font-semibold mb-4 text-lg">Ingrediënten</h2>
@@ -575,7 +520,6 @@ export default function RecipeDetail() {
                   {recipe.ingredients?.map((item: string, index: number) => {
                     const trimmed = item.trim();
                     const isTitle = trimmed.startsWith("#");
-
                     if (isTitle) {
                       return (
                         <li key={index} className="pt-2">
@@ -588,7 +532,6 @@ export default function RecipeDetail() {
                         </li>
                       );
                     }
-
                     return (
                       <li key={index} className="flex items-start gap-3">
                         <span className="mt-2.5 h-1 w-1 rounded-full bg-gray-400 shrink-0" />
@@ -613,7 +556,6 @@ export default function RecipeDetail() {
                     Start met koken
                   </button>
                 </div>
-
                 <ol className="space-y-0">
                   {recipe.steps?.map((step: string, index: number) => (
                     <li
@@ -641,6 +583,8 @@ export default function RecipeDetail() {
           </>
         )}
       </main>
+
+      {/* Ingrediënten sheet */}
       {recipe && (
         <SwipeableSheet
           open={ingredientsOpen && showFloating}
@@ -661,7 +605,6 @@ export default function RecipeDetail() {
               {recipe.ingredients?.map((item: string, index: number) => {
                 const trimmed = item.trim();
                 const isTitle = trimmed.startsWith("#");
-
                 if (isTitle) {
                   return (
                     <li
@@ -672,7 +615,6 @@ export default function RecipeDetail() {
                     </li>
                   );
                 }
-
                 return (
                   <li key={index} className="flex items-start gap-3">
                     <span className="mt-2.5 h-1.5 w-1.5 rounded-full bg-gray-400 shrink-0" />
@@ -685,6 +627,7 @@ export default function RecipeDetail() {
         </SwipeableSheet>
       )}
 
+      {/* Planner sheet */}
       <SwipeableSheet
         open={plannerOpen}
         onClose={() => setPlannerOpen(false)}
@@ -694,9 +637,7 @@ export default function RecipeDetail() {
       >
         <div
           className="px-4 space-y-2 pt-2"
-          style={{
-            paddingBottom: "calc(5rem + env(safe-area-inset-bottom))",
-          }}
+          style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom))" }}
         >
           {/* Week picker */}
           <div className="relative mb-3">
@@ -728,7 +669,6 @@ export default function RecipeDetail() {
                   end.setDate(start.getDate() + 6);
                   const range = `${start.toLocaleDateString("nl-NL", { day: "numeric", month: "short" })} – ${end.toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}`;
                   const isSelected = weekOffset === option.offset;
-
                   return (
                     <button
                       key={option.offset}
@@ -745,7 +685,7 @@ export default function RecipeDetail() {
                         <div
                           className={
                             isSelected
-                              ? "font-medium text-[var(--color-text)]"
+                              ? "font-medium text-gray-900"
                               : "text-gray-700"
                           }
                         >
@@ -775,7 +715,6 @@ export default function RecipeDetail() {
           {/* Dag knoppen */}
           {weekData.map((day) => {
             const recipesForDay = weekPlan[day.index] || [];
-
             return (
               <button
                 key={day.index}
@@ -786,7 +725,6 @@ export default function RecipeDetail() {
                   <span className="text-[var(--color-text-secondary)] capitalize text-sm font-medium">
                     {day.label}
                   </span>
-                  {/* <span className="text-xs text-gray-400">{day.shortDate}</span> */}
                   <div
                     className={clsx(
                       "overflow-hidden transition-all duration-300",
@@ -800,7 +738,6 @@ export default function RecipeDetail() {
                     </span>
                   </div>
                 </div>
-
                 <div className="flex items-center justify-center shrink-0">
                   <div
                     style={{
@@ -809,11 +746,7 @@ export default function RecipeDetail() {
                         : "scale(1) rotate(270deg)",
                       transition: "transform 0.3s ease, color 0.2s ease",
                     }}
-                    className={clsx(
-                      plannedDays.includes(day.index)
-                        ? "text-[var(--color-accent)]"
-                        : "text-[var(--color-accent)]",
-                    )}
+                    className="text-[var(--color-accent)]"
                   >
                     <Icon
                       icon={plannedDays.includes(day.index) ? Check : Plus}
@@ -826,31 +759,6 @@ export default function RecipeDetail() {
           })}
         </div>
       </SwipeableSheet>
-
-      {recipe && (
-        <div
-          className={`fixed left-1/2 -translate-x-1/2 z-40 transition-all duration-300 ${
-            showFloating && !ingredientsOpen && !createMenuOpen
-              ? "opacity-100"
-              : "opacity-0 pointer-events-none"
-          }`}
-          style={{ bottom: "calc(5rem + env(safe-area-inset-bottom))" }}
-        >
-          <button
-            onClick={() => setIngredientsOpen(!ingredientsOpen)}
-            className={clsx(styles.button.floatingFrosted, "px-6 py-5")}
-          >
-            Ingrediënten
-            <Icon
-              icon={ChevronDown}
-              size={20}
-              className={`text-gray-400 transition-transform duration-300 ${
-                ingredientsOpen ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-        </div>
-      )}
     </>
   );
 }

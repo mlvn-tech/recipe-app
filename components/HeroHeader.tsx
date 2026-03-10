@@ -2,13 +2,15 @@
 
 import { useEffect, useState, RefObject } from "react";
 import clsx from "clsx";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, UtensilsCrossed } from "lucide-react";
 
 type HeroHeaderProps = {
   title: string;
   onBack: () => void;
   rightContent?: React.ReactNode;
   heroRef?: RefObject<HTMLDivElement | null>;
+  showIngredients?: boolean;
+  onIngredientsOpen?: () => void;
 };
 
 export default function HeroHeader({
@@ -16,6 +18,8 @@ export default function HeroHeader({
   heroRef,
   onBack,
   rightContent,
+  showIngredients = false,
+  onIngredientsOpen,
 }: HeroHeaderProps) {
   const [visible, setVisible] = useState(false);
 
@@ -23,7 +27,6 @@ export default function HeroHeader({
     const handleScroll = () => {
       if (!heroRef?.current) return;
 
-      // Zorg dat header nooit zichtbaar is op paginalanding
       if (window.scrollY === 0) {
         setVisible(false);
         return;
@@ -56,7 +59,7 @@ export default function HeroHeader({
       }}
     >
       <div className="bg-white/90 backdrop-blur-md border-b border-gray-100 h-12 flex items-center justify-between px-4">
-        {/* Chevron */}
+        {/* Terug */}
         <button onClick={onBack} className="text-gray-600">
           <ChevronLeft size={20} />
         </button>
@@ -66,8 +69,19 @@ export default function HeroHeader({
           {title}
         </span>
 
-        {/* Acties */}
+        {/* Acties rechts */}
         <div className="flex items-center gap-4 text-gray-600">
+          <button
+            onClick={onIngredientsOpen}
+            className={clsx(
+              "transition-all duration-300",
+              showIngredients
+                ? "opacity-100 translate-x-0"
+                : "opacity-0 translate-x-2 pointer-events-none",
+            )}
+          >
+            <UtensilsCrossed size={18} />
+          </button>
           {rightContent}
         </div>
       </div>

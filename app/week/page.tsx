@@ -523,13 +523,18 @@ export default function WeekPage() {
                     className={clsx(
                       "text-sm font-medium",
                       isSelected
-                        ? "text-[var(--color-text)]"
-                        : "text-[var(--color-text-secondary)]",
+                        ? "text-[var(--color-text-secondary)]"
+                        : "text-gray-400",
                     )}
                   >
                     {option.label}
                   </div>
-                  <div className="text-xs text-[var(--color-text-tertiary)] mt-0.5">
+                  <div
+                    className={clsx(
+                      "text-xs mt-0.5",
+                      isSelected ? "text-[var(--color-text)]" : "text-gray-400",
+                    )}
+                  >
                     {range}
                   </div>
                 </div>
