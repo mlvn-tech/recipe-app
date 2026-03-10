@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "../../lib/supabase";
-import { Search, Clock, User, WandSparkles, Heart } from "lucide-react";
+import { Search, Clock, User, WandSparkles, Heart, X } from "lucide-react";
 import Link from "next/link";
 import { formatTitle } from "@/lib/utils";
 
@@ -15,9 +15,12 @@ export default function SearchPage() {
   const [activeCategory, setActiveCategory] = useState("Alles");
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const [scrolled, setScrolled] = useState(false);
+
   useEffect(() => {
-    // Auto-focus de zoekbalk als de pagina opent
-    setTimeout(() => inputRef.current?.focus(), 100);
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
@@ -132,16 +135,22 @@ export default function SearchPage() {
 
   return (
     <main
-      className="min-h-dvh bg-white pb-32"
+      className="min-h-dvh bg-[var(--color-bg)] pb-32"
       style={{ paddingTop: "calc(env(safe-area-inset-top) + 1rem)" }}
     >
-      {/* Header */}
-      <div className="px-5 pb-4">
-        <h1 className="text-[2rem] font-bold text-gray-900 leading-tight tracking-tight mb-5">
+      {/* Zoekbalk — sticky, direct kind van main */}
+      <div
+        className="sticky z-10 bg-[var(--color-bg)]/90 backdrop-blur-md px-5 pt-4 pb-4"
+        style={{ top: "env(safe-area-inset-top)" }}
+      >
+        <h1
+          className={`font-bold text-gray-900 leading-tight tracking-tight transition-all duration-300 ${
+            scrolled ? "text-base mb-2" : "text-[2rem] mb-4"
+          }`}
+        >
           Zoeken
         </h1>
 
-        {/* Zoekbalk */}
         <div className="relative group">
           <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
             <Search
@@ -155,14 +164,14 @@ export default function SearchPage() {
             placeholder="Recept, ingrediënt, categorie..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-full bg-white border border-gray-200 p-3 pl-11 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-gray-300 transition"
+            className="w-full rounded-full bg-white border border-gray-200 p-3 pl-11 !text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-gray-300 transition"
           />
           {search.length > 0 && (
             <button
               onClick={() => setSearch("")}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"
             >
-              Wis
+              <X size={18} strokeWidth={1.5} className="text-gray-500" />
             </button>
           )}
         </div>
@@ -187,7 +196,7 @@ export default function SearchPage() {
                 className={`snap-start flex-shrink-0 px-4 py-2 rounded-xl text-sm whitespace-nowrap border transition font-medium ${
                   isActive
                     ? "bg-gray-800 text-white border-gray-800"
-                    : "bg-white text-gray-500 border-[#EAE8E3]"
+                    : "bg-white text-gray-500 border-gray-200"
                 }`}
               >
                 {item.name}
@@ -235,8 +244,10 @@ export default function SearchPage() {
         {/* Geen resultaten */}
         {showResults && recipes !== null && filteredRecipes.length === 0 && (
           <div className="pt-8 text-center">
-            <p className="text-gray-400 text-sm">Geen recepten gevonden</p>
-            <p className="text-gray-400 text-sm">
+            <h2 className="text-[var-(--color-text-secondary)]">
+              Oeps, niks gevonden
+            </h2>
+            <p className="pt-4 text-gray-400 text-sm">
               {search
                 ? `Geen resultaten voor "${search}"`
                 : `Maak snel je eerste ${activeCategory.toLowerCase()} recept aan!`}
@@ -287,7 +298,7 @@ export default function SearchPage() {
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <h2 className="text-sm font-semibold leading-snug max-w-[180] line-clamp-2 mb-1">
+                      <h2 className="text-sm font-semibold leading-snug max-w-[190] line-clamp-2 mb-1">
                         {formatTitle(recipe.title)}
                       </h2>
                       <div className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)] flex-wrap">
@@ -297,14 +308,14 @@ export default function SearchPage() {
                             <span>{recipe.cooking_time} min.</span>
                           </div>
                         )}
-                        {recipe.servings && (
+                        {/* {recipe.servings && (
                           <div className="flex items-center gap-1">
                             <User size={11} />
                             <span>{recipe.servings} pers.</span>
                           </div>
-                        )}
+                        )} */}
                         {recipe.category && (
-                          <span className="px-2 py-0.5 bg-gray-100 rounded-lg border border-gray-100 text-gray-500">
+                          <span className="px-2 py-0.5 rounded-lg border border-gray-200 text-[var(--color-text-secondary)]">
                             {recipe.category}
                           </span>
                         )}

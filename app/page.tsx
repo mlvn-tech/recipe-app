@@ -284,7 +284,18 @@ export default function Home() {
   );
 
   return (
-    <main className="min-h-dvh bg-white pb-32">
+    <main className="min-h-dvh bg-[var(--color-bg)] pb-32">
+      {/* Frosted glass overlay achter native UI */}
+      <div
+        className="fixed top-0 left-0 right-0 z-50 pointer-events-none"
+        style={{
+          height: "env(safe-area-inset-top)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          backgroundColor: "rgba(255,255,255,0.7)",
+        }}
+      />
+
       {/* ── Hero greeting ── */}
       <div
         className="relative px-5 pb-8"
@@ -405,47 +416,49 @@ export default function Home() {
 
               if (view === "grid") {
                 return (
-                  <Link
-                    key={recipe.id}
-                    href={`/recipe/${recipe.id}`}
-                    className="block rounded-3xl overflow-hidden bg-white border border-gray-200 active:scale-[0.98] transition"
-                  >
-                    <div className="aspect-[4/3] relative">
-                      {recipe.image_url ? (
-                        <img
-                          src={recipe.image_url}
-                          alt={recipe.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gray-100" />
-                      )}
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleFavorite(recipe.id);
-                        }}
-                        className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-1.5"
-                      >
-                        <Heart
-                          size={14}
-                          strokeWidth={1.5}
-                          className={
-                            isFavorite
-                              ? "text-[var(--color-accent)] fill-[var(--color-accent)]"
-                              : "text-gray-400"
-                          }
-                        />
-                      </button>
-                    </div>
-                    <div className="p-3">
-                      <h2 className="text-sm font-semibold leading-snug line-clamp-2 min-h-[2.5rem] mb-1.5">
-                        {formatTitle(recipe.title)}
-                      </h2>
-                      <RecipeMeta recipe={recipe} />
-                    </div>
-                  </Link>
+                  <Card>
+                    <Link
+                      key={recipe.id}
+                      href={`/recipe/${recipe.id}`}
+                      className="block verflow-hidden active:scale-[0.98] transition"
+                    >
+                      <div className="aspect-[4/3] relative">
+                        {recipe.image_url ? (
+                          <img
+                            src={recipe.image_url}
+                            alt={recipe.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gray-100" />
+                        )}
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleFavorite(recipe.id);
+                          }}
+                          className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-1.5"
+                        >
+                          <Heart
+                            size={14}
+                            strokeWidth={1.5}
+                            className={
+                              isFavorite
+                                ? "text-[var(--color-accent)] fill-[var(--color-accent)]"
+                                : "text-gray-400"
+                            }
+                          />
+                        </button>
+                      </div>
+                      <div className="p-3">
+                        <h2 className="text-sm font-semibold leading-snug line-clamp-2 min-h-[2.5rem] mb-1.5">
+                          {formatTitle(recipe.title)}
+                        </h2>
+                        <RecipeMeta recipe={recipe} />
+                      </div>
+                    </Link>
+                  </Card>
                 );
               }
 

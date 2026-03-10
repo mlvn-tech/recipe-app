@@ -17,8 +17,8 @@ export default function Card({
     <div
       className={`
         bg-white
-        rounded-xl
-        shadow-sm
+        rounded-3xl
+        border border-gray-200
         ${overflow ? "overflow-hidden p-0" : "p-6"}
         ${className}
       `}

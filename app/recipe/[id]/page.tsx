@@ -490,7 +490,7 @@ export default function RecipeDetail() {
               </div>
             )}
 
-            <div className="px-4 pt-4 pb-16 space-y-4 rounded-xl">
+            <div className="px-4 pt-4 pb-16 space-y-4 rounded-3xl">
               <div className="px-6 pt-4 space-y-5 text-center">
                 {/* datum
                 <p className="text-xs text-[var(--color-text-secondary)] tracking-wide">
@@ -719,7 +719,7 @@ export default function RecipeDetail() {
             </button>
 
             {isWeekPickerOpen && (
-              <div className="absolute top-8 left-0 right-0 bg-white rounded-xl shadow-lg border border-gray-100 z-10 overflow-hidden">
+              <div className="absolute top-8 left-0 right-0 bg-white rounded-3xl shadow-lg border border-gray-100 z-10 overflow-hidden">
                 {weekOptions.map((option) => {
                   const start = new Date();
                   start.setDate(start.getDate() + option.offset * 7);
@@ -759,7 +759,7 @@ export default function RecipeDetail() {
               <button
                 key={day.index}
                 onClick={() => handlePlanDay(day.index)}
-                className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-all duration-300"
+                className="w-full flex items-center justify-between px-4 py-3 rounded-3xl bg-gray-50 hover:bg-gray-100 transition-all duration-300"
               >
                 <div className="flex flex-col text-left min-w-0 overflow-hidden transition-all duration-300">
                   <span className="text-[var(--color-text-secondary)] capitalize text-sm font-medium">
