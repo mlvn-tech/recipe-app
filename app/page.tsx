@@ -12,7 +12,6 @@ import {
   List,
   Search,
   WandSparkles,
-  ChevronRight,
 } from "lucide-react";
 
 import Icon from "@/components/icons";
@@ -53,7 +52,7 @@ export default function Home() {
 
     const fetchUser = async () => {
       const { data } = await supabase.auth.getUser();
-      const name = data?.user?.user_metadata?.name ?? "";
+      const name = data?.user?.user_metadata?.name ?? "Melvin";
       setUserName(name);
     };
     fetchUser();
@@ -165,7 +164,6 @@ export default function Home() {
         .eq("user_id", user.id);
       if (favs) setFavorites(favs.map((f) => f.recipe_id));
 
-      // Weekplanner: bereken week_start (maandag) en day_index
       const now = new Date();
       const jsDay = now.getDay();
       const dayIndex = jsDay === 0 ? 6 : jsDay - 1;
@@ -244,189 +242,148 @@ export default function Home() {
     }
   }, [recipes, filteredRecipes.length]);
 
+  // Gedeelde metadata + labels render helper
+  const RecipeMeta = ({
+    recipe,
+    light = false,
+  }: {
+    recipe: any;
+    light?: boolean;
+  }) => (
+    <div
+      className={`flex items-center gap-2 flex-wrap text-xs ${light ? "text-white/80" : "text-gray-400"}`}
+    >
+      {recipe.cooking_time && (
+        <div className="flex items-center gap-1">
+          <Clock size={12} />
+          <span>{recipe.cooking_time} min.</span>
+        </div>
+      )}
+      {recipe.servings && (
+        <div className="flex items-center gap-1">
+          <User size={12} />
+          <span>{recipe.servings} pers.</span>
+        </div>
+      )}
+      {recipe.category && (
+        <span
+          className={`px-2 py-0.5 rounded-md border text-xs ${light ? "border-white/30 text-white/80" : "border-gray-200 text-gray-500"}`}
+        >
+          {recipe.category}
+        </span>
+      )}
+      {recipe.is_ai && (
+        <span
+          className={`px-2 py-0.5 rounded-md border text-xs flex items-center gap-1 ${light ? "border-white/30 text-white/80" : "border-[rgb(var(--color-secondaccent)/0.30)] text-[rgb(var(--color-secondaccent))]"}`}
+        >
+          <WandSparkles size={10} />
+          AI
+        </span>
+      )}
+    </div>
+  );
+
   return (
     <main className="min-h-dvh bg-white pb-32">
       {/* ── Hero greeting ── */}
-      <div className="relative px-5 pt-14 pb-8">
+      <div
+        className="relative px-5 pb-8"
+        style={{ paddingTop: "calc(env(safe-area-inset-top) + 2rem)" }}
+      >
         <p className="text-[15px] font-medium text-[#F4A261] mb-1 tracking-wide">
           {greeting}
           {userName ? `, ${userName}` : ""}
         </p>
         <h1 className="text-[2rem] font-bold text-gray-900 leading-tight tracking-tight">
-          Wat gaan we
+          Wat staat er
           <br />
-          tjappen vandaag?
+          op het menu?
         </h1>
-      </div>
-
-      {/* ── Search + toggle ── */}
-      <div className="px-5 flex gap-3 mb-5">
-        <div className="relative flex-1 group">
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
-            <Search
-              size={18}
-              className="text-gray-400 transition-colors group-focus-within:text-gray-600"
-            />
-          </div>
-          <input
-            type="text"
-            placeholder="Zoek een recept..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-2xl bg-white border border-[#EAE8E3] p-3 pl-11 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-[#D4D0C8] transition shadow-sm"
-          />
-        </div>
-
-        <div className="flex items-center bg-white border border-[#EAE8E3] rounded-2xl p-1 shadow-sm">
-          <button
-            onClick={() => setView("list")}
-            className={`w-9 h-9 flex items-center justify-center rounded-xl transition ${
-              view === "list"
-                ? "bg-[var(--color-accent)] text-white"
-                : "text-gray-400"
-            }`}
-          >
-            <List size={18} />
-          </button>
-          <button
-            onClick={() => setView("grid")}
-            className={`w-9 h-9 flex items-center justify-center rounded-xl transition ${
-              view === "grid"
-                ? "bg-[#F5F3EF] text-gray-700 shadow-sm"
-                : "text-gray-400"
-            }`}
-          >
-            <LayoutGrid size={18} />
-          </button>
-        </div>
-      </div>
-
-      {/* ── Filters ── */}
-      <div className="mb-7">
-        <div
-          className="flex gap-2 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth"
-          style={{
-            paddingLeft: "1.25rem",
-            paddingRight: "1.25rem",
-            scrollPaddingLeft: "1.25rem",
-          }}
-        >
-          {finalFilters.map((item) => {
-            const isActive = activeCategory === item.name;
-            return (
-              <button
-                key={item.name}
-                onClick={() => setActiveCategory(item.name)}
-                className={`snap-start flex-shrink-0 px-4 py-2 rounded-xl text-sm whitespace-nowrap border transition font-medium ${
-                  isActive
-                    ? "bg-gray-800 text-white border-gray-800"
-                    : "bg-white text-gray-500 border-[#EAE8E3]"
-                }`}
-              >
-                {item.name}
-                {item.name !== "Alles" && (
-                  <span
-                    className={`ml-2 text-xs ${isActive ? "opacity-60" : "opacity-40"}`}
-                  >
-                    {item.count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
       </div>
 
       {/* ── Gepland voor vandaag ── */}
       {todayRecipe && (
         <div className="px-5 mb-8">
-          <h3 className="text-xs font-semibold text-gray-400 tracking-widest mb-3">
+          <h3 className="text-xs font-semibold text-gray-400 mb-3">
             Gepland voor vandaag
           </h3>
           <Link href={`/recipe/${todayRecipe.id}`}>
             <div className="relative rounded-3xl overflow-hidden bg-white border border-[#EAE8E3]">
-              {todayRecipe.image_url && (
+              {todayRecipe.image_url ? (
                 <div className="relative w-full h-44">
                   <img
                     src={todayRecipe.image_url}
                     alt={todayRecipe.title}
                     className="w-full h-full object-cover"
                   />
-                  {/* Gradient overlay onderaan */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <h3 className="!text-white font-semibold text-lg leading-tight">
+                    <h3 className="!text-white font-semibold text-lg leading-tight mb-2">
                       {formatTitle(todayRecipe.title)}
                     </h3>
-                    <div className="flex items-center gap-4 mt-1.5 text-white/80 text-sm">
-                      {todayRecipe.cooking_time && (
-                        <div className="flex items-center gap-1">
-                          <Clock size={13} />
-                          <span>{todayRecipe.cooking_time} min.</span>
-                        </div>
-                      )}
-                      {todayRecipe.servings && (
-                        <div className="flex items-center gap-1">
-                          <User size={13} />
-                          <span>{todayRecipe.servings} pers.</span>
-                        </div>
-                      )}
-                    </div>
+                    <RecipeMeta recipe={todayRecipe} light />
                   </div>
                 </div>
-              )}
-              {/* Geen foto fallback */}
-              {!todayRecipe.image_url && (
+              ) : (
                 <div className="p-4">
-                  <h3 className="font-semibold text-base">
+                  <h3 className="font-semibold text-base mb-2">
                     {formatTitle(todayRecipe.title)}
                   </h3>
-                  <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
-                    {todayRecipe.cooking_time && (
-                      <div className="flex items-center gap-1">
-                        <Clock size={13} />
-                        <span>{todayRecipe.cooking_time} min.</span>
-                      </div>
-                    )}
-                    {todayRecipe.servings && (
-                      <div className="flex items-center gap-1">
-                        <User size={13} />
-                        <span>{todayRecipe.servings} pers.</span>
-                      </div>
-                    )}
-                  </div>
+                  <RecipeMeta recipe={todayRecipe} />
                 </div>
               )}
             </div>
           </Link>
         </div>
       )}
-
-      {/* ── Recepten ── */}
-      <div className="px-5">
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-xs font-semibold text-gray-400 tracking-widest">
-            {activeCategory === "Alles" ? "Alle recepten" : activeCategory}
-          </p>
+      {/* ── Recepten header + toggle ── */}
+      <div className="px-5 flex items-end justify-between mb-3">
+        <h3 className="text-xs font-semibold text-gray-900">
+          {activeCategory === "Alles" ? "Alle recepten" : activeCategory}
           {recipes !== null && (
-            <span className="text-xs text-gray-400">
-              {filteredRecipes.length} recepten
+            <span className="ml-2 text-xs font-semibold text-gray-400">
+              {filteredRecipes.length}
             </span>
           )}
-        </div>
+        </h3>
 
+        <div className="flex items-center bg-white border border-[#EAE8E3] rounded-full p-1">
+          <button
+            onClick={() => setView("list")}
+            className={`w-6 h-6 flex items-center justify-center rounded-full transition ${
+              view === "list"
+                ? "bg-[var(--color-accent)] text-white"
+                : "text-gray-400"
+            }`}
+          >
+            <List size={16} />
+          </button>
+          <button
+            onClick={() => setView("grid")}
+            className={`w-6 h-6 flex items-center justify-center rounded-full transition ${
+              view === "grid"
+                ? "bg-[var(--color-accent)] text-white"
+                : "text-gray-400"
+            }`}
+          >
+            <LayoutGrid size={16} />
+          </button>
+        </div>
+      </div>
+
+      <div className="px-5">
         {/* Skeleton */}
         {recipes === null && (
           <div className="flex flex-col gap-4">
             {[...Array(3)].map((_, i) => (
               <div
                 key={i}
-                className="bg-white rounded-2xl overflow-hidden animate-pulse shadow-sm"
+                className="bg-white rounded-3xl overflow-hidden animate-pulse border border-[#EAE8E3]"
               >
-                <div className="h-44 bg-gray-200" />
+                <div className="h-44 bg-gray-100" />
                 <div className="p-4 space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-2/3" />
-                  <div className="h-3 bg-gray-200 rounded w-1/3" />
+                  <div className="h-4 bg-gray-100 rounded w-2/3" />
+                  <div className="h-3 bg-gray-100 rounded w-1/3" />
                 </div>
               </div>
             ))}
@@ -455,7 +412,7 @@ export default function Home() {
                   <Link
                     key={recipe.id}
                     href={`/recipe/${recipe.id}`}
-                    className="block rounded-2xl overflow-hidden bg-white border border-[#EAE8E3] active:scale-[0.98] transition"
+                    className="block rounded-3xl overflow-hidden bg-white border border-gray-200 active:scale-[0.98] transition"
                   >
                     <div className="aspect-[4/3] relative">
                       {recipe.image_url ? (
@@ -473,7 +430,7 @@ export default function Home() {
                           e.stopPropagation();
                           handleFavorite(recipe.id);
                         }}
-                        className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-1.5"
+                        className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-1.5"
                       >
                         <Heart
                           size={14}
@@ -487,23 +444,10 @@ export default function Home() {
                       </button>
                     </div>
                     <div className="p-3">
-                      <h2 className="text-sm font-semibold leading-snug line-clamp-2 min-h-[2.5rem]">
+                      <h2 className="text-sm font-semibold leading-snug line-clamp-2 min-h-[2.5rem] mb-1.5">
                         {formatTitle(recipe.title)}
                       </h2>
-                      <div className="flex items-center gap-2 mt-1.5 text-xs text-gray-400">
-                        {recipe.cooking_time && (
-                          <div className="flex items-center gap-0.5">
-                            <Clock size={11} />
-                            <span>{recipe.cooking_time}m</span>
-                          </div>
-                        )}
-                        {recipe.servings && (
-                          <div className="flex items-center gap-0.5">
-                            <User size={11} />
-                            <span>{recipe.servings}p</span>
-                          </div>
-                        )}
-                      </div>
+                      <RecipeMeta recipe={recipe} />
                     </div>
                   </Link>
                 );
@@ -516,7 +460,7 @@ export default function Home() {
                   href={`/recipe/${recipe.id}`}
                   className="block active:scale-[0.99] transition"
                 >
-                  <div className="bg-white rounded-2xl overflow-hidden border border-[#EAE8E3]">
+                  <div className="bg-white rounded-3xl overflow-hidden border border-gray-200">
                     {recipe.image_url && (
                       <div className="relative w-full h-48">
                         <img
@@ -524,7 +468,6 @@ export default function Home() {
                           alt={recipe.title}
                           className="w-full h-full object-cover"
                         />
-                        {/* Gradient + info overlay onderaan foto */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/5 to-transparent" />
                         <button
                           onClick={(e) => {
@@ -532,7 +475,7 @@ export default function Home() {
                             e.stopPropagation();
                             handleFavorite(recipe.id);
                           }}
-                          className="absolute top-3 right-3 bg-white/85 backdrop-blur-md rounded-full p-2 shadow-sm"
+                          className="absolute bottom-3 right-3 bg-white/85 backdrop-blur-md rounded-full p-2 shadow-sm"
                         >
                           <Heart
                             size={16}
@@ -546,36 +489,11 @@ export default function Home() {
                         </button>
                       </div>
                     )}
-
                     <div className="px-4 py-3.5">
                       <h2 className="text-base font-semibold leading-snug mb-2">
                         {formatTitle(recipe.title)}
                       </h2>
-                      <div className="flex items-center gap-3 text-xs text-gray-400 flex-wrap">
-                        {recipe.cooking_time && (
-                          <div className="flex items-center gap-1">
-                            <Clock size={12} />
-                            <span>{recipe.cooking_time} min.</span>
-                          </div>
-                        )}
-                        {recipe.servings && (
-                          <div className="flex items-center gap-1">
-                            <User size={12} />
-                            <span>{recipe.servings} pers.</span>
-                          </div>
-                        )}
-                        {recipe.category && (
-                          <span className="px-2 py-0.5 bg-gray-100 rounded-lg text-gray-500">
-                            {recipe.category}
-                          </span>
-                        )}
-                        {recipe.is_ai && (
-                          <span className="px-2 py-0.5 rounded-lg border border-[rgb(var(--color-secondaccent)/0.30)] text-[rgb(var(--color-secondaccent))] flex items-center gap-1">
-                            <WandSparkles size={10} />
-                            AI
-                          </span>
-                        )}
-                      </div>
+                      <RecipeMeta recipe={recipe} />
                     </div>
                   </div>
                 </Link>

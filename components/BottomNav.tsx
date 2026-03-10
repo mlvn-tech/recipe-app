@@ -12,6 +12,7 @@ import {
   User,
   PenLine,
   WandSparkles,
+  Search,
 } from "lucide-react";
 
 import Icon from "@/components/icons";
@@ -30,12 +31,18 @@ export default function BottomNav() {
       iconActive: Utensils,
     },
     {
+      label: "Zoek",
+      href: "/search",
+      icon: Search,
+      iconActive: Search,
+    },
+    { label: "Nieuw", href: "/new", icon: PlusCircle, iconActive: PlusCircle },
+    {
       label: "Week",
       href: "/week",
       icon: CalendarDays,
       iconActive: CalendarDays,
     },
-    { label: "Nieuw", href: "/new", icon: PlusCircle, iconActive: PlusCircle },
     { label: "Account", href: "/account", icon: User, iconActive: User },
   ];
 
@@ -64,7 +71,7 @@ export default function BottomNav() {
 
           const IconComponent = isActive ? item.iconActive : item.icon;
 
-          // 🔹 SPECIALE WRAPPER VOOR NIEUW
+          // SPECIALE WRAPPER VOOR NIEUW
           if (item.label === "Nieuw") {
             return (
               <div
@@ -95,7 +102,6 @@ export default function BottomNav() {
                         className="text-[rgb(var(--color-secondaccent))]"
                       />
                     </span>
-
                     <span className="whitespace-nowrap">Koken met AI</span>
                   </button>
 
@@ -109,7 +115,6 @@ export default function BottomNav() {
                     <span className="w-5 flex justify-center shrink-0">
                       <PenLine size={16} className="text-gray-500" />
                     </span>
-
                     <span className="whitespace-nowrap">Zelf maken</span>
                   </button>
                 </div>
@@ -131,7 +136,7 @@ export default function BottomNav() {
                     <Icon
                       icon={IconComponent}
                       size={24}
-                      strokeWidth={2}
+                      strokeWidth={1.5}
                       className={`transition-colors duration-200 ${
                         isActive
                           ? "text-[var(--color-accent)]"
@@ -140,7 +145,7 @@ export default function BottomNav() {
                     />
                   </div>
                   <span
-                    className={`text-xs mt-1 transition-colors h-4 ${
+                    className={`text-[10px] mt-1 transition-colors h-4 ${
                       isActive ? "text-[var(--color-accent)]" : "text-gray-500"
                     }`}
                   >
@@ -158,10 +163,7 @@ export default function BottomNav() {
                 setCreateMenuOpen(false);
 
                 if (pathname === item.href && item.href === "/") {
-                  window.scrollTo({
-                    top: 0,
-                    behavior: "smooth",
-                  });
+                  window.scrollTo({ top: 0, behavior: "smooth" });
                   return;
                 }
 
@@ -172,14 +174,13 @@ export default function BottomNav() {
               <Icon
                 icon={IconComponent}
                 size={24}
-                strokeWidth={2}
+                strokeWidth={1.5}
                 className={`transition-colors duration-200 ${
                   isActive ? "text-[var(--color-accent)]" : "text-gray-500"
                 }`}
               />
-
               <span
-                className={`text-xs mt-1 transition-colors ${
+                className={`text-[10px] mt-1 transition-colors ${
                   isActive ? "text-[var(--color-accent)]" : "text-gray-500"
                 }`}
               >
