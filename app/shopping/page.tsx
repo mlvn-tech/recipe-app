@@ -1,13 +1,11 @@
 "use client";
-import { styles } from "@/lib/styles";
 import clsx from "clsx";
 
 import { Suspense, useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
-import Header from "@/components/Header";
 import Card from "@/components/Card";
 
-import { Plus, Trash2, Check, RefreshCw } from "lucide-react";
+import { Plus, Trash2, Check, RefreshCw, ChevronLeft } from "lucide-react";
 
 import Icon from "@/components/icons";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -113,7 +111,7 @@ function SwipeableItem({
       </div>
 
       <div
-        className="relative w-full bg-white overflow-hidden"
+        className="relative w-full overflow-hidden"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -132,7 +130,11 @@ function SwipeableItem({
 
 export default function ShoppingPage() {
   return (
-    <Suspense fallback={<p className="p-8">Laden...</p>}>
+    <Suspense
+      fallback={
+        <p className="p-8 text-[var(--color-text-secondary)]">Laden…</p>
+      }
+    >
       <ShoppingPageContent />
     </Suspense>
   );
@@ -149,17 +151,21 @@ function ShoppingPageContent() {
   const [newName, setNewName] = useState("");
   const [justChecked, setJustChecked] = useState<Set<string>>(new Set());
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
+  const [isScrolled, setIsScrolled] = useState(false);
 
-  // ✅ Household state
   const [householdId, setHouseholdId] = useState<string | null>(null);
 
-  // ✅ Load household once
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 80);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   useEffect(() => {
     const loadHousehold = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-
       const userId = session?.user?.id;
       if (!userId) return;
 
@@ -175,7 +181,6 @@ function ShoppingPageContent() {
     loadHousehold();
   }, []);
 
-  // ✅ Fetch shopping items
   useEffect(() => {
     const fetchItems = async () => {
       if (!householdId) return;
@@ -199,7 +204,6 @@ function ShoppingPageContent() {
     const {
       data: { session },
     } = await supabase.auth.getSession();
-
     const userId = session?.user?.id;
     if (!userId) return;
 
@@ -212,7 +216,6 @@ function ShoppingPageContent() {
       .eq("week_start", weekStart);
 
     const allIngredients: string[] = [];
-
     data?.forEach((item: any) => {
       if (item.recipes?.ingredients) {
         allIngredients.push(...item.recipes.ingredients);
@@ -224,7 +227,6 @@ function ShoppingPageContent() {
     ].filter((i) => !i.startsWith("#"));
 
     const existingNames = items.map((i) => i.name.toLowerCase());
-
     const toInsert = unique
       .filter((name) => !existingNames.includes(name))
       .map((name) => ({
@@ -253,7 +255,6 @@ function ShoppingPageContent() {
     const {
       data: { session },
     } = await supabase.auth.getSession();
-
     const userId = session?.user?.id;
     if (!userId) return;
 
@@ -316,7 +317,6 @@ function ShoppingPageContent() {
       .from("shopping_list")
       .delete()
       .eq("household_id", householdId)
-
       .eq("checked", true);
 
     setItems((prev) => prev.filter((i) => !i.checked));
@@ -336,35 +336,59 @@ function ShoppingPageContent() {
 
   return (
     <>
-      <Header
-        title="Boodschappenlijstje"
-        showBack
-        onBack={() => router.push("/week")}
-      />
-
       <main
-        style={{ paddingTop: "var(--header-height)" }}
-        className="min-h-screen bg-[var(--color-bg)] pb-24"
+        className="min-h-screen bg-[var(--color-bg)]"
+        style={{
+          paddingBottom: "calc(5rem + env(safe-area-inset-bottom))",
+        }}
       >
-        <div className="px-4 max-w-4xl mx-auto space-y-4 pt-4">
+        {/* Hero header */}
+        <div
+          className="px-4 sticky z-10 bg-[var(--color-bg)]/90 backdrop-blur-md pb-3 max-w-4xl mx-auto"
+          style={{
+            top: 0,
+            paddingTop: "calc(env(safe-area-inset-top) + 1rem)",
+          }}
+        >
+          <button
+            onClick={() => router.push("/week")}
+            className="flex items-center gap-1 text-[var(--color-text-secondary)] active:opacity-70 transition-opacity mb-1 -ml-1"
+          >
+            <Icon icon={ChevronLeft} size={20} />
+            <span className="text-sm">Weekplanner</span>
+          </button>
+          <h1
+            className={clsx(
+              "font-bold text-gray-900 leading-tight tracking-tight transition-all duration-300",
+              isScrolled ? "text-base mb-2" : "text-[2rem] mb-3",
+            )}
+          >
+            Boodschappenlijst
+          </h1>
+        </div>
+
+        <div className="px-4 max-w-4xl mx-auto space-y-3 pt-4">
           {loading ? (
-            <div className="bg-white rounded-xl p-5 animate-pulse">
-              <div className="h-4 bg-gray-200 rounded w-1/3 mb-4" />
-              <div className="h-4 bg-gray-200 rounded w-2/3 mb-3" />
-              <div className="h-4 bg-gray-200 rounded w-1/2" />
-            </div>
+            <Card className="p-5 animate-pulse space-y-3">
+              <div className="h-4 bg-[var(--color-surface-secondary)] rounded w-1/3" />
+              <div className="h-4 bg-[var(--color-surface-secondary)] rounded w-2/3" />
+              <div className="h-4 bg-[var(--color-surface-secondary)] rounded w-1/2" />
+            </Card>
           ) : (
             <>
               {weekStart && (
                 <button
                   onClick={loadFromWeek}
                   disabled={loadingWeek}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-600 active:scale-95 transition shadow-sm"
+                  className="w-full flex justify-center gap-2 py-2.5 px-4 rounded-2xl bg-[var(--color-bg)] border border-gray-200 text-xs font-medium text-gray-700 active:scale-95 transition"
                 >
                   <Icon
                     icon={RefreshCw}
-                    size={16}
-                    className={`text-gray-400 ${loadingWeek ? "animate-spin" : ""}`}
+                    size={15}
+                    className={clsx(
+                      "text-[var(--color-text-tertiary)]",
+                      loadingWeek && "animate-spin",
+                    )}
                   />
                   {loadingWeek
                     ? "Laden..."
@@ -373,8 +397,11 @@ function ShoppingPageContent() {
               )}
 
               <Card className="p-5">
+                {/* Header van de card */}
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-gray-800">Te kopen</h3>
+                  <span className="text-sm font-semibold text-[var(--color-text)]">
+                    Te kopen
+                  </span>
                   {items.length > 0 && (
                     <button
                       onClick={() => {
@@ -386,14 +413,15 @@ function ShoppingPageContent() {
                           clearAll();
                         }
                       }}
-                      className="text-xs text-red-400 hover:text-red-500 transition"
+                      className="text-xs text-red-400 active:text-red-500 transition-colors"
                     >
                       Verwijder alles
                     </button>
                   )}
                 </div>
 
-                <li className="flex items-center gap-3 pb-4 mb-4 border-b border-gray-100 list-none">
+                {/* Nieuw item toevoegen */}
+                <div className="flex items-center gap-3 pb-4 mb-4 border-b border-[var(--color-border)]">
                   <button
                     onClick={addItem}
                     className="h-5 w-5 shrink-0 flex items-center justify-center"
@@ -401,7 +429,7 @@ function ShoppingPageContent() {
                     <Icon
                       icon={Plus}
                       size={16}
-                      className="text-gray-400 hover:text-gray-500 transition"
+                      className="text-[var(--color-text-tertiary)]"
                     />
                   </button>
                   <input
@@ -413,11 +441,12 @@ function ShoppingPageContent() {
                     onBlur={() => addItem()}
                     inputMode="text"
                     enterKeyHint="done"
-                    className="flex-1 text-sm bg-transparent focus:outline-none placeholder:text-gray-400 min-w-0"
+                    className="flex-1 text-sm bg-transparent focus:outline-none placeholder:text-[var(--color-text-tertiary)] text-[var(--color-text)] min-w-0"
                   />
-                </li>
+                </div>
 
-                <ul>
+                {/* Onafgevinkte items */}
+                <ul className="space-y-0">
                   {visibleUnchecked.map((item) => {
                     const isJustChecked = justChecked.has(item.id);
                     return (
@@ -425,16 +454,17 @@ function ShoppingPageContent() {
                         key={item.id}
                         visible={!removingIds.has(item.id)}
                       >
-                        <li className="pb-4">
+                        <li className="pb-3">
                           <SwipeableItem onDelete={() => deleteItem(item.id)}>
                             <div className="relative flex items-center gap-3 py-1">
                               <button
                                 onClick={() => toggleChecked(item)}
-                                className={`h-5 w-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-200 ${
+                                className={clsx(
+                                  "h-5 w-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all duration-200",
                                   isJustChecked
                                     ? "border-[var(--color-accent)] bg-[var(--color-accent)]"
-                                    : "border-gray-300"
-                                }`}
+                                    : "border-[var(--color-border)] bg-transparent",
+                                )}
                               >
                                 {isJustChecked && (
                                   <Icon
@@ -450,11 +480,11 @@ function ShoppingPageContent() {
                                   updateName(item, e.target.value)
                                 }
                                 rows={1}
-                                className={`flex-1 text-sm bg-transparent border-b border-transparent focus:outline-none transition-all duration-200 resize-none overflow-hidden min-w-0 ${
-                                  isJustChecked
-                                    ? "text-gray-400 line-through"
-                                    : ""
-                                }`}
+                                className={clsx(
+                                  "flex-1 text-sm bg-transparent focus:outline-none transition-all duration-200 resize-none overflow-hidden min-w-0 text-[var(--color-text)]",
+                                  isJustChecked &&
+                                    "text-[var(--color-text-tertiary)] line-through",
+                                )}
                                 onInput={(e) => {
                                   const el = e.target as HTMLTextAreaElement;
                                   el.style.height = "auto";
@@ -469,11 +499,12 @@ function ShoppingPageContent() {
                   })}
                 </ul>
 
+                {/* Afgevinkte items */}
                 {checkedItems.length > 0 && (
                   <>
-                    <div className="flex items-center justify-between mt-2 mb-4 pt-6 border-t border-gray-100">
-                      <p className="text-sm text-gray-400 font-semibold">
-                        Afgevinkte boodschappen
+                    <div className="flex items-center justify-between mt-2 mb-4 pt-4 border-t border-[var(--color-border)]">
+                      <p className="text-xs font-semibold text-[var(--color-text-secondary)]">
+                        Afgevinkt
                       </p>
                       <button
                         onClick={() => {
@@ -485,19 +516,19 @@ function ShoppingPageContent() {
                             clearChecked();
                           }
                         }}
-                        className="text-xs text-red-400 hover:text-red-500 transition"
+                        className="text-xs text-red-400 active:text-red-500 transition-colors"
                       >
                         Verwijder alles
                       </button>
                     </div>
 
-                    <ul>
+                    <ul className="space-y-0">
                       {checkedItems.map((item) => (
                         <AnimatedItem
                           key={item.id}
                           visible={!removingIds.has(item.id)}
                         >
-                          <li className="pb-4">
+                          <li className="pb-3">
                             <SwipeableItem onDelete={() => deleteItem(item.id)}>
                               <div className="flex items-center gap-3 py-1">
                                 <button
@@ -510,7 +541,7 @@ function ShoppingPageContent() {
                                     className="text-white"
                                   />
                                 </button>
-                                <span className="flex-1 text-sm text-gray-400 line-through">
+                                <span className="flex-1 text-sm text-[var(--color-text-tertiary)] line-through">
                                   {item.name}
                                 </span>
                               </div>

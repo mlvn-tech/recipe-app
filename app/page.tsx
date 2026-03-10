@@ -52,7 +52,7 @@ export default function Home() {
 
     const fetchUser = async () => {
       const { data } = await supabase.auth.getUser();
-      const name = data?.user?.user_metadata?.name ?? "Melvin";
+      const name = data?.user?.user_metadata?.name ?? "";
       setUserName(name);
     };
     fetchUser();
@@ -259,7 +259,7 @@ export default function Home() {
     light?: boolean;
   }) => (
     <div
-      className={`flex items-center gap-2 flex-wrap text-xs ${light ? "text-white/80" : "text-[var(--color-text-secondary)]"}`}
+      className={`flex items-center gap-2 flex-wrap text-xs ${light ? "text-white/85" : "text-[var(--color-text-secondary)]"}`}
     >
       {recipe.cooking_time && (
         <div className="flex items-center gap-1">
@@ -275,14 +275,14 @@ export default function Home() {
       )}
       {recipe.category && (
         <span
-          className={`px-2 py-0.5 rounded-md border text-xs ${light ? "border-white/30 text-white/80" : "border-gray-200 text-gray-500"}`}
+          className={`px-2 py-0.5 rounded-md border text-xs ${light ? "border-white/40 text-white/85" : "border-gray-200 text-gray-500"}`}
         >
           {recipe.category}
         </span>
       )}
       {recipe.is_ai && (
         <span
-          className={`px-2 py-0.5 rounded-md border text-xs flex items-center gap-1 ${light ? "border-white/30 text-white/80" : "border-[rgb(var(--color-secondaccent)/0.30)] text-[rgb(var(--color-secondaccent))]"}`}
+          className={`px-2 py-0.5 rounded-md border text-xs flex items-center gap-1 ${light ? "border-white/40 text-white/85" : "border-[rgb(var(--color-secondaccent)/0.30)] text-[rgb(var(--color-secondaccent))]"}`}
         >
           <WandSparkles size={10} />
           AI
@@ -447,10 +447,10 @@ export default function Home() {
                           e.stopPropagation();
                           handleFavorite(recipe.id);
                         }}
-                        className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-1.5"
+                        className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-2"
                       >
                         <Heart
-                          size={14}
+                          size={20}
                           strokeWidth={1.5}
                           className={
                             isFavorite
@@ -492,10 +492,10 @@ export default function Home() {
                             e.stopPropagation();
                             handleFavorite(recipe.id);
                           }}
-                          className="absolute bottom-3 right-3 bg-white/85 backdrop-blur-md rounded-full p-2 shadow-sm"
+                          className="absolute top-3 right-3 bg-white/85 backdrop-blur-md rounded-full p-2 shadow-sm"
                         >
                           <Heart
-                            size={16}
+                            size={20}
                             strokeWidth={1.5}
                             className={
                               isFavorite

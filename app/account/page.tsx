@@ -4,16 +4,17 @@ import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { QRCodeCanvas } from "qrcode.react";
-import Header from "@/components/Header";
-import Card from "@/components/Card";
-import { Share, Copy } from "lucide-react";
-
+import { Share, Copy, Pencil, Check } from "lucide-react";
 import { generateInviteCode } from "@/lib/generateInviteCode";
 
 export default function AccountPage() {
   const [user, setUser] = useState<any>(null);
   const [householdId, setHouseholdId] = useState<string | null>(null);
   const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [name, setName] = useState("");
+  const [editingName, setEditingName] = useState(false);
+  const [savingName, setSavingName] = useState(false);
 
   const router = useRouter();
 
@@ -30,6 +31,7 @@ export default function AccountPage() {
 
       const currentUser = data.user;
       setUser(currentUser);
+      setName(currentUser.user_metadata?.name ?? "");
 
       const { data: membership } = await supabase
         .from("household_members")
@@ -44,7 +46,7 @@ export default function AccountPage() {
         setHouseholdId(null);
         setInviteCode(null);
       }
-      // Als huishouden bestaat maar geen invite code heeft, genereer er een
+
       if (membership && !(membership.households as any)?.invite_code) {
         const newCode = generateInviteCode();
         await supabase
@@ -66,10 +68,12 @@ export default function AccountPage() {
     router.replace("/login");
   };
 
-  const inviteLink =
-    householdId && typeof window !== "undefined"
-      ? `${window.location.origin}/join?household=${householdId}`
-      : "";
+  const handleSaveName = async () => {
+    setSavingName(true);
+    await supabase.auth.updateUser({ data: { name: name.trim() } });
+    setSavingName(false);
+    setEditingName(false);
+  };
 
   const handleCreateHousehold = async () => {
     if (!user) return;
@@ -78,10 +82,7 @@ export default function AccountPage() {
 
     const { data: household, error } = await supabase
       .from("households")
-      .insert({
-        name: "Ons huishouden",
-        invite_code: newCode,
-      })
+      .insert({ name: "Ons huishouden", invite_code: newCode })
       .select()
       .single();
 
@@ -101,10 +102,10 @@ export default function AccountPage() {
 
   const handleCopy = async () => {
     if (!inviteCode) return;
-
     try {
       await navigator.clipboard.writeText(inviteCode);
-      alert("Invite code gekopieerd!");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Copy failed", err);
     }
@@ -112,7 +113,6 @@ export default function AccountPage() {
 
   const handleShare = async () => {
     if (!inviteCode) return;
-
     try {
       if (navigator.share) {
         await navigator.share({
@@ -121,127 +121,175 @@ export default function AccountPage() {
         });
       } else {
         await navigator.clipboard.writeText(inviteCode);
-        alert("Invite code gekopieerd!");
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
       }
     } catch (err: any) {
-      if (err.name !== "AbortError") {
-        console.error("Share failed:", err);
-      }
+      if (err.name !== "AbortError") console.error("Share failed:", err);
     }
   };
 
-  console.log("user:", user);
-  console.log("householdId:", householdId);
-  console.log("inviteCode:", inviteCode);
-
   return (
-    <>
-      <Header title="Account" showBack={false} />
-      <main
-        style={{ paddingTop: "var(--header-height)" }}
-        className="min-h-dvh bg-[var(--color-bg)] pb-24"
-      >
-        <div className="px-4 space-y-4 pt-4">
-          {/* Account info */}
-          <Card>
-            <div className="flex flex-col items-center text-center space-y-6">
-              <div className="space-y-2">
-                {user?.email ? (
-                  <>
-                    <p className="text-sm text-[var(--color-text-secondary)]">
-                      {user.email}
-                    </p>
+    <main
+      className="min-h-dvh bg-[var(--color-bg)] pb-32"
+      style={{ paddingTop: "calc(env(safe-area-inset-top) + 1rem)" }}
+    >
+      {/* Hero */}
+      <div className="px-5 pb-6">
+        <h1 className="text-[2rem] font-bold text-gray-900 leading-tight tracking-tight">
+          Account
+        </h1>
+      </div>
 
-                    <button
-                      onClick={handleLogout}
-                      className="text-sm text-[var(--color-accent)]"
-                    >
-                      Log uit
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-sm text-gray-500">Niet ingelogd</p>
-                  </>
-                )}
-              </div>
-            </div>
-          </Card>
+      <div className="px-5 space-y-6">
+        {/* Account sectie */}
+        <div>
+          <h3 className="text-sm font-semibold text-gray-400 mb-3">
+            Ingelogd als
+          </h3>
+          <div className="bg-white border border-gray-200 rounded-3xl px-5 py-4 flex items-center justify-between">
+            <p className="text-sm font-medium text-gray-800">
+              {user?.email ?? "—"}
+            </p>
+            <button
+              onClick={handleLogout}
+              className="text-xs font-medium text-[var(--color-accent)]"
+            >
+              Uitloggen
+            </button>
+          </div>
+        </div>
 
-          {/* CASE 1: User heeft household */}
-          {user?.email && householdId && (
-            <Card>
-              <div className="flex flex-col items-center text-center space-y-6">
-                <div>
-                  <h2 className="text-lg font-semibold">
-                    Samen recepten verzamelen?
-                  </h2>
-                  <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-                    Laat iemand de QR-code scannen of verstuur een uitnodiging
+        {/* Naam sectie */}
+        {user?.email && (
+          <div>
+            <h3 className="text-sm font-semibold text-gray-400 mb-3">Naam</h3>
+            <div className="bg-white border border-gray-200 rounded-3xl px-5 py-4 flex items-center justify-between gap-3">
+              {editingName ? (
+                <>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    style={{ fontSize: "16px" }}
+                    autoFocus
+                    className="flex-1 bg-transparent text-sm font-medium text-gray-800 focus:outline-none"
+                    placeholder="Je naam"
+                  />
+                  <button
+                    onClick={handleSaveName}
+                    disabled={savingName}
+                    className="text-sm font-medium text-[var(--color-accent)]"
+                  >
+                    {savingName ? "..." : "Opslaan"}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-medium text-gray-800 flex-1">
+                    {name || (
+                      <span className="text-gray-400">Nog geen naam</span>
+                    )}
                   </p>
+                  <button
+                    onClick={() => setEditingName(true)}
+                    className="text-xs font-medium text-[var(--color-accent)]"
+                  >
+                    Wijzig
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* CASE 1: Heeft household */}
+        {user?.email && householdId && (
+          <div>
+            <h3 className="text-sm font-semibold text-gray-400 mb-3">
+              Huishouden
+            </h3>
+            <div className="bg-white border border-gray-200 rounded-3xl px-5 py-6">
+              <h2 className="text-base font-semibold text-gray-900 mb-1">
+                Samen recepten verzamelen?
+              </h2>
+              <p className="text-sm text-gray-400 mb-6">
+                Laat iemand de QR-code scannen of deel de uitnodigingscode
+              </p>
+
+              {/* QR code + knoppen */}
+              <div className="flex items-center gap-5">
+                {/* QR code */}
+                <div className="py-3 px-6 rounded-2xl shrink-0">
+                  <QRCodeCanvas value={inviteCode ?? ""} size={80} />
+                  <div className="pt-4">
+                    <p className="flex justify-center text-lg font-semibold tracking-widest text-gray-900">
+                      {inviteCode}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="bg-white p-4 rounded-2xl shadow-sm">
-                  <QRCodeCanvas value={inviteCode ?? ""} size={110} />
-                </div>
-
-                {/* Invite code zichtbaar */}
-                <div className="text-2xl tracking-widest font-semibold">
-                  {inviteCode}
-                </div>
-
-                <div className="flex gap-10">
+                {/* Acties */}
+                <div className="flex flex-col gap-2 flex-1">
                   <button
                     onClick={handleShare}
-                    className="flex flex-col items-center text-gray-600 active:scale-95 transition"
+                    className="flex justify-center gap-2 py-2.5 px-4 rounded-2xl bg-[var(--color-bg)] border border-gray-200 text-xs font-medium text-gray-700 active:scale-95 transition"
                   >
-                    <Share size={24} className="mb-1 text-gray-600" />
-                    <span className="text-xs">Deel</span>
+                    <Share size={14} strokeWidth={1.5} />
+                    Deel
                   </button>
-
                   <button
                     onClick={handleCopy}
-                    className="flex flex-col items-center text-gray-600 active:scale-95 transition"
+                    className="flex justify-center gap-2 py-2.5 px-4 rounded-2xl bg-[var(--color-bg)] border border-gray-200 text-xs font-medium text-gray-700 active:scale-95 transition"
                   >
-                    <Copy size={24} className="mb-1 text-gray-600" />
-                    <span className="text-xs">Kopieer</span>
+                    <Copy size={14} strokeWidth={1.5} />
+                    {copied ? "Gekopieerd!" : "Kopieer"}
                   </button>
                 </div>
               </div>
-            </Card>
-          )}
+            </div>
+          </div>
+        )}
 
-          {/* CASE 2: User heeft GEEN household */}
-          {user?.email && !householdId && (
-            <Card>
-              <div className="space-y-4 text-center">
-                <h2 className="text-lg font-semibold">Nog geen huishouden</h2>
-
-                <p className="text-sm text-[var(--color-text-secondary)]">
-                  Maak een huishouden aan of voeg je bij een bestaand
-                  huishouden.
-                </p>
-
-                <div className="flex flex-col gap-3">
-                  <button
-                    onClick={handleCreateHousehold}
-                    className="px-4 py-2 rounded-xl bg-[var(--color-primary)] text-white"
-                  >
-                    Maak huishouden aan
-                  </button>
-
-                  <button
-                    onClick={() => router.push("/join")}
-                    className="px-4 py-2 rounded-xl border border-gray-300"
-                  >
-                    Join met code
-                  </button>
-                </div>
+        {/* CASE 2: Geen household */}
+        {user?.email && !householdId && (
+          <div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
+              Huishouden
+            </p>
+            <div className="bg-white border border-gray-200 rounded-3xl px-5 py-6">
+              <h2 className="text-base font-semibold text-gray-900 mb-1">
+                Nog geen huishouden
+              </h2>
+              <p className="text-sm text-gray-400 mb-6">
+                Maak een huishouden aan of voeg je bij een bestaand huishouden
+                met een code.
+              </p>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={handleCreateHousehold}
+                  className="w-full py-3 rounded-2xl bg-gray-900 text-white text-sm font-medium active:scale-95 transition"
+                >
+                  Maak huishouden aan
+                </button>
+                <button
+                  onClick={() => router.push("/join")}
+                  className="w-full py-3 rounded-2xl border border-gray-200 text-sm font-medium text-gray-700 active:scale-95 transition"
+                >
+                  Join met code
+                </button>
               </div>
-            </Card>
-          )}
-        </div>
-      </main>
-    </>
+            </div>
+          </div>
+        )}
+
+        {/* Niet ingelogd */}
+        {!user && (
+          <div className="bg-white border border-gray-200 rounded-3xl px-5 py-4 text-center">
+            <p className="text-sm text-gray-400">Niet ingelogd</p>
+          </div>
+        )}
+      </div>
+    </main>
   );
 }

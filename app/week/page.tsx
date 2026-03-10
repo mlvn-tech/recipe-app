@@ -1,9 +1,7 @@
 "use client";
-import { styles } from "@/lib/styles";
 import clsx from "clsx";
 
-import { useMemo, useState, useEffect } from "react";
-import Header from "@/components/Header";
+import { useMemo, useState, useEffect, useRef } from "react";
 import Card from "@/components/Card";
 
 import { Plus, X, ChevronDown, Check, ShoppingBag } from "lucide-react";
@@ -14,7 +12,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SearchInput from "@/components/SearchInput";
 import SwipeableSheet from "@/components/SwipeableSheet";
-import { useUI } from "@/components/UIContext";
 
 type ShoppingItem = {
   name: string;
@@ -27,8 +24,9 @@ export default function WeekPage() {
   const [activeDay, setActiveDay] = useState<number | null>(null);
   const [weekOffset, setWeekOffset] = useState(0);
   const [isWeekPickerOpen, setIsWeekPickerOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
-  const { createMenuOpen } = useUI();
+  const mainRef = useRef<HTMLDivElement>(null);
 
   const getUserId = async () => {
     const {
@@ -41,7 +39,6 @@ export default function WeekPage() {
     const {
       data: { session },
     } = await supabase.auth.getSession();
-
     const userId = session?.user?.id;
     if (!userId) return null;
 
@@ -72,6 +69,19 @@ export default function WeekPage() {
   });
   const [shoppingCount, setShoppingCount] = useState(0);
 
+  const router = useRouter();
+  const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState("Alles");
+
+  // Scroll detectie voor sticky header
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 80);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   useEffect(() => {
     const fetchShoppingCount = async () => {
       const householdId = await getHouseholdId();
@@ -89,31 +99,18 @@ export default function WeekPage() {
     fetchShoppingCount();
   }, []);
 
-  const router = useRouter();
-  const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState("Alles");
-
   const baseCategories = ["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"];
 
   const getCount = (cat: string) => {
-    if (cat === "Favorieten") {
-      return favorites.length;
-    }
-
-    if (cat === "Alles") {
-      return recipes.length;
-    }
-
+    if (cat === "Favorieten") return favorites.length;
+    if (cat === "Alles") return recipes.length;
     return recipes.filter(
       (r) => r.category?.toLowerCase() === cat.toLowerCase(),
     ).length;
   };
 
   const sortedCategories = baseCategories
-    .map((cat) => ({
-      name: cat,
-      count: getCount(cat),
-    }))
+    .map((cat) => ({ name: cat, count: getCount(cat) }))
     .sort((a, b) => {
       if (b.count !== a.count) return b.count - a.count;
       return a.name.localeCompare(b.name);
@@ -145,6 +142,9 @@ export default function WeekPage() {
     end.setDate(start.getDate() + 6);
     return `${start.toLocaleDateString("nl-NL", { day: "numeric", month: "short" })} t/m ${end.toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}`;
   }, [baseDate]);
+
+  const currentWeekOptionLabel =
+    weekOptions.find((w) => w.offset === weekOffset)?.label ?? "Deze week";
 
   const weekData = useMemo(() => {
     const start = new Date(baseDate);
@@ -198,7 +198,6 @@ export default function WeekPage() {
 
       setFavorites(data?.map((f) => f.recipe_id) || []);
     };
-
     fetchFavorites();
   }, []);
 
@@ -254,18 +253,11 @@ export default function WeekPage() {
     const matchesSearch = recipe.title
       .toLowerCase()
       .includes(search.toLowerCase());
-
-    if (activeCategory === "Alles") {
-      return matchesSearch;
-    }
-
-    if (activeCategory === "Favorieten") {
+    if (activeCategory === "Alles") return matchesSearch;
+    if (activeCategory === "Favorieten")
       return matchesSearch && favorites.includes(recipe.id);
-    }
-
     const matchesCategory =
       recipe.category?.toLowerCase() === activeCategory.toLowerCase();
-
     return matchesSearch && matchesCategory;
   });
 
@@ -275,7 +267,6 @@ export default function WeekPage() {
     const {
       data: { session },
     } = await supabase.auth.getSession();
-
     const userId = session?.user?.id;
     if (!userId) return;
 
@@ -340,23 +331,103 @@ export default function WeekPage() {
     }
   };
 
+  const sheetBottomPadding = "calc(5rem + env(safe-area-inset-bottom))";
+
+  // Gedeelde week + shopping bar — gebruikt in zowel de hero als de sticky header
+  const WeekBar = ({ compact = false }: { compact?: boolean }) => (
+    <div
+      className={clsx(
+        "flex items-center justify-between",
+        compact ? "px-4" : "mt-3",
+      )}
+    >
+      <button
+        onClick={() => setIsWeekPickerOpen(true)}
+        className={clsx(
+          "flex items-center gap-2 transition-opacity active:opacity-70",
+          compact ? "py-1" : "py-0",
+        )}
+      >
+        <div className="text-left">
+          {!compact && (
+            <p className="text-sm font-normal text-[var(--color-text-secondary)] mb-0.5">
+              {currentWeekOptionLabel}
+            </p>
+          )}
+          <div className="flex items-center gap-1.5">
+            <span
+              className={clsx(
+                "text-[var(--color-text)]",
+                compact ? "text-xs" : "text-xs",
+              )}
+            >
+              {weekLabel}
+            </span>
+            <Icon
+              icon={ChevronDown}
+              size={14}
+              className="text-[var(--color-text-secondary)]"
+            />
+          </div>
+        </div>
+      </button>
+
+      <div className="relative">
+        <button
+          onClick={() => router.push(`/shopping?week=${weekStartDate}`)}
+          className="w-9 h-9 flex items-center justify-center rounded-xl active:opacity-70 transition-opacity"
+        >
+          <Icon
+            icon={ShoppingBag}
+            size={24}
+            className="text-[var(--color-text-secondary)]"
+          />
+        </button>
+        {shoppingCount > 0 && (
+          <div className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-[var(--color-accent)] rounded-full flex items-center justify-center pointer-events-none">
+            <span className="text-white text-[10px] font-bold leading-none">
+              {shoppingCount}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <>
-      <Header title="Weekplanner" showBack={false} />
-
       <main
-        className="min-h-screen bg-[var(--color-bg)] pb-24"
+        className="min-h-screen bg-[var(--color-bg)]"
         style={{
-          paddingBottom: "calc(10rem + env(safe-area-inset-bottom))",
-          paddingTop: "var(--header-height)",
+          paddingBottom: "calc(5rem + env(safe-area-inset-bottom))",
         }}
       >
-        <div className="px-4 max-w-4xl mx-auto space-y-4 pt-4">
+        {/* Hero header */}
+        <div
+          className="px-4 sticky z-10 bg-[var(--color-bg)]/90 backdrop-blur-md pb-3 max-w-4xl mx-auto"
+          style={{
+            top: 0,
+            paddingTop: "calc(env(safe-area-inset-top) + 1rem)",
+          }}
+        >
+          <h1
+            className={clsx(
+              "font-bold text-[var(--color-text)] leading-tight tracking-tight transition-all duration-300",
+              isScrolled ? "text-base mb-2" : "text-[2rem] mb-3",
+            )}
+          >
+            Weekplanner
+          </h1>
+          <WeekBar />
+        </div>
+
+        {/* Dagkaarten */}
+        <div className="px-4 max-w-4xl mx-auto space-y-4 pt-2">
           {weekData.map((day, index) => (
             <Card key={index} className="p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="capitalize font-semibold text-lg">
+                  <h2 className="capitalize font-semibold text-[var(--color-text)]">
                     {day.label}
                   </h2>
                   <p className="text-sm text-[var(--color-text-secondary)]">
@@ -365,29 +436,29 @@ export default function WeekPage() {
                 </div>
                 <button
                   onClick={() => setActiveDay(index)}
-                  className="flex items-center gap-1 text-sm text-[var(--color-accent)]"
+                  className="flex items-center gap-1 text-xs text-[var(--color-accent)] active:opacity-70 transition-opacity"
                 >
-                  <Icon icon={Plus} size={18} />
-                  Voeg toe
+                  <Icon icon={Plus} size={16} />
+                  Toevoegen
                 </button>
               </div>
 
               {weekPlan[index].length === 0 ? (
-                <div className="text-sm text-gray-400">
-                  Nog geen recepten gepland
-                </div>
+                <p className="text-sm text-[var(--color-text-tertiary)]">
+                  Nog niets gepland
+                </p>
               ) : (
                 <div className="space-y-2">
                   {weekPlan[index].map((recipe) => (
                     <div
                       key={recipe.id}
-                      className="flex items-center justify-between text-sm bg-gray-50 px-3 py-2 rounded-lg"
+                      className="flex items-center justify-between text-sm rounded-xl"
                     >
                       <Link
                         href={`/recipe/${recipe.id}`}
                         className="flex items-center gap-3 min-w-0 flex-1"
                       >
-                        <div className="h-8 w-8 rounded-full overflow-hidden bg-gray-200 shrink-0">
+                        <div className="h-12 w-12 rounded-lg overflow-hidden bg-[var(--color-surface-tertiary)] shrink-0">
                           {recipe.image_url && (
                             <img
                               src={recipe.image_url}
@@ -396,13 +467,13 @@ export default function WeekPage() {
                             />
                           )}
                         </div>
-                        <span className="truncate max-w-[200px]">
+                        <span className="text-[var(--color-text)] line-clamp-2">
                           {recipe.title}
                         </span>
                       </Link>
                       <button
                         onClick={() => removeFromDay(index, recipe.id)}
-                        className="text-gray-400 hover:text-red-500 shrink-0"
+                        className="ml-auto text-[var(--color-text-tertiary)] active:text-red-400 shrink-0 transition-colors ml-2"
                       >
                         <Icon icon={X} size={16} />
                       </button>
@@ -415,44 +486,6 @@ export default function WeekPage() {
         </div>
       </main>
 
-      {/* Floating knoppen */}
-      <div
-        className={clsx(
-          "fixed left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 transition-all duration-200",
-          createMenuOpen ? "opacity-0 pointer-events-none" : "opacity-100",
-        )}
-        style={{
-          bottom: "calc(5rem + env(safe-area-inset-bottom))",
-        }}
-      >
-        <button
-          onClick={() => setIsWeekPickerOpen(true)}
-          className={clsx(styles.button.floatingFrosted, "px-6 py-5")}
-        >
-          {weekLabel}
-          <Icon icon={ChevronDown} size={20} className="text-gray-400" />
-        </button>
-
-        <div className="relative">
-          <button
-            onClick={() => router.push(`/shopping?week=${weekStartDate}`)}
-            className={clsx(
-              styles.button.floatingFrosted,
-              "w-15 h-15 justify-center",
-            )}
-          >
-            <Icon icon={ShoppingBag} size={24} className="text-gray-500" />
-          </button>
-          {shoppingCount > 0 && (
-            <div className="absolute -top-1 -right-1 h-6 w-6 bg-[var(--color-brand)] rounded-full flex items-center justify-center">
-              <span className="text-white text-[12px] font-bold">
-                {shoppingCount}
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* Week picker sheet */}
       <SwipeableSheet
         open={isWeekPickerOpen}
@@ -462,8 +495,8 @@ export default function WeekPage() {
         maxHeight="90dvh"
       >
         <div
-          className="px-6 space-y-3 pt-2"
-          style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom))" }}
+          className="px-4 space-y-1 pt-1"
+          style={{ paddingBottom: sheetBottomPadding }}
         >
           {weekOptions.map((option) => {
             const start = new Date();
@@ -478,22 +511,35 @@ export default function WeekPage() {
               <button
                 key={option.offset}
                 onClick={() => setWeekOffset(option.offset)}
-                className={`w-full flex items-center justify-between p-4 rounded-xl border transition ${
+                className={clsx(
+                  "w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all",
                   isSelected
-                    ? "bg-gray-50 border-gray-100 font-medium"
-                    : "bg-white border-gray-200 text-gray-600"
-                }`}
+                    ? "border border-gray-200"
+                    : "border border-transparent",
+                )}
               >
                 <div className="text-left">
-                  <div>{option.label}</div>
                   <div
-                    className={`text-sm ${isSelected ? "text-gray-500" : "text-gray-400"}`}
+                    className={clsx(
+                      "text-sm font-medium",
+                      isSelected
+                        ? "text-[var(--color-text)]"
+                        : "text-[var(--color-text-secondary)]",
+                    )}
                   >
+                    {option.label}
+                  </div>
+                  <div className="text-xs text-[var(--color-text-tertiary)] mt-0.5">
                     {range}
                   </div>
                 </div>
                 <div
-                  className={`h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 ${isSelected ? "border-[var(--color-accent)]" : "border-gray-300"}`}
+                  className={clsx(
+                    "h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors",
+                    isSelected
+                      ? "border-[var(--color-accent)]"
+                      : "border-[var(--color-border)]",
+                  )}
                 >
                   {isSelected && (
                     <div className="h-2.5 w-2.5 rounded-full bg-[var(--color-accent)]" />
@@ -522,34 +568,35 @@ export default function WeekPage() {
         </div>
 
         <div
-          className="flex gap-3 overflow-x-auto mb-4 no-scrollbar shrink-0 snap-x snap-mandatory scroll-smooth"
+          className="flex gap-2 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth mb-4 shrink-0"
           style={{
-            scrollPaddingLeft: "1.5rem",
             paddingLeft: "1.5rem",
             paddingRight: "1.5rem",
+            scrollPaddingLeft: "1.5rem",
           }}
         >
           {finalFilters.map((item) => {
-            const cat = item.name;
-            const count = item.count;
-            const isActive = activeCategory === cat;
-
+            const isActive = activeCategory === item.name;
             return (
               <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`snap-start px-4 py-2 rounded-xl text-sm whitespace-nowrap border transition ${
+                key={item.name}
+                onClick={() => setActiveCategory(item.name)}
+                className={clsx(
+                  "snap-start flex-shrink-0 px-4 py-2 rounded-xl text-sm whitespace-nowrap border transition font-medium",
                   isActive
-                    ? "bg-gray-100 border-gray-100 font-medium"
-                    : "bg-white border-gray-200 text-gray-600"
-                }`}
-              >
-                <span>{cat}</span>
-                {cat !== "Alles" && count > 0 && (
-                  <span className="text-gray-400 font-normal ml-2">
-                    {count}
-                  </span>
+                    ? "bg-gray-800 text-white border-gray-800"
+                    : "bg-white text-gray-500 border-gray-200",
                 )}
+              >
+                {item.name}
+                <span
+                  className={clsx(
+                    "ml-2 text-xs",
+                    isActive ? "opacity-60" : "opacity-40",
+                  )}
+                >
+                  {item.count}
+                </span>
               </button>
             );
           })}
@@ -557,11 +604,11 @@ export default function WeekPage() {
 
         <div
           className="flex-1 overflow-y-auto px-6 space-y-2"
-          style={{ paddingBottom: "calc(5rem + env(safe-area-inset-bottom))" }}
+          style={{ paddingBottom: sheetBottomPadding }}
         >
           {filteredRecipes.length === 0 ? (
-            <div className="text-sm text-gray-400 py-6 text-center">
-              Geen recepten gevonden.
+            <div className="text-sm text-[var(--color-text-tertiary)] py-6 text-center">
+              Geen recepten gevonden
             </div>
           ) : (
             filteredRecipes.map((recipe) => {
@@ -572,14 +619,15 @@ export default function WeekPage() {
                 <button
                   key={recipe.id}
                   onClick={() => toggleRecipeForDay(recipe)}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition ${
+                  className={clsx(
+                    "w-full flex items-center justify-between px-4 py-3 rounded-xl transition",
                     isSelected
-                      ? "bg-[var(--color-accent)]/10"
-                      : "bg-gray-50 hover:bg-gray-100"
-                  }`}
+                      ? "border border-gray-200"
+                      : "border border-transparent",
+                  )}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-200 shrink-0">
+                    <div className="h-10 w-10 rounded-lg overflow-hidden bg-[var(--color-surface-tertiary)] shrink-0">
                       {recipe.image_url && (
                         <img
                           src={recipe.image_url}
@@ -588,16 +636,17 @@ export default function WeekPage() {
                         />
                       )}
                     </div>
-                    <span className="text-sm text-left truncate max-w-[200px]">
+                    <span className="text-sm text-left truncate max-w-[200px] text-[var(--color-text)]">
                       {recipe.title}
                     </span>
                   </div>
                   <div
-                    className={`h-5 w-5 rounded-md border-2 flex items-center justify-center shrink-0 transition ${
+                    className={clsx(
+                      "h-5 w-5 rounded-md border-2 flex items-center justify-center shrink-0 transition",
                       isSelected
                         ? "bg-[var(--color-accent)] border-[var(--color-accent)]"
-                        : "border-gray-300 bg-white"
-                    }`}
+                        : "border-[var(--color-border)] bg-transparent",
+                    )}
                   >
                     {isSelected && (
                       <Icon icon={Check} size={16} className="text-white" />

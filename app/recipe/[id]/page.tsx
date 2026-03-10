@@ -727,6 +727,7 @@ export default function RecipeDetail() {
                   const end = new Date(start);
                   end.setDate(start.getDate() + 6);
                   const range = `${start.toLocaleDateString("nl-NL", { day: "numeric", month: "short" })} – ${end.toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}`;
+                  const isSelected = weekOffset === option.offset;
 
                   return (
                     <button
@@ -736,14 +737,34 @@ export default function RecipeDetail() {
                         setIsWeekPickerOpen(false);
                       }}
                       className={clsx(
-                        "w-full text-left px-4 py-3 text-sm transition",
-                        weekOffset === option.offset
-                          ? "text-[var(--color-accent)] font-medium"
-                          : "text-gray-700 hover:bg-gray-50",
+                        "w-full flex items-center justify-between px-4 py-3 text-sm transition",
+                        isSelected ? "bg-gray-50" : "hover:bg-gray-50",
                       )}
                     >
-                      <div>{option.label}</div>
-                      <div className="text-xs text-gray-400">{range}</div>
+                      <div className="text-left">
+                        <div
+                          className={
+                            isSelected
+                              ? "font-medium text-[var(--color-text)]"
+                              : "text-gray-700"
+                          }
+                        >
+                          {option.label}
+                        </div>
+                        <div className="text-xs text-gray-400">{range}</div>
+                      </div>
+                      <div
+                        className={clsx(
+                          "h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors",
+                          isSelected
+                            ? "border-[var(--color-accent)]"
+                            : "border-gray-300",
+                        )}
+                      >
+                        {isSelected && (
+                          <div className="h-2.5 w-2.5 rounded-full bg-[var(--color-accent)]" />
+                        )}
+                      </div>
                     </button>
                   );
                 })}

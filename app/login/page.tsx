@@ -4,13 +4,16 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter, useSearchParams } from "next/navigation";
 import { styles } from "@/lib/styles";
-import Card from "@/components/Card";
+
+type Step = "email" | "code" | "name";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
-  const [sent, setSent] = useState(false);
+  const [name, setName] = useState("");
+  const [step, setStep] = useState<Step>("email");
   const [loading, setLoading] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(false);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -20,14 +23,12 @@ export default function LoginPage() {
     setLoading(true);
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: {
-        shouldCreateUser: true,
-      },
+      options: { shouldCreateUser: true },
     });
     setLoading(false);
 
     if (!error) {
-      setSent(true);
+      setStep("code");
     } else {
       console.error(error);
       alert("Er ging iets mis.");
@@ -36,7 +37,7 @@ export default function LoginPage() {
 
   const handleVerify = async () => {
     setLoading(true);
-    const { error } = await supabase.auth.verifyOtp({
+    const { data, error } = await supabase.auth.verifyOtp({
       email,
       token: code,
       type: "email",
@@ -44,76 +45,155 @@ export default function LoginPage() {
     setLoading(false);
 
     if (!error) {
-      router.replace(redirectTo);
+      // Check of de gebruiker al een naam heeft
+      const existingName = data.user?.user_metadata?.name;
+      if (!existingName) {
+        setIsNewUser(true);
+        setStep("name");
+      } else {
+        router.replace(redirectTo);
+      }
     } else {
       alert("Ongeldige code, probeer opnieuw.");
     }
   };
 
-  return (
-    <main className="min-h-screen flex items-center justify-center px-6 bg-[var(--color-bg)] pb-28">
-      <div className="w-full max-w-sm space-y-6 pt-4">
-        <Card className="p-5">
-          <div className="flex flex-col gap-4">
-            <h1 className="text-lg font-semibold text-center">Inloggen</h1>
+  const handleSaveName = async () => {
+    if (!name.trim()) {
+      router.replace(redirectTo);
+      return;
+    }
 
-            {!sent ? (
-              <>
-                <p className="text-sm text-center text-[var(--color-text-secondary)]">
-                  Vul het e-mailadres in waar we de inlogcode naartoe mogen
-                  sturen
-                </p>
-                <input
-                  type="email"
-                  placeholder="E-mailadres"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className={styles.input.default}
-                />
+    setLoading(true);
+    await supabase.auth.updateUser({ data: { name: name.trim() } });
+    setLoading(false);
+
+    router.replace(redirectTo);
+  };
+
+  return (
+    <main
+      className="min-h-dvh bg-[var(--color-bg)] flex flex-col justify-center px-5 pb-16"
+      style={{ paddingTop: "calc(env(safe-area-inset-top) + 2rem)" }}
+    >
+      <div className="w-full max-w-sm mx-auto">
+        {/* Stap 1 — Email */}
+        {step === "email" && (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-[2rem] font-bold text-gray-900 leading-tight tracking-tight mb-2">
+                Welkom
+              </h1>
+              <p className="text-sm text-gray-400">
+                Vul je e-mailadres in om een inlogcode te ontvangen.
+              </p>
+            </div>
+
+            <div className="bg-white border border-gray-200 rounded-3xl px-5 py-6 space-y-4">
+              <input
+                type="email"
+                placeholder="E-mailadres"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{ fontSize: "16px" }}
+                className="w-full rounded-2xl bg-[var(--color-bg)] border border-gray-200 px-4 py-3 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-gray-300 transition"
+              />
+              <div className="flex justify-center">
                 <button
                   onClick={handleLogin}
-                  disabled={loading}
-                  className={`${styles.button.save} w-full`}
+                  disabled={loading || !email.trim()}
+                  className="px-10 py-3 rounded-full bg-[var(--color-accent)] text-white text-sm font-medium disabled:opacity-40 active:scale-95 transition"
                 >
                   {loading ? "Versturen..." : "Stuur inlogcode"}
                 </button>
-              </>
-            ) : (
-              <>
-                <p className="text-sm text-center text-gray-500">
-                  Vul de 6-cijferige code in die we naar
-                  <br />
-                  <strong>{email}</strong>
-                  <br />
-                  hebben gestuurd
-                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="123456"
-                  maxLength={6}
-                  value={code}
-                  onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-                  className={`${styles.input.default} text-center text-2xl tracking-widest`}
-                />
+        {/* Stap 2 — Code */}
+        {step === "code" && (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-[2rem] font-bold text-gray-900 leading-tight tracking-tight mb-2">
+                Check je mail
+              </h1>
+              <p className="text-sm text-gray-400">
+                We hebben een 6-cijferige code gestuurd naar{" "}
+                <span className="font-medium text-gray-700">{email}</span>.
+              </p>
+            </div>
+
+            <div className="bg-white border border-gray-200 rounded-3xl px-5 py-6 space-y-4">
+              <input
+                type="text"
+                inputMode="numeric"
+                placeholder="123456"
+                maxLength={6}
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+                style={{ fontSize: "16px" }}
+                className="w-full rounded-2xl bg-[var(--color-bg)] border border-gray-200 px-4 py-3 text-gray-800 placeholder:text-gray-400 text-center text-2xl tracking-widest focus:outline-none focus:border-gray-300 transition"
+              />
+              <div className="flex justify-center">
                 <button
                   onClick={handleVerify}
                   disabled={loading || code.length < 6}
-                  className={`${styles.button.save} w-full`}
+                  className="px-10 py-3 rounded-full bg-[var(--color-accent)] text-white text-sm font-medium disabled:opacity-40 active:scale-95 transition"
                 >
                   {loading ? "Controleren..." : "Inloggen"}
                 </button>
-                <button
-                  onClick={() => setSent(false)}
-                  className="text-sm text-center text-gray-400"
-                >
-                  Verkeerd e-mailadres? Ga terug
-                </button>
-              </>
-            )}
+              </div>
+            </div>
+
+            <button
+              onClick={() => setStep("email")}
+              className="w-full text-sm text-center text-gray-400"
+            >
+              Verkeerd e-mailadres? Ga terug
+            </button>
           </div>
-        </Card>
+        )}
+
+        {/* Stap 3 — Naam */}
+        {step === "name" && (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-[2rem] font-bold text-gray-900 leading-tight tracking-tight mb-2">
+                Hoe heet je?
+              </h1>
+              <p className="text-sm text-gray-400">
+                Dan kunnen we je persoonlijk begroeten
+              </p>
+            </div>
+
+            <div className="bg-white border border-gray-200 rounded-3xl px-5 py-6 space-y-4">
+              <input
+                type="text"
+                placeholder="Je naam"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                style={{ fontSize: "16px" }}
+                className="w-full rounded-2xl bg-[var(--color-bg)] border border-gray-200 px-4 py-3 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-gray-300 transition"
+              />
+              <div className="flex justify-center">
+                <button
+                  onClick={handleSaveName}
+                  disabled={loading}
+                  className="px-10 bg-[var(--color-accent)] py-3 rounded-full text-white text-sm font-medium disabled:opacity-40 active:scale-95 transition"
+                >
+                  {loading ? "Opslaan..." : "Doorgaan"}
+                </button>
+              </div>
+            </div>
+            <button
+              onClick={() => router.replace(redirectTo)}
+              className="w-full text-sm text-center text-gray-400"
+            >
+              Overslaan
+            </button>
+          </div>
+        )}
       </div>
     </main>
   );

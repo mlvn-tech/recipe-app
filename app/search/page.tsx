@@ -272,10 +272,10 @@ export default function SearchPage() {
                     {/* Favorite — rechtsboven */}
                     <button
                       onClick={(e) => toggleFavorite(e, recipe.id)}
-                      className="absolute top-3.5 right-3.5"
+                      className="p-1.5 absolute top-2.5 right-2.5 rounded-full bg-white border border-gray-200"
                     >
                       <Heart
-                        size={14}
+                        size={18}
                         strokeWidth={1.5}
                         className={
                           isFavorite

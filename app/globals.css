@@ -9,12 +9,17 @@
   --color-bg: #F8F8F8;
   /* Teal */
   --color-brand: #2F5D67;
-  /* Turquoise
-  --color-brand: #EFA30A; */
-  /* Oranje-geel */
+  
   --color-accent: #e48f2e;
   --color-secondaccent: 168 139 254;
   --color-danger: #ef4444;
+  
+  --color-text-tertiary: #9ca3af;
+  --color-text: #1F2933;
+  --color-surface-secondary: #F0F0F0;
+  --color-border: #E5E7EB;
+
+
 }
 
 
