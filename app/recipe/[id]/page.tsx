@@ -4,7 +4,7 @@ import { styles } from "@/lib/styles";
 
 import { useEffect, useState, useRef, useMemo } from "react";
 import { supabase } from "../../../lib/supabase";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import {
   User,
@@ -32,6 +32,9 @@ export default function RecipeDetail() {
   const params = useParams();
   const idParam = params.id;
   const id = Array.isArray(idParam) ? idParam[0] : idParam;
+
+  const searchParams = useSearchParams();
+  const fromCook = searchParams.get("from") === "cook";
 
   const [isScrolled, setIsScrolled] = useState(false);
   const router = useRouter();
@@ -366,11 +369,26 @@ export default function RecipeDetail() {
                 />
                 {/* Terugknop over de afbeelding */}
                 <button
-                  onClick={() => router.back()}
-                  className="absolute top-[calc(env(safe-area-inset-top)+12px)] left-4 bg-black/30 backdrop-blur-sm rounded-full p-2"
+                  onClick={() => (fromCook ? router.push("/") : router.back())}
+                  className={clsx(
+                    "fixed z-30 p-2 transition-all duration-300",
+                    isScrolled
+                      ? "opacity-0 pointer-events-none"
+                      : "opacity-100",
+                  )}
+                  style={{
+                    top: "calc(env(safe-area-inset-top) + 12px)",
+                    left: "0.5rem",
+                  }}
                 >
-                  <Icon icon={ChevronLeft} size={22} className="text-white" />
+                  <Icon
+                    icon={ChevronLeft}
+                    size={32}
+                    strokeWidth={1.5}
+                    className="text-white"
+                  />
                 </button>
+
                 {/* Favoriet knop over de afbeelding */}
                 <button
                   onClick={toggleFavorite}
@@ -378,7 +396,7 @@ export default function RecipeDetail() {
                 >
                   <Icon
                     icon={Heart}
-                    size={22}
+                    size={28}
                     strokeWidth={1.5}
                     className={
                       isFavorite
@@ -407,7 +425,9 @@ export default function RecipeDetail() {
                 {/* Chevron + terug */}
                 <div className="flex items-center gap-1 -ml-1">
                   <button
-                    onClick={() => router.back()}
+                    onClick={() =>
+                      fromCook ? router.push("/") : router.back()
+                    }
                     className="text-[var(--color-text-secondary)] active:opacity-70 transition-opacity"
                   >
                     <Icon icon={ChevronLeft} size={20} />
@@ -580,7 +600,7 @@ export default function RecipeDetail() {
         <div
           className="fixed bottom-0 left-0 right-0 flex justify-center p-4 pointer-events-none"
           style={{
-            paddingBottom: "calc(env(safe-area-inset-bottom) + 1.5rem)",
+            paddingBottom: "calc(env(safe-area-inset-bottom) + 1rem)",
           }}
         >
           <button

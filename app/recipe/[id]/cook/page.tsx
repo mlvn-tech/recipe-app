@@ -213,7 +213,7 @@ export default function CookMode() {
         <div className="flex items-center justify-between mb-3">
           {/* Left – Close cook mode */}
           <button
-            onClick={() => router.push(`/recipe/${id}`)}
+            onClick={() => router.replace(`/recipe/${recipe.id}?from=cook`)}
             className="flex items-center justify-center text-gray-500 hover:text-gray-700 transition"
           >
             <X className="w-6 h-6" />
