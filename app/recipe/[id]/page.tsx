@@ -456,8 +456,8 @@ export default function RecipeDetail() {
 
             {/* Content */}
             <div className="px-4 pb-16 space-y-4">
-              <div className="flex flex-col items-center px-2 space-y-5">
-                <h1 className="pt-8 text-2xl text-center font-bold leading-tight">
+              <div className="flex flex-col items-center px-2 space-y-7">
+                <h1 className="pt-8 text-3xl text-center font-bold leading-tight">
                   {formatTitle(recipe.title)}
                 </h1>
 
@@ -486,7 +486,7 @@ export default function RecipeDetail() {
                     {recipe.is_ai && (
                       <div className="flex items-center gap-1 px-3 py-1 rounded-lg border border-[rgb(var(--color-secondaccent)/0.40)] text-[rgb(var(--color-secondaccent))] text-xs">
                         <Icon icon={WandSparkles} size={14} />
-                        AI
+                        AI gegenereerd
                       </div>
                     )}
                   </div>
