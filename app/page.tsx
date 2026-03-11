@@ -30,7 +30,7 @@ export default function Home() {
   const [recipes, setRecipes] = useState<any[] | null>(null);
   const [greeting, setGreeting] = useState("");
   const [userName, setUserName] = useState("");
-  const [view, setView] = useState<"list" | "grid">("list");
+
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("Alles");
   const router = useRouter();
@@ -154,23 +154,11 @@ export default function Home() {
         .select("household_id")
         .eq("user_id", user.id)
         .maybeSingle();
+
       if (!membership) {
         setRecipes([]);
         return;
       }
-
-      const { data } = await supabase
-        .from("recipes")
-        .select("*")
-        .eq("household_id", membership.household_id)
-        .order("created_at", { ascending: false });
-      setRecipes(data || []);
-
-      const { data: favs } = await supabase
-        .from("favorites")
-        .select("recipe_id")
-        .eq("user_id", user.id);
-      if (favs) setFavorites(favs.map((f) => f.recipe_id));
 
       const now = new Date();
       const jsDay = now.getDay();
@@ -180,21 +168,32 @@ export default function Home() {
       weekStart.setHours(0, 0, 0, 0);
       const weekStartStr = weekStart.toISOString().split("T")[0];
 
-      const { data: plannedToday } = await supabase
-        .from("week_plans")
-        .select("recipe_id")
-        .eq("household_id", membership.household_id)
-        .eq("week_start", weekStartStr)
-        .eq("day_index", dayIndex)
-        .maybeSingle();
-
-      if (plannedToday?.recipe_id) {
-        const { data: recipe } = await supabase
+      // Alles parallel fetchen
+      const [recipesRes, favsRes, plannedRes] = await Promise.all([
+        supabase
           .from("recipes")
           .select("*")
-          .eq("id", plannedToday.recipe_id)
-          .maybeSingle();
-        if (recipe) setTodayRecipe(recipe);
+          .eq("household_id", membership.household_id)
+          .order("created_at", { ascending: false }),
+        supabase.from("favorites").select("recipe_id").eq("user_id", user.id),
+        supabase
+          .from("week_plans")
+          .select("recipe_id")
+          .eq("household_id", membership.household_id)
+          .eq("week_start", weekStartStr)
+          .eq("day_index", dayIndex)
+          .maybeSingle(),
+      ]);
+
+      setRecipes(recipesRes.data || []);
+      if (favsRes.data) setFavorites(favsRes.data.map((f) => f.recipe_id));
+
+      // Today recipe uit de al opgehaalde recepten halen — geen extra query nodig
+      if (plannedRes.data?.recipe_id) {
+        const todayR = recipesRes.data?.find(
+          (r) => r.id === plannedRes.data!.recipe_id,
+        );
+        if (todayR) setTodayRecipe(todayR);
       }
     };
 
@@ -249,6 +248,23 @@ export default function Home() {
       return () => clearTimeout(timer);
     }
   }, [recipes, filteredRecipes.length]);
+
+  const [view, setView] = useState<"list" | "grid">("list");
+  const [sliderView, setSliderView] = useState<"list" | "grid">("list");
+  const [stretching, setStretching] = useState(false);
+  const [visible, setVisible] = useState(true);
+
+  const handleViewChange = (newView: "list" | "grid") => {
+    if (newView === view) return;
+    setStretching(true);
+    setVisible(false);
+    setTimeout(() => {
+      setSliderView(newView);
+      setStretching(false);
+      setView(newView);
+      setVisible(true);
+    }, 150);
+  };
 
   // Gedeelde metadata + labels render helper
   const RecipeMeta = ({
@@ -323,7 +339,15 @@ export default function Home() {
       </div>
 
       {/* ── Gepland voor vandaag ── */}
-      {todayRecipe && (
+      {recipes === null && (
+        <div className="mb-8 animate-pulse">
+          <div className="h-4 bg-gray-100 rounded w-36 mb-3" />
+          <div className="bg-white rounded-3xl overflow-hidden border border-gray-200">
+            <div className="h-44 bg-gray-100" />
+          </div>
+        </div>
+      )}
+      {recipes !== null && todayRecipe && (
         <div className="mb-8">
           <h3 className="text-sm font-semibold text-gray-400 mb-3">
             Gepland voor vandaag
@@ -368,22 +392,36 @@ export default function Home() {
           )}
         </h3>
 
-        <div className="flex items-center bg-white border border-gray-200 rounded-full p-1">
+        <div className="relative flex items-center bg-white border border-gray-200 rounded-full p-1">
+          {/* Sliding achtergrond */}
+          <div
+            className={clsx(
+              "absolute top-1 bottom-1 rounded-full bg-gray-800 transition-all duration-300 ease-in-out",
+              stretching
+                ? "left-1 right-1" // strekt uit over beide knoppen
+                : sliderView === "grid"
+                  ? "left-11 right-1"
+                  : "left-1 right-11",
+            )}
+          />
+
           <button
-            onClick={() => setView("list")}
-            className={`w-8 h-8 flex items-center justify-center rounded-full transition ${
-              view === "list" ? "bg-gray-800 text-white" : "text-gray-400"
-            }`}
+            onClick={() => handleViewChange("list")}
+            className={clsx(
+              "relative z-10 w-10 h-10 flex items-center justify-center rounded-full transition-colors duration-300",
+              view === "list" ? "text-white" : "text-gray-400",
+            )}
           >
-            <List size={18} />
+            <List size={20} />
           </button>
           <button
-            onClick={() => setView("grid")}
-            className={`w-8 h-8 flex items-center justify-center rounded-full transition ${
-              view === "grid" ? "bg-gray-800 text-white" : "text-gray-400"
-            }`}
+            onClick={() => handleViewChange("grid")}
+            className={clsx(
+              "relative z-10 w-10 h-10 flex items-center justify-center rounded-full transition-colors duration-300",
+              view === "grid" ? "text-white" : "text-gray-400",
+            )}
           >
-            <LayoutGrid size={18} />
+            <LayoutGrid size={20} />
           </button>
         </div>
       </div>
@@ -391,19 +429,22 @@ export default function Home() {
       <div className="">
         {/* Skeleton */}
         {recipes === null && (
-          <div className="flex flex-col gap-4">
-            {[...Array(3)].map((_, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-3xl overflow-hidden animate-pulse border border-gray-200"
-              >
-                <div className="h-44 bg-gray-100" />
-                <div className="p-4 space-y-2">
-                  <div className="h-4 bg-gray-100 rounded w-2/3" />
-                  <div className="h-3 bg-gray-100 rounded w-1/3" />
+          <div className="animate-pulse">
+            {/* Recepten skeleton */}
+            <div className="flex flex-col gap-4">
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-white rounded-3xl overflow-hidden border border-gray-200"
+                >
+                  <div className="h-44 bg-gray-100" />
+                  <div className="p-4 space-y-2">
+                    <div className="h-4 bg-gray-100 rounded w-2/3" />
+                    <div className="h-3 bg-gray-100 rounded w-1/3" />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
 
@@ -415,39 +456,85 @@ export default function Home() {
         )}
 
         {/* Recepten lijst / grid */}
-        {recipes !== null && filteredRecipes.length > 0 && (
-          <div
-            className={
-              view === "grid" ? "grid grid-cols-2 gap-3" : "flex flex-col gap-4"
-            }
-          >
-            {filteredRecipes.map((recipe) => {
-              const isFavorite = favorites.includes(recipe.id);
+        <div
+          className={clsx(
+            "transition-all duration-400 ease-in-out",
+            view === "grid" ? "grid grid-cols-2 gap-3" : "flex flex-col gap-4",
+            visible ? "opacity-100 scale-100" : "opacity-0 scale-[0.97]",
+          )}
+        >
+          {filteredRecipes.map((recipe) => {
+            const isFavorite = favorites.includes(recipe.id);
 
-              if (view === "grid") {
-                return (
-                  <Link
-                    key={recipe.id}
-                    href={`/recipe/${recipe.id}`}
-                    className="block overflow-hidden active:scale-[0.98] transition rounded-3xl border border-gray-200"
-                  >
-                    <div className="aspect-[4/3] relative">
-                      {recipe.image_url ? (
-                        <img
-                          src={recipe.image_url}
-                          alt={recipe.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gray-100" />
-                      )}
+            if (view === "grid") {
+              return (
+                <Link
+                  key={recipe.id}
+                  href={`/recipe/${recipe.id}`}
+                  className="block overflow-hidden active:scale-[0.98] transition rounded-3xl ring ring-gray-200"
+                >
+                  <div className="aspect-[4/3] relative">
+                    {recipe.image_url ? (
+                      <img
+                        src={recipe.image_url}
+                        alt={recipe.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-100" />
+                    )}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleFavorite(recipe.id);
+                      }}
+                      className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-2"
+                    >
+                      <Heart
+                        size={20}
+                        strokeWidth={1.5}
+                        className={
+                          isFavorite
+                            ? "text-[var(--color-accent)] fill-[var(--color-accent)]"
+                            : "text-gray-400"
+                        }
+                      />
+                    </button>
+                  </div>
+                  <div className="p-3">
+                    <h2 className="text-sm font-semibold leading-snug line-clamp-2 min-h-[2.5rem] mb-1.5">
+                      {formatTitle(recipe.title)}
+                    </h2>
+                    <RecipeMeta recipe={recipe} />
+                  </div>
+                </Link>
+              );
+            }
+
+            // List view
+            return (
+              <Link
+                key={recipe.id}
+                href={`/recipe/${recipe.id}`}
+                className="block active:scale-[0.99] transition"
+              >
+                <div className="bg-white rounded-3xl overflow-hidden ring-1 ring-gray-200">
+                  {recipe.image_url && (
+                    <div className="relative w-full h-48">
+                      <img
+                        src={recipe.image_url}
+                        alt={recipe.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0  to-transparent" />
                       <button
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           handleFavorite(recipe.id);
                         }}
-                        className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-2"
+                        className="absolute top-3 right-3 bg-white/85 backdrop-blur-md rounded-full p-2 shadow-sm"
                       >
                         <Heart
                           size={20}
@@ -455,69 +542,23 @@ export default function Home() {
                           className={
                             isFavorite
                               ? "text-[var(--color-accent)] fill-[var(--color-accent)]"
-                              : "text-gray-400"
+                              : "text-gray-500"
                           }
                         />
                       </button>
                     </div>
-                    <div className="p-3">
-                      <h2 className="text-sm font-semibold leading-snug line-clamp-2 min-h-[2.5rem] mb-1.5">
-                        {formatTitle(recipe.title)}
-                      </h2>
-                      <RecipeMeta recipe={recipe} />
-                    </div>
-                  </Link>
-                );
-              }
-
-              // List view
-              return (
-                <Link
-                  key={recipe.id}
-                  href={`/recipe/${recipe.id}`}
-                  className="block active:scale-[0.99] transition"
-                >
-                  <div className="bg-white rounded-3xl overflow-hidden border border-gray-200">
-                    {recipe.image_url && (
-                      <div className="relative w-full h-48">
-                        <img
-                          src={recipe.image_url}
-                          alt={recipe.title}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0  to-transparent" />
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleFavorite(recipe.id);
-                          }}
-                          className="absolute top-3 right-3 bg-white/85 backdrop-blur-md rounded-full p-2 shadow-sm"
-                        >
-                          <Heart
-                            size={20}
-                            strokeWidth={1.5}
-                            className={
-                              isFavorite
-                                ? "text-[var(--color-accent)] fill-[var(--color-accent)]"
-                                : "text-gray-500"
-                            }
-                          />
-                        </button>
-                      </div>
-                    )}
-                    <div className="px-4 py-3.5">
-                      <h2 className="text-base font-semibold leading-snug mb-2">
-                        {formatTitle(recipe.title)}
-                      </h2>
-                      <RecipeMeta recipe={recipe} />
-                    </div>
+                  )}
+                  <div className="px-4 py-3.5">
+                    <h2 className="text-base font-semibold leading-snug mb-2">
+                      {formatTitle(recipe.title)}
+                    </h2>
+                    <RecipeMeta recipe={recipe} />
                   </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </main>
   );

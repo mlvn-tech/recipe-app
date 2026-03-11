@@ -380,11 +380,12 @@ export default function WeekPage() {
           <Icon
             icon={ShoppingBag}
             size={24}
+            strokeWidth={1.5}
             className="text-[var(--color-text-secondary)]"
           />
         </button>
         {shoppingCount > 0 && (
-          <div className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-[var(--color-accent)] rounded-full flex items-center justify-center pointer-events-none">
+          <div className="absolute -top-0.5 -right-0.5 h-4 px-1 bg-[var(--color-accent)] rounded-full flex items-center justify-center pointer-events-none">
             <span className="text-white text-[10px] font-bold leading-none">
               {shoppingCount}
             </span>

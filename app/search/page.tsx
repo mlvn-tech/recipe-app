@@ -137,7 +137,7 @@ export default function SearchPage() {
     <main className="min-h-dvh bg-[var(--color-bg)] pb-32">
       {/* Zoekbalk — sticky, direct kind van main */}
       <div
-        className="px-4 sticky z-10 bg-[var(--color-bg)]/90 backdrop-blur-md pb-4"
+        className="px-4 sticky z-10 bg-[var(--color-bg)]/95 backdrop-blur-md pb-4"
         style={{
           top: 0,
           paddingTop: "calc(env(safe-area-inset-top) + 1rem)",
@@ -272,10 +272,10 @@ export default function SearchPage() {
                     {/* Favorite — rechtsboven */}
                     <button
                       onClick={(e) => toggleFavorite(e, recipe.id)}
-                      className="p-1.5 absolute top-2.5 right-2.5 rounded-full bg-white border border-gray-200"
+                      className="p-2 absolute top-2.5 right-2.5 rounded-full bg-white border border-gray-200"
                     >
                       <Heart
-                        size={18}
+                        size={20}
                         strokeWidth={1.5}
                         className={
                           isFavorite

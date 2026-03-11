@@ -143,14 +143,35 @@ export default function RecipeDetail() {
 
   const ingredientsEndRef = useRef<HTMLDivElement | null>(null);
   const heroEndRef = useRef<HTMLDivElement | null>(null);
+  const metaRef = useRef<HTMLDivElement>(null);
 
   // Scroll detectie voor sticky header (voorbij heroEndRef)
   useEffect(() => {
+    let lastScrollY = window.scrollY;
+
     const handleScroll = () => {
-      if (!heroEndRef.current) return;
-      const rect = heroEndRef.current.getBoundingClientRect();
-      setIsScrolled(rect.top <= 0);
+      if (!heroEndRef.current || !metaRef.current) return;
+
+      const heroRect = heroEndRef.current.getBoundingClientRect();
+      const metaRect = metaRef.current.getBoundingClientRect();
+      const scrollingUp = window.scrollY < lastScrollY;
+      lastScrollY = window.scrollY;
+
+      if (heroRect.top <= 0) {
+        // Voorbij de foto
+        if (scrollingUp && metaRect.bottom > 80) {
+          // Scrollt omhoog en metadata is weer zichtbaar → verberg
+          setIsScrolled(false);
+        } else if (!scrollingUp) {
+          // Scrollt omlaag → altijd tonen
+          setIsScrolled(true);
+        }
+      } else {
+        // Nog bij de foto → altijd verbergen
+        setIsScrolled(false);
+      }
     };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
@@ -367,7 +388,7 @@ export default function RecipeDetail() {
                 </button>
               </div>
             )}
-
+            <div ref={heroEndRef} className="" />
             {/* Sticky header */}
             <div className="sticky top-0 z-20 h-0 overflow-visible">
               <div
@@ -397,7 +418,7 @@ export default function RecipeDetail() {
 
                 {/* Titel + icoontjes */}
                 <div className="flex items-center justify-between mt-0.5">
-                  <h2 className="font-bold text-[var(--color-text)] leading-tight tracking-tight transition-all duration-300 text-base mb-2">
+                  <h2 className="font-bold text-[var(--color-text)] leading-tight tracking-tight transition-all duration-300 text-base mb-2 mr-2">
                     {formatTitle(recipe.title)}
                   </h2>
                   <div className="flex items-center gap-4 text-gray-600 shrink-0">
@@ -410,15 +431,16 @@ export default function RecipeDetail() {
                           : "opacity-0 translate-x-2 pointer-events-none",
                       )}
                     >
-                      <Icon icon={List} size={20} />
+                      <Icon icon={List} size={24} strokeWidth={1.5} />
                     </button>
                     <button onClick={() => setPlannerOpen(true)}>
-                      <Icon icon={CalendarPlus} size={20} />
+                      <Icon icon={CalendarPlus} size={24} strokeWidth={1.5} />
                     </button>
                     <button onClick={toggleFavorite}>
                       <Icon
                         icon={Heart}
-                        size={20}
+                        size={24}
+                        strokeWidth={1.5}
                         className={
                           isFavorite
                             ? "text-[var(--color-accent)] fill-[var(--color-accent)]"
@@ -434,20 +456,20 @@ export default function RecipeDetail() {
             {/* Content */}
             <div className="px-4 pb-16 space-y-4">
               <div className="px-2 space-y-4">
-                <h1 className="pt-12 text-2xl font-bold leading-tight">
+                <h1 className="pt-10 text-[2rem] font-bold leading-tight">
                   {formatTitle(recipe.title)}
                 </h1>
 
-                <div className="flex items-center gap-6 text-sm text-[var(--color-text-secondary)]">
+                <div className="flex items-center gap-6 text-md text-[var(--color-text-secondary)]">
                   {recipe.cooking_time && (
                     <div className="flex items-center gap-1">
-                      <Icon icon={Clock} size={18} />
+                      <Icon icon={Clock} size={20} />
                       <span>{recipe.cooking_time} minuten</span>
                     </div>
                   )}
                   {recipe.servings && (
                     <div className="flex items-center gap-1">
-                      <Icon icon={User} size={18} />
+                      <Icon icon={User} size={20} />
                       <span>{recipe.servings} personen</span>
                     </div>
                   )}
@@ -456,7 +478,7 @@ export default function RecipeDetail() {
                 {(recipe.is_ai || recipe.category) && (
                   <div className="flex gap-2 pb-8">
                     {recipe.category && (
-                      <div className="px-3 py-1 rounded-lg border border-gray-300 text-gray-600 text-xs capitalize">
+                      <div className="px-3 py-1 rounded-lg border border-gray-300 text-gray-600 text-sm capitalize">
                         {recipe.category}
                       </div>
                     )}
@@ -471,24 +493,24 @@ export default function RecipeDetail() {
                         onClick={handleShare}
                         className="text-[var(--color-text-secondary)] active:scale-90 transition"
                       >
-                        <Share size={20} />
+                        <Share size={24} strokeWidth={1.5} />
                       </button>
                       <button
                         onClick={() => router.push(`/recipe/${recipe.id}/edit`)}
                         className="text-[var(--color-text-secondary)] active:scale-90 transition"
                       >
-                        <PenSquare size={20} />
+                        <PenSquare size={24} strokeWidth={1.5} />
                       </button>
                       <button
                         onClick={() => setPlannerOpen(true)}
                         className="text-[var(--color-text-secondary)] active:scale-90 transition"
                       >
-                        <CalendarPlus size={20} />
+                        <CalendarPlus size={24} strokeWidth={1.5} />
                       </button>
                     </div>
                   </div>
                 )}
-
+                <div ref={metaRef}></div>
                 {/* <div className="flex items-center gap-8">
                   <button
                     onClick={handleShare}
@@ -512,7 +534,6 @@ export default function RecipeDetail() {
               </div>
 
               {/* Trigger voor sticky header */}
-              <div ref={heroEndRef} className="" />
 
               <Card>
                 <h2 className="font-semibold mb-4 text-lg">Ingrediënten</h2>
