@@ -10,17 +10,15 @@ import {
   Heart,
   LayoutGrid,
   List,
-  Search,
   WandSparkles,
+  UtensilsCrossed,
 } from "lucide-react";
 
-import Icon from "@/components/icons";
 import Link from "next/link";
 import Card from "@/components/Card";
 
 import EmptyRecipesState from "@/components/EmptyRecipesState";
 import { useUI } from "@/components/UIContext";
-import { styles } from "@/lib/styles";
 import clsx from "clsx";
 import { formatTitle } from "@/lib/utils";
 
@@ -35,14 +33,10 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState("Alles");
   const router = useRouter();
   const { setHighlightCreate } = useUI();
-  const [generating, setGenerating] = useState(false);
-  const [ingredientInput, setIngredientInput] = useState("");
-  const [selectedServings, setSelectedServings] = useState(2);
-  const [selectedCategory, setSelectedCategory] = useState("Diner");
-  const [showText, setShowText] = useState(true);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [animatingId, setAnimatingId] = useState<string | null>(null);
   const [todayRecipe, setTodayRecipe] = useState<any | null>(null);
+  const [todayCustom, setTodayCustom] = useState<string | null>(null);
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -57,15 +51,6 @@ export default function Home() {
     };
     fetchUser();
   }, []);
-
-  useEffect(() => {
-    if (generating) {
-      setShowText(false);
-    } else {
-      const timer = setTimeout(() => setShowText(true), 300);
-      return () => clearTimeout(timer);
-    }
-  }, [generating]);
 
   const [scrolled, setScrolled] = useState(false);
 
@@ -104,41 +89,6 @@ export default function Home() {
     }
   };
 
-  const handleGenerate = async () => {
-    if (!ingredientInput.trim()) return;
-    try {
-      setGenerating(true);
-      const ingredientArray = ingredientInput
-        .split(",")
-        .map((i) => i.trim())
-        .filter(Boolean);
-      const res = await fetch("/api/generate-recipe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ingredients: ingredientArray,
-          servings: selectedServings,
-          category: selectedCategory,
-        }),
-      });
-      const text = await res.text();
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (e) {
-        return;
-      }
-      if (!data.error) {
-        localStorage.setItem("ai_preview", JSON.stringify(data));
-        router.push("/recipe/preview");
-      }
-    } catch (err) {
-      console.error("Generate error:", err);
-    } finally {
-      setGenerating(false);
-    }
-  };
-
   useEffect(() => {
     const fetchRecipes = async () => {
       const {
@@ -168,7 +118,6 @@ export default function Home() {
       weekStart.setHours(0, 0, 0, 0);
       const weekStartStr = weekStart.toISOString().split("T")[0];
 
-      // Alles parallel fetchen
       const [recipesRes, favsRes, plannedRes] = await Promise.all([
         supabase
           .from("recipes")
@@ -178,22 +127,26 @@ export default function Home() {
         supabase.from("favorites").select("recipe_id").eq("user_id", user.id),
         supabase
           .from("week_plans")
-          .select("recipe_id")
+          .select("recipe_id, custom_name")
           .eq("household_id", membership.household_id)
           .eq("week_start", weekStartStr)
-          .eq("day_index", dayIndex)
-          .maybeSingle(),
+          .eq("day_index", dayIndex),
       ]);
 
       setRecipes(recipesRes.data || []);
       if (favsRes.data) setFavorites(favsRes.data.map((f) => f.recipe_id));
 
-      // Today recipe uit de al opgehaalde recepten halen — geen extra query nodig
-      if (plannedRes.data?.recipe_id) {
+      const plannedItems = plannedRes.data || [];
+      const plannedRecipeItem = plannedItems.find((i: any) => i.recipe_id);
+      const plannedCustomItem = plannedItems.find((i: any) => i.custom_name);
+
+      if (plannedRecipeItem) {
         const todayR = recipesRes.data?.find(
-          (r) => r.id === plannedRes.data!.recipe_id,
+          (r) => r.id === plannedRecipeItem.recipe_id,
         );
         if (todayR) setTodayRecipe(todayR);
+      } else if (plannedCustomItem) {
+        setTodayCustom(plannedCustomItem.custom_name);
       }
     };
 
@@ -266,7 +219,6 @@ export default function Home() {
     }, 150);
   };
 
-  // Gedeelde metadata + labels render helper
   const RecipeMeta = ({
     recipe,
     light = false,
@@ -311,9 +263,7 @@ export default function Home() {
     <main className="px-4 min-h-dvh bg-[var(--color-bg)] pb-32">
       {/* Frosted glass — alleen zichtbaar na scrollen */}
       <div
-        className={`fixed top-0 left-0 right-0 z-50 pointer-events-none transition-opacity duration-300 ${
-          scrolled ? "opacity-100" : "opacity-0"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 pointer-events-none transition-opacity duration-300 ${scrolled ? "opacity-100" : "opacity-0"}`}
         style={{
           height: "env(safe-area-inset-top)",
           backdropFilter: "blur(20px)",
@@ -338,15 +288,24 @@ export default function Home() {
         </h1>
       </div>
 
-      {/* ── Gepland voor vandaag ── */}
-      {recipes === null && (
-        <div className="mb-8 animate-pulse">
-          <div className="h-4 bg-gray-100 rounded w-36 mb-3" />
-          <div className="bg-white rounded-3xl overflow-hidden border border-gray-200">
-            <div className="h-44 bg-gray-100" />
+      {/* ── Gepland voor vandaag — custom naam ── */}
+      {recipes !== null && !todayRecipe && todayCustom && (
+        <div className="mb-8">
+          <h3 className="text-sm font-semibold text-gray-400 mb-3">
+            Gepland voor vandaag
+          </h3>
+          <div className="rounded-3xl overflow-hidden bg-white border border-gray-200 px-4 py-4 flex items-center gap-3">
+            <div className="bg-gray-100 rounded-xl p-4 shrink-0">
+              <UtensilsCrossed size={20} className="text-gray-400" />
+            </div>
+            <span className="font-semibold text-gray-800">
+              {formatTitle(todayCustom)}
+            </span>
           </div>
         </div>
       )}
+
+      {/* ── Gepland voor vandaag — recept ── */}
       {recipes !== null && todayRecipe && (
         <div className="mb-8">
           <h3 className="text-sm font-semibold text-gray-400 mb-3">
@@ -381,6 +340,7 @@ export default function Home() {
           </Link>
         </div>
       )}
+
       {/* ── Recepten header + toggle ── */}
       <div className="flex items-end justify-between mb-3">
         <h3 className="text-sm font-semibold text-gray-900">
@@ -393,18 +353,16 @@ export default function Home() {
         </h3>
 
         <div className="relative flex items-center bg-white border border-gray-200 rounded-full p-1">
-          {/* Sliding achtergrond */}
           <div
             className={clsx(
               "absolute top-1 bottom-1 rounded-full bg-gray-800 transition-all duration-300 ease-in-out",
               stretching
-                ? "left-1 right-1" // strekt uit over beide knoppen
+                ? "left-1 right-1"
                 : sliderView === "grid"
                   ? "left-11 right-1"
                   : "left-1 right-11",
             )}
           />
-
           <button
             onClick={() => handleViewChange("list")}
             className={clsx(
@@ -430,7 +388,6 @@ export default function Home() {
         {/* Skeleton */}
         {recipes === null && (
           <div className="animate-pulse">
-            {/* Recepten skeleton */}
             <div className="flex flex-col gap-4">
               {[...Array(3)].map((_, i) => (
                 <div
@@ -527,7 +484,7 @@ export default function Home() {
                         alt={recipe.title}
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0  to-transparent" />
+                      <div className="absolute inset-0 to-transparent" />
                       <button
                         onClick={(e) => {
                           e.preventDefault();

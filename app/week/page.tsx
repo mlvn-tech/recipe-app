@@ -1,10 +1,18 @@
 "use client";
+import { styles } from "@/lib/styles";
 import clsx from "clsx";
 
 import { useMemo, useState, useEffect, useRef } from "react";
 import Card from "@/components/Card";
 
-import { Plus, X, ChevronDown, Check, ShoppingBag } from "lucide-react";
+import {
+  Plus,
+  X,
+  ChevronDown,
+  Check,
+  ShoppingBag,
+  UtensilsCrossed,
+} from "lucide-react";
 
 import Icon from "@/components/icons";
 import { supabase } from "@/lib/supabase";
@@ -25,8 +33,15 @@ export default function WeekPage() {
   const [weekOffset, setWeekOffset] = useState(0);
   const [isWeekPickerOpen, setIsWeekPickerOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [customInputDay, setCustomInputDay] = useState<number | null>(null);
+  const [customInput, setCustomInput] = useState("");
+  const [actionMenuDay, setActionMenuDay] = useState<number | null>(null);
 
   const mainRef = useRef<HTMLDivElement>(null);
+
+  const toggleDayActions = (dayIndex: number) => {
+    setActionMenuDay(actionMenuDay === dayIndex ? null : dayIndex);
+  };
 
   const getUserId = async () => {
     const {
@@ -58,7 +73,11 @@ export default function WeekPage() {
     { label: "Over 3 weken", offset: 3 },
   ];
 
-  const [weekPlan, setWeekPlan] = useState<Record<number, any[]>>({
+  type DayItem =
+    | { type: "recipe"; data: any }
+    | { type: "custom"; name: string; id: string };
+
+  const [weekPlan, setWeekPlan] = useState<Record<number, DayItem[]>>({
     0: [],
     1: [],
     2: [],
@@ -67,6 +86,7 @@ export default function WeekPage() {
     5: [],
     6: [],
   });
+
   const [shoppingCount, setShoppingCount] = useState(0);
 
   const router = useRouter();
@@ -208,11 +228,12 @@ export default function WeekPage() {
 
       const { data } = await supabase
         .from("week_plans")
-        .select("day_index, recipe_id, recipes(*)")
+        .select("id, day_index, recipe_id, custom_name, recipes(*)")
         .eq("week_start", weekStartDate)
         .eq("household_id", householdId);
 
-      const grouped: Record<number, any[]> = {
+      const grouped: Record<number, DayItem[]> = {
+        // ← dit was weg
         0: [],
         1: [],
         2: [],
@@ -223,7 +244,15 @@ export default function WeekPage() {
       };
 
       data?.forEach((item: any) => {
-        if (item.recipes) grouped[item.day_index].push(item.recipes);
+        if (item.custom_name) {
+          grouped[item.day_index].push({
+            type: "custom",
+            name: item.custom_name,
+            id: item.id,
+          });
+        } else if (item.recipes) {
+          grouped[item.day_index].push({ type: "recipe", data: item.recipes });
+        }
       });
 
       setWeekPlan(grouped);
@@ -231,6 +260,37 @@ export default function WeekPage() {
 
     fetchWeekPlan();
   }, [weekStartDate]);
+
+  const addCustomItem = async (dayIndex: number) => {
+    if (!customInput.trim()) return;
+    const householdId = await getHouseholdId();
+    const userId = await getUserId();
+    if (!householdId || !userId) return;
+
+    const { data, error } = await supabase
+      .from("week_plans")
+      .insert({
+        week_start: weekStartDate,
+        day_index: dayIndex,
+        custom_name: customInput.trim(),
+        user_id: userId,
+        household_id: householdId,
+      })
+      .select()
+      .single();
+
+    if (!error && data) {
+      setWeekPlan((prev) => ({
+        ...prev,
+        [dayIndex]: [
+          ...prev[dayIndex],
+          { type: "custom", name: customInput.trim(), id: data.id },
+        ],
+      }));
+      setCustomInput("");
+      setCustomInputDay(null);
+    }
+  };
 
   const shoppingList = useMemo((): ShoppingItem[] => {
     const grouped: Record<string, number> = {};
@@ -270,7 +330,9 @@ export default function WeekPage() {
     const userId = session?.user?.id;
     if (!userId) return;
 
-    const exists = weekPlan[activeDay].some((r) => r.id === recipe.id);
+    const exists = weekPlan[activeDay].some(
+      (i) => i.type === "recipe" && i.data.id === recipe.id,
+    );
 
     if (exists) {
       const householdId = await getHouseholdId();
@@ -287,7 +349,9 @@ export default function WeekPage() {
       if (!error) {
         setWeekPlan((prev) => ({
           ...prev,
-          [activeDay]: prev[activeDay].filter((r) => r.id !== recipe.id),
+          [activeDay]: prev[activeDay].filter(
+            (i) => !(i.type === "recipe" && i.data.id === recipe.id),
+          ),
         }));
       }
     } else {
@@ -305,28 +369,38 @@ export default function WeekPage() {
       if (!error) {
         setWeekPlan((prev) => ({
           ...prev,
-          [activeDay]: [...prev[activeDay], recipe],
+          [activeDay]: [...prev[activeDay], { type: "recipe", data: recipe }],
         }));
       }
     }
   };
 
-  const removeFromDay = async (dayIndex: number, recipeId: any) => {
+  const removeFromDay = async (dayIndex: number, item: DayItem) => {
     const householdId = await getHouseholdId();
     if (!householdId) return;
 
-    const { error } = await supabase
+    let query = supabase
       .from("week_plans")
       .delete()
       .eq("week_start", weekStartDate)
       .eq("day_index", dayIndex)
-      .eq("recipe_id", recipeId)
       .eq("household_id", householdId);
 
+    if (item.type === "recipe") {
+      query = query.eq("recipe_id", item.data.id);
+    } else {
+      query = query.eq("id", item.id);
+    }
+
+    const { error } = await query;
     if (!error) {
       setWeekPlan((prev) => ({
         ...prev,
-        [dayIndex]: prev[dayIndex].filter((r) => r.id !== recipeId),
+        [dayIndex]: prev[dayIndex].filter((i) =>
+          item.type === "recipe"
+            ? !(i.type === "recipe" && i.data.id === item.data.id)
+            : !(i.type === "custom" && i.id === item.id),
+        ),
       }));
     }
   };
@@ -425,8 +499,8 @@ export default function WeekPage() {
         {/* Dagkaarten */}
         <div className="px-4 max-w-4xl mx-auto space-y-4 pt-2">
           {weekData.map((day, index) => (
-            <Card key={index} className="p-5 space-y-4">
-              <div className="flex items-center justify-between">
+            <Card key={index} className="p-3 space-y-2">
+              <div className="flex justify-between">
                 <div>
                   <h2 className="capitalize font-semibold text-[var(--color-text)]">
                     {day.label}
@@ -435,13 +509,54 @@ export default function WeekPage() {
                     {day.shortDate}
                   </p>
                 </div>
-                <button
-                  onClick={() => setActiveDay(index)}
-                  className="flex items-center gap-1 text-xs text-[var(--color-accent)] active:opacity-70 transition-opacity"
-                >
-                  <Icon icon={Plus} size={16} />
-                  Toevoegen
-                </button>
+
+                <div className="flex items-start gap-2 w-[26px] justify-end relative mt-1.5">
+                  <div
+                    className={clsx(
+                      "absolute right-7 flex items-center gap-3 whitespace-nowrap transition-all duration-200",
+                      actionMenuDay === index
+                        ? "opacity-100 translate-x-0"
+                        : "opacity-0 translate-x-2 pointer-events-none",
+                    )}
+                  >
+                    <button
+                      onClick={() => {
+                        setCustomInputDay(index);
+                        setCustomInput("");
+                        setActionMenuDay(null);
+                      }}
+                      className="text-xs text-[var(--color-accent)] whitespace-nowrap"
+                    >
+                      Zelf invullen
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setActiveDay(index);
+                        setActionMenuDay(null);
+                      }}
+                      className="text-xs text-[var(--color-accent)] whitespace-nowrap"
+                    >
+                      Toevoegen
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => toggleDayActions(index)}
+                    className="flex items-center justify-center w-[20px] h-[20px] active:opacity-70 transition"
+                  >
+                    <Icon
+                      icon={Plus}
+                      size={20}
+                      className={clsx(
+                        "transition-transform duration-200",
+                        actionMenuDay === index
+                          ? "rotate-45 text-[var(--color-accent)]"
+                          : "text-[var(--color-text)]",
+                      )}
+                    />
+                  </button>
+                </div>
               </div>
 
               {weekPlan[index].length === 0 ? (
@@ -450,31 +565,45 @@ export default function WeekPage() {
                 </p>
               ) : (
                 <div className="space-y-2">
-                  {weekPlan[index].map((recipe) => (
+                  {weekPlan[index].map((item, i) => (
                     <div
-                      key={recipe.id}
+                      key={i}
                       className="flex items-center justify-between text-sm rounded-xl"
                     >
-                      <Link
-                        href={`/recipe/${recipe.id}`}
-                        className="flex items-center gap-3 min-w-0 flex-1"
-                      >
-                        <div className="h-12 w-12 rounded-lg overflow-hidden bg-[var(--color-surface-tertiary)] shrink-0">
-                          {recipe.image_url && (
-                            <img
-                              src={recipe.image_url}
-                              alt={recipe.title}
-                              className="w-full h-full object-cover"
+                      {item.type === "recipe" ? (
+                        <Link
+                          href={`/recipe/${item.data.id}`}
+                          className="flex items-center gap-3 min-w-0 flex-1"
+                        >
+                          <div className="h-12 w-12 rounded-lg overflow-hidden bg-[var(--color-surface-tertiary)] shrink-0">
+                            {item.data.image_url && (
+                              <img
+                                src={item.data.image_url}
+                                alt={item.data.title}
+                                className="w-full h-full object-cover"
+                              />
+                            )}
+                          </div>
+                          <span className="text-[var(--color-text)] line-clamp-2">
+                            {item.data.title}
+                          </span>
+                        </Link>
+                      ) : (
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                            <UtensilsCrossed
+                              size={18}
+                              className="text-gray-400"
                             />
-                          )}
+                          </div>
+                          <span className="text-[var(--color-text)]">
+                            {item.name}
+                          </span>
                         </div>
-                        <span className="text-[var(--color-text)] line-clamp-2">
-                          {recipe.title}
-                        </span>
-                      </Link>
+                      )}
                       <button
-                        onClick={() => removeFromDay(index, recipe.id)}
-                        className="ml-auto text-[var(--color-text-tertiary)] active:text-red-400 shrink-0 transition-colors ml-2"
+                        onClick={() => removeFromDay(index, item)}
+                        className="ml-2 text-[var(--color-text-tertiary)] active:text-red-400 shrink-0 transition-colors"
                       >
                         <Icon icon={X} size={16} />
                       </button>
@@ -482,6 +611,34 @@ export default function WeekPage() {
                   ))}
                 </div>
               )}
+
+              <div className="w-full">
+                {customInputDay === index && (
+                  <div className="relative w-full">
+                    <input
+                      autoFocus
+                      type="text"
+                      value={customInput}
+                      onChange={(e) => setCustomInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") addCustomItem(index);
+                        if (e.key === "Escape") setCustomInputDay(null);
+                      }}
+                      placeholder="bijv. Aardappels met broccoli"
+                      className="w-full text-sm px-4 py-2.5 pr-10 rounded-xl border border-gray-200 outline-none"
+                      enterKeyHint="done"
+                    />
+                    {customInput.length > 0 && (
+                      <button
+                        onClick={() => setCustomInput("")}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </Card>
           ))}
         </div>
@@ -620,7 +777,10 @@ export default function WeekPage() {
             filteredRecipes.map((recipe) => {
               const isSelected =
                 activeDay !== null &&
-                weekPlan[activeDay].some((r) => r.id === recipe.id);
+                weekPlan[activeDay].some(
+                  (i) => i.type === "recipe" && i.data.id === recipe.id,
+                );
+
               return (
                 <button
                   key={recipe.id}
