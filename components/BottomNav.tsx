@@ -21,6 +21,10 @@ export default function BottomNav() {
   const { createMenuOpen, setCreateMenuOpen } = useUI();
 
   const pathname = usePathname();
+  const hideNav = pathname.startsWith("/recipe/");
+
+  if (hideNav) return null;
+
   const router = useRouter();
 
   const items = [

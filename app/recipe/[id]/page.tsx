@@ -1,5 +1,6 @@
 "use client";
 import clsx from "clsx";
+import { styles } from "@/lib/styles";
 
 import { useEffect, useState, useRef, useMemo } from "react";
 import { supabase } from "../../../lib/supabase";
@@ -455,8 +456,8 @@ export default function RecipeDetail() {
 
             {/* Content */}
             <div className="px-4 pb-16 space-y-4">
-              <div className="px-2 space-y-4">
-                <h1 className="pt-10 text-[2rem] font-bold leading-tight">
+              <div className="flex flex-col items-center px-2 space-y-5">
+                <h1 className="pt-8 text-2xl text-center font-bold leading-tight">
                   {formatTitle(recipe.title)}
                 </h1>
 
@@ -476,7 +477,7 @@ export default function RecipeDetail() {
                 </div>
 
                 {(recipe.is_ai || recipe.category) && (
-                  <div className="flex gap-2 pb-8">
+                  <div className="flex gap-2">
                     {recipe.category && (
                       <div className="px-3 py-1 rounded-lg border border-gray-300 text-gray-600 text-sm capitalize">
                         {recipe.category}
@@ -488,52 +489,30 @@ export default function RecipeDetail() {
                         AI
                       </div>
                     )}
-                    <div className="ml-auto flex items-center gap-6">
-                      <button
-                        onClick={handleShare}
-                        className="text-[var(--color-text-secondary)] active:scale-90 transition"
-                      >
-                        <Share size={24} strokeWidth={1.5} />
-                      </button>
-                      <button
-                        onClick={() => router.push(`/recipe/${recipe.id}/edit`)}
-                        className="text-[var(--color-text-secondary)] active:scale-90 transition"
-                      >
-                        <PenSquare size={24} strokeWidth={1.5} />
-                      </button>
-                      <button
-                        onClick={() => setPlannerOpen(true)}
-                        className="text-[var(--color-text-secondary)] active:scale-90 transition"
-                      >
-                        <CalendarPlus size={24} strokeWidth={1.5} />
-                      </button>
-                    </div>
                   </div>
                 )}
-                <div ref={metaRef}></div>
-                {/* <div className="flex items-center gap-8">
+                <div className="flex items-center gap-6 mb-8">
                   <button
                     onClick={handleShare}
                     className="text-[var(--color-text-secondary)] active:scale-90 transition"
                   >
-                    <Share size={20} />
+                    <Share size={24} strokeWidth={1.5} />
                   </button>
                   <button
                     onClick={() => router.push(`/recipe/${recipe.id}/edit`)}
                     className="text-[var(--color-text-secondary)] active:scale-90 transition"
                   >
-                    <PenSquare size={20} />
+                    <PenSquare size={24} strokeWidth={1.5} />
                   </button>
                   <button
                     onClick={() => setPlannerOpen(true)}
                     className="text-[var(--color-text-secondary)] active:scale-90 transition"
                   >
-                    <CalendarPlus size={20} />
+                    <CalendarPlus size={24} strokeWidth={1.5} />
                   </button>
-                </div> */}
+                </div>
+                <div ref={metaRef}></div>
               </div>
-
-              {/* Trigger voor sticky header */}
 
               <Card>
                 <h2 className="font-semibold mb-4 text-lg">Ingrediënten</h2>
@@ -569,13 +548,6 @@ export default function RecipeDetail() {
                   <h2 className="font-semibold text-lg leading-none">
                     Bereiding
                   </h2>
-                  <button
-                    onClick={() => router.push(`/recipe/${recipe.id}/cook`)}
-                    className="flex items-center gap-2 text-sm text-[var(--color-accent)] font-medium"
-                  >
-                    <PlayCircle size={22} />
-                    Start met koken
-                  </button>
                 </div>
                 <ol className="space-y-0">
                   {recipe.steps?.map((step: string, index: number) => (
@@ -603,6 +575,28 @@ export default function RecipeDetail() {
             </div>
           </>
         )}
+
+        {/* Floating cook button */}
+        <div
+          className="fixed bottom-0 left-0 right-0 flex justify-center p-4 pointer-events-none"
+          style={{
+            paddingBottom: "calc(env(safe-area-inset-bottom) + 1.5rem)",
+          }}
+        >
+          <button
+            onClick={() => router.push(`/recipe/${recipe.id}/cook`)}
+            className={clsx(
+              styles.button.primary,
+              "text-xs !px-4 !py-3 flex items-center justify-center gap-2 pointer-events-auto transition-all duration-300",
+              isScrolled
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-4 pointer-events-none",
+            )}
+          >
+            <PlayCircle size={24} strokeWidth={1.5} />
+            Start met koken
+          </button>
+        </div>
       </main>
 
       {/* Ingrediënten sheet */}
