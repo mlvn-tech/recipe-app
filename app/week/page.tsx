@@ -219,12 +219,6 @@ export default function WeekPage() {
   }, []);
 
   useEffect(() => {
-    const closeInput = () => setCustomInputDay(null);
-    window.addEventListener("scroll", closeInput);
-    return () => window.removeEventListener("scroll", closeInput);
-  }, []);
-
-  useEffect(() => {
     const fetchShoppingCount = async () => {
       const householdId = await getHouseholdId();
       if (!householdId) return;
@@ -744,7 +738,7 @@ export default function WeekPage() {
 
               {/* Custom input */}
               {customInputDay === index && (
-                <div className="mt-2 relative w-full">
+                <div className="relative w-full">
                   <input
                     type="text"
                     value={customInput}
@@ -773,7 +767,7 @@ export default function WeekPage() {
               )}
 
               {/* Acties onderaan */}
-              <div className="flex gap-4 pt-3 border-t border-[var(--color-border)] mt-3">
+              <div className="flex gap-4 pt-3 border-t border-[var(--color-border)] mt-2">
                 <button
                   onClick={() => {
                     setActiveDay(index);
