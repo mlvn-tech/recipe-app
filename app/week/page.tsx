@@ -148,6 +148,7 @@ export default function WeekPage() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [customInputDay, setCustomInputDay] = useState<number | null>(null);
   const [customInput, setCustomInput] = useState("");
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [actionMenuDay, setActionMenuDay] = useState<number | null>(null);
 
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
@@ -223,6 +224,16 @@ export default function WeekPage() {
     window.addEventListener("scroll", closeInput);
     return () => window.removeEventListener("scroll", closeInput);
   }, []);
+
+  // Focus input met vertraging zodat iOS de layout kan stabiliseren
+  useEffect(() => {
+    if (customInputDay !== null) {
+      const timer = setTimeout(() => {
+        customInputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [customInputDay]);
 
   useEffect(() => {
     const fetchShoppingCount = async () => {
@@ -355,7 +366,6 @@ export default function WeekPage() {
         .eq("household_id", householdId);
 
       const grouped: Record<number, DayItem[]> = {
-        // ← dit was weg
         0: [],
         1: [],
         2: [],
@@ -390,6 +400,7 @@ export default function WeekPage() {
         !customInputRef.current.contains(event.target as Node)
       ) {
         setCustomInputDay(null);
+        setEditingItemId(null);
       }
     };
 
@@ -400,35 +411,57 @@ export default function WeekPage() {
     };
   }, []);
 
-  const addCustomItem = async (dayIndex: number) => {
+  const saveCustomItem = async (dayIndex: number) => {
     if (!customInput.trim()) return;
     const householdId = await getHouseholdId();
     const userId = await getUserId();
     if (!householdId || !userId) return;
 
-    const { data, error } = await supabase
-      .from("week_plans")
-      .insert({
-        week_start: weekStartDate,
-        day_index: dayIndex,
-        custom_name: customInput.trim(),
-        user_id: userId,
-        household_id: householdId,
-      })
-      .select()
-      .single();
+    if (editingItemId) {
+      // Update bestaand item
+      const { error } = await supabase
+        .from("week_plans")
+        .update({ custom_name: customInput.trim() })
+        .eq("id", editingItemId);
 
-    if (!error && data) {
-      setWeekPlan((prev) => ({
-        ...prev,
-        [dayIndex]: [
-          ...prev[dayIndex],
-          { type: "custom", name: customInput.trim(), id: data.id },
-        ],
-      }));
-      setCustomInput("");
-      setCustomInputDay(null);
+      if (!error) {
+        setWeekPlan((prev) => ({
+          ...prev,
+          [dayIndex]: prev[dayIndex].map((i) =>
+            i.type === "custom" && i.id === editingItemId
+              ? { ...i, name: customInput.trim() }
+              : i,
+          ),
+        }));
+      }
+    } else {
+      // Nieuw item aanmaken
+      const { data, error } = await supabase
+        .from("week_plans")
+        .insert({
+          week_start: weekStartDate,
+          day_index: dayIndex,
+          custom_name: customInput.trim(),
+          user_id: userId,
+          household_id: householdId,
+        })
+        .select()
+        .single();
+
+      if (!error && data) {
+        setWeekPlan((prev) => ({
+          ...prev,
+          [dayIndex]: [
+            ...prev[dayIndex],
+            { type: "custom", name: customInput.trim(), id: data.id },
+          ],
+        }));
+      }
     }
+
+    setCustomInput("");
+    setCustomInputDay(null);
+    setEditingItemId(null);
   };
 
   const shoppingList = useMemo((): ShoppingItem[] => {
@@ -713,6 +746,7 @@ export default function WeekPage() {
                                   onClick={() => {
                                     setCustomInputDay(index);
                                     setCustomInput(item.name);
+                                    setEditingItemId(item.id);
                                   }}
                                   className="flex items-center gap-3 min-w-0 flex-1 text-left"
                                 >
@@ -742,16 +776,21 @@ export default function WeekPage() {
                 <div className="relative w-full">
                   <input
                     ref={customInputRef}
-                    autoFocus
                     type="text"
                     value={customInput}
                     onChange={(e) => setCustomInput(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") addCustomItem(index);
-                      if (e.key === "Escape") setCustomInputDay(null);
+                      if (e.key === "Enter") saveCustomItem(index);
+                      if (e.key === "Escape") {
+                        setCustomInputDay(null);
+                        setEditingItemId(null);
+                      }
                     }}
                     onBlur={() => {
-                      if (!customInput.trim()) setCustomInputDay(null);
+                      if (!customInput.trim()) {
+                        setCustomInputDay(null);
+                        setEditingItemId(null);
+                      }
                     }}
                     placeholder="bijv. Aardappels met broccoli"
                     className="w-full text-sm px-4 py-2.5 pr-10 rounded-xl border border-gray-200 outline-none"
@@ -785,6 +824,7 @@ export default function WeekPage() {
                   onClick={() => {
                     setCustomInputDay(index);
                     setCustomInput("");
+                    setEditingItemId(null);
                   }}
                   className="flex items-center gap-1 text-xs text-[var(--color-accent)]"
                 >
