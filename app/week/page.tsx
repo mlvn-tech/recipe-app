@@ -536,10 +536,10 @@ export default function WeekPage() {
       if (!error) {
         setWeekPlan((prev) => ({
           ...prev,
-          [activeDay]: [...prev[activeDay], { type: "recipe", data: recipe }],
+          [activeDay]: prev[activeDay].filter(
+            (i) => !(i.type === "recipe" && i.data.id === recipe.id),
+          ),
         }));
-
-        setActiveDay(null); // sluit de sheet
       }
     } else {
       const householdId = await getHouseholdId();
