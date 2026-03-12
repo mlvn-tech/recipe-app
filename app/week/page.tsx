@@ -225,16 +225,6 @@ export default function WeekPage() {
     return () => window.removeEventListener("scroll", closeInput);
   }, []);
 
-  // Focus input met vertraging zodat iOS de layout kan stabiliseren
-  useEffect(() => {
-    if (customInputDay !== null) {
-      const timer = setTimeout(() => {
-        customInputRef.current?.focus();
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [customInputDay]);
-
   useEffect(() => {
     const fetchShoppingCount = async () => {
       const householdId = await getHouseholdId();
@@ -747,6 +737,9 @@ export default function WeekPage() {
                                     setCustomInputDay(index);
                                     setCustomInput(item.name);
                                     setEditingItemId(item.id);
+                                    requestAnimationFrame(() => {
+                                      customInputRef.current?.focus();
+                                    });
                                   }}
                                   className="flex items-center gap-3 min-w-0 flex-1 text-left"
                                 >
@@ -825,6 +818,9 @@ export default function WeekPage() {
                     setCustomInputDay(index);
                     setCustomInput("");
                     setEditingItemId(null);
+                    requestAnimationFrame(() => {
+                      customInputRef.current?.focus();
+                    });
                   }}
                   className="flex items-center gap-1 text-xs text-[var(--color-accent)]"
                 >
