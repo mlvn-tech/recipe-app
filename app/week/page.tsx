@@ -145,8 +145,9 @@ export default function WeekPage() {
   const [weekOffset, setWeekOffset] = useState(0);
   const [isWeekPickerOpen, setIsWeekPickerOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [customInputDay, setCustomInputDay] = useState<number | null>(null);
+  const [customSheetDay, setCustomSheetDay] = useState<number | null>(null);
   const [customInput, setCustomInput] = useState("");
+  const [previousCustomNames, setPreviousCustomNames] = useState<string[]>([]);
   const [actionMenuDay, setActionMenuDay] = useState<number | null>(null);
 
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
@@ -214,6 +215,28 @@ export default function WeekPage() {
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const fetchPreviousCustomNames = async () => {
+      const householdId = await getHouseholdId();
+      if (!householdId) return;
+
+      const { data } = await supabase
+        .from("week_plans")
+        .select("custom_name")
+        .eq("household_id", householdId)
+        .not("custom_name", "is", null);
+
+      if (data) {
+        const unique = [
+          ...new Set(data.map((d) => d.custom_name).filter(Boolean)),
+        ] as string[];
+        setPreviousCustomNames(unique);
+      }
+    };
+
+    fetchPreviousCustomNames();
   }, []);
 
   useEffect(() => {
@@ -400,8 +423,13 @@ export default function WeekPage() {
           { type: "custom", name: customInput.trim(), id: data.id },
         ],
       }));
+      setPreviousCustomNames((prev) =>
+        prev.includes(customInput.trim())
+          ? prev
+          : [customInput.trim(), ...prev],
+      );
       setCustomInput("");
-      setCustomInputDay(null);
+      setCustomSheetDay(null);
     }
   };
 
@@ -704,35 +732,6 @@ export default function WeekPage() {
                 </div>
               )}
 
-              {/* Custom input */}
-              {customInputDay === index && (
-                <div className="relative w-full">
-                  <input
-                    type="text"
-                    value={customInput}
-                    onChange={(e) => setCustomInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") addCustomItem(index);
-                      if (e.key === "Escape") {
-                        setCustomInputDay(null);
-                      }
-                    }}
-                    placeholder="bijv. Aardappels met broccoli"
-                    className="w-full text-sm px-4 py-2.5 pr-10 rounded-xl border border-gray-200 outline-none"
-                    enterKeyHint="done"
-                  />
-
-                  {customInput.length > 0 && (
-                    <button
-                      onClick={() => setCustomInput("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    >
-                      <X size={16} />
-                    </button>
-                  )}
-                </div>
-              )}
-
               {/* Acties onderaan */}
               <div className="flex gap-4 pt-3 border-t border-[var(--color-border)] mt-2">
                 <button
@@ -747,8 +746,8 @@ export default function WeekPage() {
 
                 <button
                   onClick={() => {
-                    setCustomInputDay(index);
                     setCustomInput("");
+                    setCustomSheetDay(index);
                   }}
                   className="flex items-center gap-1 text-xs text-[var(--color-accent)]"
                 >
@@ -828,6 +827,101 @@ export default function WeekPage() {
               </button>
             );
           })}
+        </div>
+      </SwipeableSheet>
+
+      {/* Zelf invullen sheet */}
+      <SwipeableSheet
+        open={customSheetDay !== null}
+        onClose={() => setCustomSheetDay(null)}
+        title="Zelf invullen"
+        height="auto"
+        maxHeight="90dvh"
+      >
+        <div
+          className="px-4 pt-1"
+          style={{ paddingBottom: sheetBottomPadding }}
+        >
+          {/* Preview + input */}
+          <div className="flex items-center gap-4 mb-5">
+            <div className="h-16 w-16 rounded-xl bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">
+              <UtensilsCrossed
+                size={24}
+                className="text-[var(--color-accent)]"
+              />
+            </div>
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                value={customInput}
+                onChange={(e) => setCustomInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && customSheetDay !== null)
+                    addCustomItem(customSheetDay);
+                }}
+                placeholder="bijv. Aardappels met broccoli"
+                className="w-full text-sm px-4 py-3 pr-10 rounded-xl border border-gray-200 outline-none"
+                style={{ fontSize: 16 }}
+                enterKeyHint="done"
+              />
+              {customInput.length > 0 && (
+                <button
+                  onClick={() => setCustomInput("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Toevoegen knop */}
+          <button
+            onClick={() => {
+              if (customSheetDay !== null) addCustomItem(customSheetDay);
+            }}
+            disabled={!customInput.trim()}
+            className={clsx(
+              "w-full py-3 rounded-xl text-sm font-medium transition",
+              customInput.trim()
+                ? "bg-[var(--color-accent)] text-white"
+                : "bg-gray-100 text-gray-400",
+            )}
+          >
+            Toevoegen
+          </button>
+
+          {/* Eerder ingevuld */}
+          {previousCustomNames.length > 0 && (
+            <div className="mt-6">
+              <p className="text-xs font-medium text-[var(--color-text-secondary)] mb-2 px-1">
+                Eerder ingevuld
+              </p>
+              <div className="space-y-1">
+                {previousCustomNames
+                  .filter((name) =>
+                    name.toLowerCase().includes(customInput.toLowerCase()),
+                  )
+                  .map((name) => (
+                    <button
+                      key={name}
+                      onClick={() => setCustomInput(name)}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 transition text-left"
+                    >
+                      <div className="h-9 w-9 rounded-lg bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">
+                        <UtensilsCrossed
+                          size={16}
+                          className="text-[var(--color-accent)]"
+                        />
+                      </div>
+                      <span className="text-sm text-[var(--color-text)]">
+                        {name}
+                      </span>
+                    </button>
+                  ))}
+              </div>
+            </div>
+          )}
         </div>
       </SwipeableSheet>
 
