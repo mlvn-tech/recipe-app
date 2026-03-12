@@ -13,7 +13,6 @@ import {
   ShoppingBag,
   UtensilsCrossed,
   Trash2,
-  Pencil,
 } from "lucide-react";
 
 import Icon from "@/components/icons";
@@ -148,7 +147,6 @@ export default function WeekPage() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [customInputDay, setCustomInputDay] = useState<number | null>(null);
   const [customInput, setCustomInput] = useState("");
-  const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [actionMenuDay, setActionMenuDay] = useState<number | null>(null);
 
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
@@ -376,57 +374,35 @@ export default function WeekPage() {
     fetchWeekPlan();
   }, [weekStartDate]);
 
-  const saveCustomItem = async (dayIndex: number) => {
+  const addCustomItem = async (dayIndex: number) => {
     if (!customInput.trim()) return;
     const householdId = await getHouseholdId();
     const userId = await getUserId();
     if (!householdId || !userId) return;
 
-    if (editingItemId) {
-      // Update bestaand item
-      const { error } = await supabase
-        .from("week_plans")
-        .update({ custom_name: customInput.trim() })
-        .eq("id", editingItemId);
+    const { data, error } = await supabase
+      .from("week_plans")
+      .insert({
+        week_start: weekStartDate,
+        day_index: dayIndex,
+        custom_name: customInput.trim(),
+        user_id: userId,
+        household_id: householdId,
+      })
+      .select()
+      .single();
 
-      if (!error) {
-        setWeekPlan((prev) => ({
-          ...prev,
-          [dayIndex]: prev[dayIndex].map((i) =>
-            i.type === "custom" && i.id === editingItemId
-              ? { ...i, name: customInput.trim() }
-              : i,
-          ),
-        }));
-      }
-    } else {
-      // Nieuw item aanmaken
-      const { data, error } = await supabase
-        .from("week_plans")
-        .insert({
-          week_start: weekStartDate,
-          day_index: dayIndex,
-          custom_name: customInput.trim(),
-          user_id: userId,
-          household_id: householdId,
-        })
-        .select()
-        .single();
-
-      if (!error && data) {
-        setWeekPlan((prev) => ({
-          ...prev,
-          [dayIndex]: [
-            ...prev[dayIndex],
-            { type: "custom", name: customInput.trim(), id: data.id },
-          ],
-        }));
-      }
+    if (!error && data) {
+      setWeekPlan((prev) => ({
+        ...prev,
+        [dayIndex]: [
+          ...prev[dayIndex],
+          { type: "custom", name: customInput.trim(), id: data.id },
+        ],
+      }));
+      setCustomInput("");
+      setCustomInputDay(null);
     }
-
-    setCustomInput("");
-    setCustomInputDay(null);
-    setEditingItemId(null);
   };
 
   const shoppingList = useMemo((): ShoppingItem[] => {
@@ -707,25 +683,17 @@ export default function WeekPage() {
                                   </span>
                                 </Link>
                               ) : (
-                                <button
-                                  onClick={() => {
-                                    setCustomInputDay(index);
-                                    setCustomInput(item.name);
-                                    setEditingItemId(item.id);
-                                  }}
-                                  className="flex items-center gap-3 min-w-0 flex-1 text-left"
-                                >
+                                <div className="flex items-center gap-3 min-w-0 flex-1">
                                   <div className="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
                                     <UtensilsCrossed
                                       size={18}
                                       className="text-gray-400"
                                     />
                                   </div>
-
                                   <span className="text-[var(--color-text)]">
                                     {item.name}
                                   </span>
-                                </button>
+                                </div>
                               )}
                             </div>
                           </SwipeableItem>
@@ -744,10 +712,9 @@ export default function WeekPage() {
                     value={customInput}
                     onChange={(e) => setCustomInput(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") saveCustomItem(index);
+                      if (e.key === "Enter") addCustomItem(index);
                       if (e.key === "Escape") {
                         setCustomInputDay(null);
-                        setEditingItemId(null);
                       }
                     }}
                     placeholder="bijv. Aardappels met broccoli"
@@ -782,11 +749,10 @@ export default function WeekPage() {
                   onClick={() => {
                     setCustomInputDay(index);
                     setCustomInput("");
-                    setEditingItemId(null);
                   }}
                   className="flex items-center gap-1 text-xs text-[var(--color-accent)]"
                 >
-                  <Icon icon={Pencil} size={14} />
+                  <Icon icon={Plus} size={14} />
                   Zelf invullen
                 </button>
               </div>
