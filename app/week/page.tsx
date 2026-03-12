@@ -154,7 +154,6 @@ export default function WeekPage() {
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
 
   const mainRef = useRef<HTMLDivElement>(null);
-  const customInputRef = useRef<HTMLInputElement | null>(null);
 
   const toggleDayActions = (dayIndex: number) => {
     setActionMenuDay(actionMenuDay === dayIndex ? null : dayIndex);
@@ -382,24 +381,6 @@ export default function WeekPage() {
 
     fetchWeekPlan();
   }, [weekStartDate]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        customInputRef.current &&
-        !customInputRef.current.contains(event.target as Node)
-      ) {
-        setCustomInputDay(null);
-        setEditingItemId(null);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
   const saveCustomItem = async (dayIndex: number) => {
     if (!customInput.trim()) return;
@@ -737,9 +718,6 @@ export default function WeekPage() {
                                     setCustomInputDay(index);
                                     setCustomInput(item.name);
                                     setEditingItemId(item.id);
-                                    requestAnimationFrame(() => {
-                                      customInputRef.current?.focus();
-                                    });
                                   }}
                                   className="flex items-center gap-3 min-w-0 flex-1 text-left"
                                 >
@@ -766,21 +744,14 @@ export default function WeekPage() {
 
               {/* Custom input */}
               {customInputDay === index && (
-                <div className="relative w-full">
+                <div className="mt-2 relative w-full">
                   <input
-                    ref={customInputRef}
                     type="text"
                     value={customInput}
                     onChange={(e) => setCustomInput(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") saveCustomItem(index);
                       if (e.key === "Escape") {
-                        setCustomInputDay(null);
-                        setEditingItemId(null);
-                      }
-                    }}
-                    onBlur={() => {
-                      if (!customInput.trim()) {
                         setCustomInputDay(null);
                         setEditingItemId(null);
                       }
@@ -802,7 +773,7 @@ export default function WeekPage() {
               )}
 
               {/* Acties onderaan */}
-              <div className="flex gap-4 pt-3 border-t border-[var(--color-border)] mt-2">
+              <div className="flex gap-4 pt-3 border-t border-[var(--color-border)] mt-3">
                 <button
                   onClick={() => {
                     setActiveDay(index);
@@ -818,9 +789,6 @@ export default function WeekPage() {
                     setCustomInputDay(index);
                     setCustomInput("");
                     setEditingItemId(null);
-                    requestAnimationFrame(() => {
-                      customInputRef.current?.focus();
-                    });
                   }}
                   className="flex items-center gap-1 text-xs text-[var(--color-accent)]"
                 >
