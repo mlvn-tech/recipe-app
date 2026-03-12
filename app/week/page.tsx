@@ -13,6 +13,7 @@ import {
   ShoppingBag,
   UtensilsCrossed,
   Trash2,
+  Pencil,
 } from "lucide-react";
 
 import Icon from "@/components/icons";
@@ -712,10 +713,10 @@ export default function WeekPage() {
                                 </Link>
                               ) : (
                                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                                  <div className="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                                  <div className="h-12 w-12 rounded-xl bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">
                                     <UtensilsCrossed
                                       size={18}
-                                      className="text-gray-400"
+                                      className="text-[var(--color-accent)]"
                                     />
                                   </div>
                                   <span className="text-[var(--color-text)]">
@@ -740,7 +741,7 @@ export default function WeekPage() {
                   }}
                   className="flex items-center gap-1 text-xs text-[var(--color-accent)]"
                 >
-                  <Icon icon={Plus} size={16} />
+                  <Icon icon={Plus} size={14} />
                   Recept toevoegen
                 </button>
 
@@ -751,7 +752,7 @@ export default function WeekPage() {
                   }}
                   className="flex items-center gap-1 text-xs text-[var(--color-accent)]"
                 >
-                  <Icon icon={Plus} size={14} />
+                  <Icon icon={Pencil} size={12} />
                   Zelf invullen
                 </button>
               </div>
@@ -835,8 +836,7 @@ export default function WeekPage() {
         open={customSheetDay !== null}
         onClose={() => setCustomSheetDay(null)}
         title="Zelf invullen"
-        height="auto"
-        maxHeight="90dvh"
+        height="64dvh"
       >
         <div
           className="px-4 pt-1"
