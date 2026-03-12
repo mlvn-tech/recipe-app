@@ -12,6 +12,8 @@ import {
   Check,
   ShoppingBag,
   UtensilsCrossed,
+  Trash2,
+  Pencil,
 } from "lucide-react";
 
 import Icon from "@/components/icons";
@@ -26,6 +28,117 @@ type ShoppingItem = {
   count: number;
 };
 
+function AnimatedItem({
+  children,
+  visible,
+}: {
+  children: React.ReactNode;
+  visible: boolean;
+}) {
+  const [height, setHeight] = useState<number | "auto">("auto");
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!visible && ref.current) {
+      const h = ref.current.offsetHeight;
+      setHeight(h);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setHeight(0);
+        });
+      });
+    }
+  }, [visible]);
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        height: height === "auto" ? "auto" : height,
+        overflow: "hidden",
+        opacity: visible ? 1 : 0,
+        transition: "height 0.3s ease, opacity 0.25s ease",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function SwipeableItem({
+  children,
+  onDelete,
+}: {
+  children: React.ReactNode;
+  onDelete: () => void;
+}) {
+  const [offsetX, setOffsetX] = useState(0);
+  const [swiping, setSwiping] = useState(false);
+  const startX = useRef(0);
+  const threshold = 80;
+
+  const rubberband = (x: number, limit: number) => {
+    const abs = Math.abs(x);
+    const elastic = limit * (1 - Math.exp(-abs / limit));
+    return -elastic;
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    startX.current = e.touches[0].clientX;
+    setSwiping(true);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    const diff = e.touches[0].clientX - startX.current;
+    if (diff < 0) setOffsetX(rubberband(diff, threshold));
+  };
+
+  const onTouchEnd = () => {
+    setSwiping(false);
+    if (offsetX < -threshold * 0.7) onDelete();
+    else setOffsetX(0);
+  };
+
+  const progress = Math.min(Math.abs(offsetX) / threshold, 1);
+  const pillWidth = Math.max(0, Math.abs(offsetX) - 10);
+  const pillOpacity = Math.min(progress * 2, 1);
+
+  return (
+    <div className="relative flex items-center">
+      <div
+        className="absolute right-0 flex items-center justify-center bg-red-500 rounded-full"
+        style={{
+          width: pillWidth,
+          height: 28,
+          top: "50%",
+          transform: "translateY(-50%)",
+          opacity: pillOpacity,
+          transition: swiping ? "none" : "width 0.3s ease, opacity 0.3s ease",
+        }}
+      >
+        {progress > 0.5 && (
+          <Icon icon={Trash2} size={16} className="text-white shrink-0" />
+        )}
+      </div>
+
+      <div
+        className="relative w-full overflow-hidden"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        style={{
+          transform: `translateX(${offsetX}px)`,
+          transition: swiping
+            ? "none"
+            : "transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export default function WeekPage() {
   const [recipes, setRecipes] = useState<any[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -37,7 +150,10 @@ export default function WeekPage() {
   const [customInput, setCustomInput] = useState("");
   const [actionMenuDay, setActionMenuDay] = useState<number | null>(null);
 
+  const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
+
   const mainRef = useRef<HTMLDivElement>(null);
+  const customInputRef = useRef<HTMLInputElement | null>(null);
 
   const toggleDayActions = (dayIndex: number) => {
     setActionMenuDay(actionMenuDay === dayIndex ? null : dayIndex);
@@ -100,6 +216,12 @@ export default function WeekPage() {
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const closeInput = () => setCustomInputDay(null);
+    window.addEventListener("scroll", closeInput);
+    return () => window.removeEventListener("scroll", closeInput);
   }, []);
 
   useEffect(() => {
@@ -174,9 +296,9 @@ export default function WeekPage() {
       date.setDate(start.getDate() + i);
       return {
         label: date.toLocaleDateString("nl-NL", { weekday: "long" }),
-        shortDate: date.toLocaleDateString("nl-NL", {
+        Date: date.toLocaleDateString("nl-NL", {
           day: "numeric",
-          month: "short",
+          month: "long",
         }),
       };
     });
@@ -261,6 +383,23 @@ export default function WeekPage() {
     fetchWeekPlan();
   }, [weekStartDate]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        customInputRef.current &&
+        !customInputRef.current.contains(event.target as Node)
+      ) {
+        setCustomInputDay(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const addCustomItem = async (dayIndex: number) => {
     if (!customInput.trim()) return;
     const householdId = await getHouseholdId();
@@ -321,6 +460,21 @@ export default function WeekPage() {
     return matchesSearch && matchesCategory;
   });
 
+  const sortedRecipes = [...filteredRecipes].sort((a, b) => {
+    if (activeDay === null) return 0;
+
+    const aSelected = weekPlan[activeDay]?.some(
+      (i) => i.type === "recipe" && i.data.id === a.id,
+    );
+
+    const bSelected = weekPlan[activeDay]?.some(
+      (i) => i.type === "recipe" && i.data.id === b.id,
+    );
+
+    if (aSelected === bSelected) return 0;
+    return aSelected ? -1 : 1;
+  });
+
   const toggleRecipeForDay = async (recipe: any) => {
     if (activeDay === null) return;
 
@@ -349,10 +503,10 @@ export default function WeekPage() {
       if (!error) {
         setWeekPlan((prev) => ({
           ...prev,
-          [activeDay]: prev[activeDay].filter(
-            (i) => !(i.type === "recipe" && i.data.id === recipe.id),
-          ),
+          [activeDay]: [...prev[activeDay], { type: "recipe", data: recipe }],
         }));
+
+        setActiveDay(null); // sluit de sheet
       }
     } else {
       const householdId = await getHouseholdId();
@@ -376,24 +530,33 @@ export default function WeekPage() {
   };
 
   const removeFromDay = async (dayIndex: number, item: DayItem) => {
-    const householdId = await getHouseholdId();
-    if (!householdId) return;
+    const id = item.type === "recipe" ? item.data.id : item.id;
 
-    let query = supabase
-      .from("week_plans")
-      .delete()
-      .eq("week_start", weekStartDate)
-      .eq("day_index", dayIndex)
-      .eq("household_id", householdId);
+    setRemovingIds((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
 
-    if (item.type === "recipe") {
-      query = query.eq("recipe_id", item.data.id);
-    } else {
-      query = query.eq("id", item.id);
-    }
+    setTimeout(async () => {
+      const householdId = await getHouseholdId();
+      if (!householdId) return;
 
-    const { error } = await query;
-    if (!error) {
+      let query = supabase
+        .from("week_plans")
+        .delete()
+        .eq("week_start", weekStartDate)
+        .eq("day_index", dayIndex)
+        .eq("household_id", householdId);
+
+      if (item.type === "recipe") {
+        query = query.eq("recipe_id", item.data.id);
+      } else {
+        query = query.eq("id", item.id);
+      }
+
+      await query;
+
       setWeekPlan((prev) => ({
         ...prev,
         [dayIndex]: prev[dayIndex].filter((i) =>
@@ -402,7 +565,7 @@ export default function WeekPage() {
             : !(i.type === "custom" && i.id === item.id),
         ),
       }));
-    }
+    }, 250);
   };
 
   const sheetBottomPadding = "calc(5rem + env(safe-area-inset-bottom))";
@@ -439,7 +602,7 @@ export default function WeekPage() {
             </span>
             <Icon
               icon={ChevronDown}
-              size={14}
+              size={16}
               className="text-[var(--color-text-secondary)]"
             />
           </div>
@@ -497,147 +660,137 @@ export default function WeekPage() {
         </div>
 
         {/* Dagkaarten */}
+
         <div className="px-4 max-w-4xl mx-auto space-y-4 pt-2">
           {weekData.map((day, index) => (
-            <Card key={index} className="p-3 space-y-2">
-              <div className="flex justify-between">
-                <div>
-                  <h2 className="capitalize font-semibold text-[var(--color-text)]">
-                    {day.label}
-                  </h2>
-                  <p className="text-sm text-[var(--color-text-secondary)]">
-                    {day.shortDate}
-                  </p>
-                </div>
-
-                <div className="flex items-start gap-2 w-[26px] justify-end relative mt-1.5">
-                  <div
-                    className={clsx(
-                      "absolute right-7 flex items-center gap-3 whitespace-nowrap transition-all duration-200",
-                      actionMenuDay === index
-                        ? "opacity-100 translate-x-0"
-                        : "opacity-0 translate-x-2 pointer-events-none",
-                    )}
-                  >
-                    <button
-                      onClick={() => {
-                        setCustomInputDay(index);
-                        setCustomInput("");
-                        setActionMenuDay(null);
-                      }}
-                      className="text-xs text-[var(--color-accent)] whitespace-nowrap"
-                    >
-                      Zelf invullen
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setActiveDay(index);
-                        setActionMenuDay(null);
-                      }}
-                      className="text-xs text-[var(--color-accent)] whitespace-nowrap"
-                    >
-                      Toevoegen
-                    </button>
-                  </div>
-
-                  <button
-                    onClick={() => toggleDayActions(index)}
-                    className="flex items-center justify-center w-[20px] h-[20px] active:opacity-70 transition"
-                  >
-                    <Icon
-                      icon={Plus}
-                      size={20}
-                      className={clsx(
-                        "transition-transform duration-200",
-                        actionMenuDay === index
-                          ? "rotate-45 text-[var(--color-accent)]"
-                          : "text-[var(--color-text)]",
-                      )}
-                    />
-                  </button>
-                </div>
+            <Card key={index} className="p-5">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="capitalize font-semibold text-[var(--color-text)] flex items-center gap-2">
+                  {day.label}
+                  <span>{day.Date}</span>
+                </h2>
               </div>
 
+              {/* Items */}
               {weekPlan[index].length === 0 ? (
                 <p className="text-sm text-[var(--color-text-tertiary)]">
                   Nog niets gepland
                 </p>
               ) : (
                 <div className="space-y-2">
-                  {weekPlan[index].map((item, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between text-sm rounded-xl"
-                    >
-                      {item.type === "recipe" ? (
-                        <Link
-                          href={`/recipe/${item.data.id}`}
-                          className="flex items-center gap-3 min-w-0 flex-1"
-                        >
-                          <div className="h-12 w-12 rounded-lg overflow-hidden bg-[var(--color-surface-tertiary)] shrink-0">
-                            {item.data.image_url && (
-                              <img
-                                src={item.data.image_url}
-                                alt={item.data.title}
-                                className="w-full h-full object-cover"
-                              />
-                            )}
-                          </div>
-                          <span className="text-[var(--color-text)] line-clamp-2">
-                            {item.data.title}
-                          </span>
-                        </Link>
-                      ) : (
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <div className="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                            <UtensilsCrossed
-                              size={18}
-                              className="text-gray-400"
-                            />
-                          </div>
-                          <span className="text-[var(--color-text)]">
-                            {item.name}
-                          </span>
+                  {weekPlan[index].map((item, i) => {
+                    const id = item.type === "recipe" ? item.data.id : item.id;
+
+                    return (
+                      <AnimatedItem key={id} visible={!removingIds.has(id)}>
+                        <div className="py-1">
+                          <SwipeableItem
+                            onDelete={() => removeFromDay(index, item)}
+                          >
+                            <div className="flex items-center justify-between text-sm">
+                              {item.type === "recipe" ? (
+                                <Link
+                                  href={`/recipe/${item.data.id}`}
+                                  className="flex items-center gap-3 min-w-0 flex-1"
+                                >
+                                  <div className="h-12 w-12 rounded-lg overflow-hidden bg-[var(--color-surface-tertiary)] shrink-0">
+                                    {item.data.image_url && (
+                                      <img
+                                        src={item.data.image_url}
+                                        alt={item.data.title}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    )}
+                                  </div>
+
+                                  <span className="text-[var(--color-text)] line-clamp-2">
+                                    {item.data.title}
+                                  </span>
+                                </Link>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    setCustomInputDay(index);
+                                    setCustomInput(item.name);
+                                  }}
+                                  className="flex items-center gap-3 min-w-0 flex-1 text-left"
+                                >
+                                  <div className="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                                    <UtensilsCrossed
+                                      size={18}
+                                      className="text-gray-400"
+                                    />
+                                  </div>
+
+                                  <span className="text-[var(--color-text)]">
+                                    {item.name}
+                                  </span>
+                                </button>
+                              )}
+                            </div>
+                          </SwipeableItem>
                         </div>
-                      )}
-                      <button
-                        onClick={() => removeFromDay(index, item)}
-                        className="ml-2 text-[var(--color-text-tertiary)] active:text-red-400 shrink-0 transition-colors"
-                      >
-                        <Icon icon={X} size={16} />
-                      </button>
-                    </div>
-                  ))}
+                      </AnimatedItem>
+                    );
+                  })}
                 </div>
               )}
 
-              <div className="w-full">
-                {customInputDay === index && (
-                  <div className="relative w-full">
-                    <input
-                      autoFocus
-                      type="text"
-                      value={customInput}
-                      onChange={(e) => setCustomInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") addCustomItem(index);
-                        if (e.key === "Escape") setCustomInputDay(null);
-                      }}
-                      placeholder="bijv. Aardappels met broccoli"
-                      className="w-full text-sm px-4 py-2.5 pr-10 rounded-xl border border-gray-200 outline-none"
-                      enterKeyHint="done"
-                    />
-                    {customInput.length > 0 && (
-                      <button
-                        onClick={() => setCustomInput("")}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                      >
-                        <X size={16} />
-                      </button>
-                    )}
-                  </div>
-                )}
+              {/* Custom input */}
+              {customInputDay === index && (
+                <div className="relative w-full">
+                  <input
+                    ref={customInputRef}
+                    autoFocus
+                    type="text"
+                    value={customInput}
+                    onChange={(e) => setCustomInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") addCustomItem(index);
+                      if (e.key === "Escape") setCustomInputDay(null);
+                    }}
+                    onBlur={() => {
+                      if (!customInput.trim()) setCustomInputDay(null);
+                    }}
+                    placeholder="bijv. Aardappels met broccoli"
+                    className="w-full text-sm px-4 py-2.5 pr-10 rounded-xl border border-gray-200 outline-none"
+                    enterKeyHint="done"
+                  />
+
+                  {customInput.length > 0 && (
+                    <button
+                      onClick={() => setCustomInput("")}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* Acties onderaan */}
+              <div className="flex gap-4 pt-3 border-t border-[var(--color-border)] mt-2">
+                <button
+                  onClick={() => {
+                    setActiveDay(index);
+                  }}
+                  className="flex items-center gap-1 text-xs text-[var(--color-accent)]"
+                >
+                  <Icon icon={Plus} size={16} />
+                  Recept toevoegen
+                </button>
+
+                <button
+                  onClick={() => {
+                    setCustomInputDay(index);
+                    setCustomInput("");
+                  }}
+                  className="flex items-center gap-1 text-xs text-[var(--color-accent)]"
+                >
+                  <Icon icon={Pencil} size={14} />
+                  Zelf invullen
+                </button>
               </div>
             </Card>
           ))}
@@ -719,109 +872,114 @@ export default function WeekPage() {
         open={activeDay !== null}
         onClose={() => setActiveDay(null)}
         title="Kies een recept"
-        height="auto"
-        maxHeight="70dvh"
+        height="75dvh"
       >
-        <div className="px-6 mb-4 shrink-0">
-          <SearchInput
-            value={search}
-            onChange={setSearch}
-            placeholder="Zoek recept..."
-          />
-        </div>
+        <div className="flex flex-col h-full">
+          {/* search */}
+          <div className="px-6 mb-4 shrink-0">
+            <SearchInput
+              value={search}
+              onChange={setSearch}
+              placeholder="Zoek recept..."
+            />
+          </div>
 
-        <div
-          className="flex gap-2 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth mb-4 shrink-0"
-          style={{
-            paddingLeft: "1.5rem",
-            paddingRight: "1.5rem",
-            scrollPaddingLeft: "1.5rem",
-          }}
-        >
-          {finalFilters.map((item) => {
-            const isActive = activeCategory === item.name;
-            return (
-              <button
-                key={item.name}
-                onClick={() => setActiveCategory(item.name)}
-                className={clsx(
-                  "snap-start flex-shrink-0 px-4 py-2 rounded-xl text-sm whitespace-nowrap border transition font-medium",
-                  isActive
-                    ? "bg-gray-800 text-white border-gray-800"
-                    : "bg-white text-gray-500 border-gray-200",
-                )}
-              >
-                {item.name}
-                <span
-                  className={clsx(
-                    "ml-2 text-xs",
-                    isActive ? "opacity-60" : "opacity-40",
-                  )}
-                >
-                  {item.count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div
-          className="flex-1 overflow-y-auto px-6 space-y-2"
-          style={{ paddingBottom: sheetBottomPadding }}
-        >
-          {filteredRecipes.length === 0 ? (
-            <div className="text-sm text-[var(--color-text-tertiary)] py-6 text-center">
-              Geen recepten gevonden
-            </div>
-          ) : (
-            filteredRecipes.map((recipe) => {
-              const isSelected =
-                activeDay !== null &&
-                weekPlan[activeDay].some(
-                  (i) => i.type === "recipe" && i.data.id === recipe.id,
-                );
-
+          {/* filters */}
+          <div
+            className="flex gap-2 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth mb-4 shrink-0"
+            style={{
+              paddingLeft: "1.5rem",
+              paddingRight: "1.5rem",
+              scrollPaddingLeft: "1.5rem",
+            }}
+          >
+            {finalFilters.map((item) => {
+              const isActive = activeCategory === item.name;
               return (
                 <button
-                  key={recipe.id}
-                  onClick={() => toggleRecipeForDay(recipe)}
+                  key={item.name}
+                  onClick={() => setActiveCategory(item.name)}
                   className={clsx(
-                    "w-full flex items-center justify-between px-4 py-3 rounded-xl transition",
-                    isSelected
-                      ? "border border-gray-200"
-                      : "border border-transparent",
+                    "snap-start flex-shrink-0 px-4 py-2 rounded-xl text-sm whitespace-nowrap border transition font-medium",
+                    isActive
+                      ? "bg-gray-800 text-white border-gray-800"
+                      : "bg-white text-gray-500 border-gray-200",
                   )}
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="h-10 w-10 rounded-lg overflow-hidden bg-[var(--color-surface-tertiary)] shrink-0">
-                      {recipe.image_url && (
-                        <img
-                          src={recipe.image_url}
-                          alt={recipe.title}
-                          className="w-full h-full object-cover"
-                        />
-                      )}
-                    </div>
-                    <span className="text-sm text-left truncate max-w-[200px] text-[var(--color-text)]">
-                      {recipe.title}
-                    </span>
-                  </div>
-                  <div
+                  {item.name}
+                  <span
                     className={clsx(
-                      "h-5 w-5 rounded-md border-2 flex items-center justify-center shrink-0 transition",
-                      isSelected
-                        ? "bg-[var(--color-accent)] border-[var(--color-accent)]"
-                        : "border-[var(--color-border)] bg-transparent",
+                      "ml-2 text-xs",
+                      isActive ? "opacity-60" : "opacity-40",
                     )}
                   >
-                    {isSelected && (
-                      <Icon icon={Check} size={16} className="text-white" />
-                    )}
-                  </div>
+                    {item.count}
+                  </span>
                 </button>
               );
-            })
-          )}
+            })}
+          </div>
+
+          {/* results */}
+          <div
+            className="flex-1 overflow-y-auto px-6 space-y-4"
+            style={{ paddingBottom: sheetBottomPadding }}
+          >
+            {filteredRecipes.length === 0 ? (
+              <div className="text-sm text-[var(--color-text-tertiary)] py-6 text-center">
+                Geen recepten gevonden
+              </div>
+            ) : (
+              sortedRecipes.map((recipe) => {
+                const isSelected =
+                  activeDay !== null &&
+                  weekPlan[activeDay].some(
+                    (i) => i.type === "recipe" && i.data.id === recipe.id,
+                  );
+
+                return (
+                  <button
+                    key={recipe.id}
+                    onClick={() => toggleRecipeForDay(recipe)}
+                    className={clsx(
+                      "w-full flex items-center justify-between px-4 py-3 rounded-xl transition",
+                      isSelected
+                        ? "bg-gray-50 border border-gray-50"
+                        : "border border-gray-200",
+                    )}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="h-10 w-10 rounded-lg overflow-hidden bg-[var(--color-surface-tertiary)] shrink-0">
+                        {recipe.image_url && (
+                          <img
+                            src={recipe.image_url}
+                            alt={recipe.title}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                      </div>
+                      <span className="text-sm text-left truncate max-w-[200px] text-[var(--color-text)]">
+                        {recipe.title}
+                      </span>
+                    </div>
+
+                    <div
+                      className={clsx(
+                        "h-5 w-5 rounded-md border-2 flex items-center justify-center shrink-0 transition",
+                        isSelected
+                          ? "bg-[var(--color-accent)] border-[var(--color-accent)]"
+                          : "border-[var(--color-border)] bg-transparent",
+                      )}
+                    >
+                      {isSelected && (
+                        <Icon icon={Check} size={16} className="text-white" />
+                      )}
+                    </div>
+                  </button>
+                );
+              })
+            )}
+          </div>
         </div>
       </SwipeableSheet>
     </>

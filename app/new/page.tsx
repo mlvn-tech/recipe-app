@@ -1,69 +1,102 @@
 "use client";
-import { styles } from "@/lib/styles";
-import clsx from "clsx";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/lib/supabase";
-import Header from "@/components/Header";
-import Card from "@/components/Card";
 import { useRouter } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+import Card from "@/components/Card";
+import Header from "@/components/Header";
 import Icon from "@/components/icons";
+import { styles } from "@/lib/styles";
 import { toast } from "sonner";
+import { Plus, X, ChevronDown } from "lucide-react";
+import clsx from "clsx";
 
 export default function NewRecipe() {
   const router = useRouter();
 
   const [title, setTitle] = useState("");
-  const [ingredients, setIngredients] = useState("");
-  const [steps, setSteps] = useState("");
-  const [cookingTime, setCookingTime] = useState<number | null>(null);
+
+  const [ingredients, setIngredients] = useState<string[]>([""]);
+  const ingredientRefs = useRef<HTMLInputElement[]>([]);
+
+  const [steps, setSteps] = useState<string[]>([""]);
+  const stepRefs = useRef<HTMLInputElement[]>([]);
+
   const [notes, setNotes] = useState("");
+
+  const [cookingTime, setCookingTime] = useState<number | null>(null);
+  const [selectedServings, setSelectedServings] = useState(2);
+  const [selectedCategory, setSelectedCategory] = useState("Diner");
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const [categoryOpen, setCategoryOpen] = useState(false);
-  const [selectedServings, setSelectedServings] = useState(2);
-  const [selectedCategory, setSelectedCategory] = useState("Diner");
-  const categoryRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const ingredientsTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   const categories = ["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"];
 
-  const insertIngredientTitle = () => {
-    if (!ingredientsTextareaRef.current) return;
+  /* INGREDIENT FUNCTIONS */
 
-    const textarea = ingredientsTextareaRef.current;
-    const cursorPos = textarea.selectionStart;
+  const addIngredient = () => {
+    setIngredients((prev) => [...prev, ""]);
 
-    const before = ingredients.slice(0, cursorPos);
-    const after = ingredients.slice(cursorPos);
-
-    const needsNewLine = before.length > 0 && !before.endsWith("\n");
-    const prefix = needsNewLine ? "\n\n# " : "# ";
-
-    const newValue = before + prefix + after;
-
-    setIngredients(newValue);
-
-    // Cursor achter "# "
     setTimeout(() => {
-      const newCursorPos = cursorPos + prefix.length;
-      textarea.focus();
-      textarea.setSelectionRange(newCursorPos, newCursorPos);
+      ingredientRefs.current[ingredients.length]?.focus();
     }, 0);
   };
 
+  const updateIngredient = (index: number, value: string) => {
+    const updated = [...ingredients];
+    updated[index] = value;
+    setIngredients(updated);
+  };
+
+  const removeIngredient = (index: number) => {
+    if (ingredients.length === 1) return;
+
+    const updated = ingredients.filter((_, i) => i !== index);
+    setIngredients(updated);
+
+    setTimeout(() => {
+      ingredientRefs.current[index - 1]?.focus();
+    }, 0);
+  };
+
+  /* STEP FUNCTIONS */
+
+  const addStep = () => {
+    setSteps((prev) => [...prev, ""]);
+
+    setTimeout(() => {
+      stepRefs.current[steps.length]?.focus();
+    }, 0);
+  };
+
+  const updateStep = (index: number, value: string) => {
+    const updated = [...steps];
+    updated[index] = value;
+    setSteps(updated);
+  };
+
+  const removeStep = (index: number) => {
+    if (steps.length === 1) return;
+
+    const updated = steps.filter((_, i) => i !== index);
+    setSteps(updated);
+
+    setTimeout(() => {
+      stepRefs.current[index - 1]?.focus();
+    }, 0);
+  };
+
+  /* SUBMIT */
+
   const handleSubmit = async () => {
     if (
-      title.trim() === "" ||
-      ingredients.trim() === "" ||
-      steps.trim() === "" ||
-      selectedCategory.trim() === "" ||
-      cookingTime === null ||
-      selectedServings === null
+      !title.trim() ||
+      ingredients.filter((i) => i.trim()).length === 0 ||
+      steps.filter((s) => s.trim()).length === 0 ||
+      !cookingTime
     ) {
       toast.error("Oeps, het recept is niet compleet");
       return;
@@ -80,7 +113,7 @@ export default function NewRecipe() {
         .upload(fileName, imageFile);
 
       if (uploadError) {
-        console.error(uploadError);
+        toast.error("Upload mislukt");
         return;
       }
 
@@ -91,21 +124,15 @@ export default function NewRecipe() {
       imageUrl = data.publicUrl;
     }
 
-    const cleanedIngredients = ingredients
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
+    const cleanedIngredients = ingredients.map((i) => i.trim()).filter(Boolean);
 
-    const cleanedSteps = steps
-      .split(/\n(?=\d+\.\s)|\n\s*\n/)
-      .map((step) => step.replace(/^\d+\.\s*/, "").trim())
-      .filter(Boolean);
+    const cleanedSteps = steps.map((s) => s.trim()).filter(Boolean);
 
     const {
       data: { session },
     } = await supabase.auth.getSession();
-    const userId = session?.user?.id;
 
+    const userId = session?.user?.id;
     if (!userId) return;
 
     const { data: membership } = await supabase
@@ -118,8 +145,6 @@ export default function NewRecipe() {
       toast.error("Geen household gevonden");
       return;
     }
-
-    const householdId = membership.household_id;
 
     const { data, error } = await supabase
       .from("recipes")
@@ -134,35 +159,21 @@ export default function NewRecipe() {
           notes,
           image_url: imageUrl,
           user_id: userId,
-          household_id: householdId,
+          household_id: membership.household_id,
         },
       ])
       .select()
       .single();
 
     if (error) {
-      console.error(error);
-      toast.error("Er ging iets mis bij opslaan");
+      toast.error("Opslaan mislukt");
       return;
     }
 
     toast.success("Recept aangemaakt");
+
     router.replace(`/recipe/${data.id}`);
   };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        categoryRef.current &&
-        !categoryRef.current.contains(event.target as Node)
-      ) {
-        setCategoryOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   return (
     <>
@@ -172,189 +183,261 @@ export default function NewRecipe() {
         style={{ paddingTop: "var(--header-height)" }}
         className="min-h-screen bg-[var(--color-bg)] pb-32"
       >
-        <div className="px-4 max-w-4xl mx-auto space-y-4 pt-4">
-          {/* Afbeelding */}
-          <Card className="p-5">
-            <label className="text-sm text-gray-500 block mb-3">
-              Afbeelding <span className="text-gray-400">(optioneel)</span>
-            </label>
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="relative h-56 rounded-xl overflow-hidden cursor-pointer group"
-            >
-              {imagePreview ? (
-                <>
-                  <img
-                    src={imagePreview}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">
-                      Wijzig afbeelding
-                    </span>
-                  </div>
-                </>
-              ) : (
-                <div className="h-full bg-gray-100 flex items-center justify-center">
-                  <span className="text-gray-400 text-sm">
-                    Klik om afbeelding toe te voegen
-                  </span>
-                </div>
-              )}
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  setImageFile(file);
-                  setImagePreview(URL.createObjectURL(file));
-                }
-              }}
-            />
-          </Card>
+        {/* HERO IMAGE */}
 
-          {/* Titel */}
-          <Card className="p-5">
-            <label className="text-sm text-gray-500 block mb-2">
-              Titel <span className="text-red-500">*</span>
-            </label>
-            <input
-              value={title}
-              maxLength={80}
-              onChange={(e) => setTitle(e.target.value)}
-              className={styles.input.default}
+        <div
+          onClick={() => fileInputRef.current?.click()}
+          className="relative w-full h-[40vh] bg-gray-100 flex items-center justify-center cursor-pointer"
+        >
+          {imagePreview ? (
+            <img
+              src={imagePreview}
+              className="absolute inset-0 w-full h-full object-cover"
             />
-          </Card>
+          ) : (
+            <span className="text-gray-400 text-sm">
+              Klik om foto toe te voegen
+            </span>
+          )}
+        </div>
 
-          {/* Meta + Categorie */}
-          <Card className="p-5 space-y-4">
-            <div>
-              <label className={clsx(styles.label.default, "mb-2")}>
-                Kooktijd (minuten) <span className="text-red-500">*</span>
-              </label>
-              <input
-                inputMode="numeric"
-                value={cookingTime ?? ""}
-                onChange={(e) =>
-                  setCookingTime(e.target.value ? Number(e.target.value) : null)
-                }
-                className={styles.input.default}
+        <input
+          ref={fileInputRef}
+          type="file"
+          hidden
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+
+            if (file) {
+              setImageFile(file);
+              setImagePreview(URL.createObjectURL(file));
+            }
+          }}
+        />
+
+        <div className="px-4 max-w-3xl mx-auto space-y-6 mt-6">
+          {/* TITLE */}
+
+          <input
+            placeholder="Wat staat er op het menu?"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full text-3xl font-bold text-center outline-none bg-transparent"
+          />
+
+          {/* META */}
+
+          <div className="flex justify-center gap-4">
+            {/* Cooking time */}
+
+            <input
+              inputMode="numeric"
+              placeholder="30 min"
+              value={cookingTime ?? ""}
+              onChange={(e) =>
+                setCookingTime(e.target.value ? Number(e.target.value) : null)
+              }
+              className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm w-24 text-center outline-none"
+            />
+
+            {/* Servings */}
+
+            <div className="relative">
+              <select
+                value={selectedServings}
+                onChange={(e) => setSelectedServings(Number(e.target.value))}
+                className={clsx(
+                  styles.dropdown.trigger,
+                  "appearance-none pr-8",
+                )}
+              >
+                {[1, 2, 3, 4, 5, 6].map((n) => (
+                  <option key={n}>{n}</option>
+                ))}
+              </select>
+
+              <Icon
+                icon={ChevronDown}
+                size={18}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"
               />
             </div>
 
-            {/* Aantal + Categorie naast elkaar */}
-            <div className="flex gap-4 mt-4">
-              {/* Aantal */}
-              <div className="flex flex-col gap-2 w-16">
-                <label className={clsx(styles.label.default)}>Porties</label>
+            {/* Category */}
 
-                <div className="relative">
-                  <select
-                    value={selectedServings}
-                    onChange={(e) =>
-                      setSelectedServings(Number(e.target.value))
-                    }
-                    className={clsx(
-                      styles.dropdown.trigger,
-                      "appearance-none cursor-pointer text-center",
-                    )}
-                  >
-                    {[1, 2, 3, 4, 5, 6].map((num) => (
-                      <option key={num} value={num}>
-                        {num}
-                      </option>
-                    ))}
-                  </select>
+            <div className="relative">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className={clsx(
+                  styles.dropdown.trigger,
+                  "appearance-none pr-8",
+                )}
+              >
+                {categories.map((cat) => (
+                  <option key={cat}>{cat}</option>
+                ))}
+              </select>
 
-                  <Icon
-                    icon={ChevronDown}
-                    size={20}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                  />
-                </div>
-              </div>
-
-              {/* Categorie */}
-              <div className="flex flex-col gap-2 flex-1">
-                <label className={clsx(styles.label.default)}>Categorie</label>
-
-                <div className="relative">
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className={clsx(
-                      styles.dropdown.trigger,
-                      "appearance-none cursor-pointer",
-                    )}
-                  >
-                    {["Ontbijt", "Lunch", "Diner", "Dessert", "Snack"].map(
-                      (cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ),
-                    )}
-                  </select>
-
-                  <Icon
-                    icon={ChevronDown}
-                    size={20}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                  />
-                </div>
-              </div>
+              <Icon
+                icon={ChevronDown}
+                size={18}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"
+              />
             </div>
-          </Card>
+          </div>
 
-          {/* Ingrediënten */}
-          <Card className="p-5">
-            <label className={clsx(styles.label.default, "mb-2")}>
-              Ingrediënten <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              ref={ingredientsTextareaRef}
-              value={ingredients}
-              onChange={(e) => setIngredients(e.target.value)}
-              className={`${styles.input.default} min-h-[280px]`}
-            />
+          {/* INGREDIENTS */}
+
+          <Card className="p-5 space-y-3">
+            <h2 className="font-semibold text-lg">Ingrediënten</h2>
+
+            <div className="space-y-2">
+              {ingredients.map((ingredient, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-gray-400" />
+
+                  <input
+                    ref={(el) => {
+                      if (el) ingredientRefs.current[i] = el;
+                    }}
+                    value={ingredient}
+                    enterKeyHint="next"
+                    onChange={(e) => updateIngredient(i, e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addIngredient();
+                      }
+
+                      if (e.key === "Backspace" && ingredient === "") {
+                        e.preventDefault();
+                        removeIngredient(i);
+                      }
+                    }}
+                    className="
+                      flex-1
+                      bg-gray-50
+                      border
+                      border-gray-200
+                      rounded-lg
+                      px-3
+                      py-2
+                      text-sm
+                      outline-none
+                    "
+                    placeholder={i === 0 ? "bijv. 200g pasta" : ""}
+                  />
+
+                  {ingredients.length > 1 && (
+                    <button
+                      onClick={() => removeIngredient(i)}
+                      className="text-gray-400"
+                    >
+                      <Icon icon={X} size={16} />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
             <button
-              type="button"
-              onClick={insertIngredientTitle}
-              className="mt-2 text-sm text-gray-500 hover:text-[var(--color-accent)] transition"
+              onClick={addIngredient}
+              className="flex items-center gap-1 text-sm text-gray-500"
             >
-              + Voeg ingrediënten titel toe
+              <Icon icon={Plus} size={16} />
+              Ingrediënt toevoegen
             </button>
           </Card>
 
-          {/* Bereiding */}
-          <Card className="p-5">
-            <label className={clsx(styles.label.default, "mb-2")}>
-              Bereiding <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              value={steps}
-              onChange={(e) => setSteps(e.target.value)}
-              className={`${styles.input.default} min-h-[280px]`}
-            />
+          {/* STEPS */}
+
+          <Card className="p-5 space-y-3">
+            <h2 className="font-semibold text-lg">Bereiding</h2>
+
+            {steps.map((step, i) => (
+              <div key={i} className="flex gap-2 items-center">
+                <span className="text-gray-400">{i + 1}.</span>
+
+                <input
+                  ref={(el) => {
+                    if (el) ingredientRefs.current[i] = el;
+                  }}
+                  value={step}
+                  enterKeyHint="next"
+                  onChange={(e) => updateStep(i, e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addStep();
+                    }
+
+                    if (e.key === "Backspace" && step === "") {
+                      e.preventDefault();
+                      removeStep(i);
+                    }
+                  }}
+                  className="
+                    flex-1
+                    bg-gray-50
+                    border
+                    border-gray-200
+                    rounded-lg
+                    px-3
+                    py-2
+                    text-sm
+                    outline-none
+                  "
+                  placeholder={i === 0 ? "bijv. Snijd de ui fijn" : ""}
+                />
+
+                {steps.length > 1 && (
+                  <button
+                    onClick={() => removeStep(i)}
+                    className="text-gray-400"
+                  >
+                    <Icon icon={X} size={16} />
+                  </button>
+                )}
+              </div>
+            ))}
+
+            <button
+              onClick={addStep}
+              className="flex items-center gap-1 text-sm text-gray-500"
+            >
+              <Icon icon={Plus} size={16} />
+              Stap toevoegen
+            </button>
           </Card>
 
-          {/* Notities */}
+          {/* NOTES */}
+
           <Card className="p-5">
-            <label className={clsx(styles.label.default, "mb-2")}>
-              Notities (optioneel)
-            </label>
+            <h2 className="font-semibold mb-3">Notities</h2>
+
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className={`${styles.input.default} min-h-[100px]`}
+              className="
+                w-full
+                min-h-[100px]
+                bg-gray-50
+                border
+                border-gray-200
+                rounded-lg
+                px-3
+                py-2
+                text-sm
+                outline-none
+              "
             />
           </Card>
         </div>
       </main>
+
+      {/* SAVE BUTTON */}
 
       <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-50">
         <button onClick={handleSubmit} className={styles.button.save}>

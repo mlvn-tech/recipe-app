@@ -254,14 +254,14 @@ export default function AccountPage() {
                     <div className="flex flex-col gap-2 flex-1">
                       <button
                         onClick={handleShare}
-                        className="flex justify-center gap-2 py-2.5 px-4 rounded-full bg-[var(--color-bg)] border border-gray-200 text-xs font-medium text-gray-700 active:scale-95 transition"
+                        className="flex justify-center gap-2 py-2.5 px-4 rounded-xl bg-[var(--color-bg)] border border-gray-200 text-xs font-medium text-gray-700 active:scale-95 transition"
                       >
                         <Share size={14} strokeWidth={1.5} />
                         Deel
                       </button>
                       <button
                         onClick={handleCopy}
-                        className="flex justify-center gap-2 py-2.5 px-4 rounded-full bg-[var(--color-bg)] border border-gray-200 text-xs font-medium text-gray-700 active:scale-95 transition"
+                        className="flex justify-center gap-2 py-2.5 px-4 rounded-xl bg-[var(--color-bg)] border border-gray-200 text-xs font-medium text-gray-700 active:scale-95 transition"
                       >
                         <Copy size={14} strokeWidth={1.5} />
                         {copied ? "Gekopieerd!" : "Kopieer"}

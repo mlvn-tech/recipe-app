@@ -86,9 +86,7 @@ export default function SwipeableSheet({
           maxHeight: maxHeight ?? "90dvh",
           height: height ?? "auto",
           transform: open ? `translateY(${dragY}px)` : "translateY(100%)",
-          transition: dragging
-            ? "none"
-            : "transform 0.3s ease-in-out, height 0.3s ease-in-out",
+          transition: dragging ? "none" : "transform 0.3s ease-in-out",
         }}
       >
         {/* Swipeable header */}
