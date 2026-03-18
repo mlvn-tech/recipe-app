@@ -369,7 +369,9 @@ export default function RecipeDetail() {
                 />
                 {/* Terugknop over de afbeelding */}
                 <button
-                  onClick={() => (fromCook ? router.push("/") : router.back())}
+                  onClick={() =>
+                    fromCook ? router.replace("/") : router.back()
+                  }
                   className={clsx(
                     "fixed z-30 p-2 transition-all duration-300",
                     isScrolled

@@ -1,12 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Header from "@/components/Header";
 import { styles } from "@/lib/styles";
 import clsx from "clsx";
-
-import { RefreshCw, ChevronDown } from "lucide-react";
-
+import { ChevronDown, X, WandSparkles } from "lucide-react";
 import Icon from "@/components/icons";
 import { useRouter } from "next/navigation";
 import Card from "@/components/Card";
@@ -32,9 +29,7 @@ export default function AIPage() {
 
       const res = await fetch("/api/generate-recipe", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ingredients: ingredientArray,
           servings: selectedServings,
@@ -43,7 +38,6 @@ export default function AIPage() {
       });
 
       const text = await res.text();
-
       let data;
       try {
         data = JSON.parse(text);
@@ -64,51 +58,76 @@ export default function AIPage() {
 
   return (
     <>
-      <Header title="Koken met AI" showBack={false} />
+      {/* ── Header ── */}
+      <div
+        className="fixed top-0 left-0 right-0 z-20 bg-[var(--color-bg)]/90 backdrop-blur-md border-b border-gray-100"
+        style={{
+          paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)",
+          paddingBottom: "0.75rem",
+        }}
+      >
+        <div className="relative flex items-center justify-center px-4 max-w-4xl mx-auto">
+          <button
+            onClick={() => router.push("/")}
+            className="absolute left-4 text-[var(--color-text-secondary)] active:opacity-70 transition-opacity p-1 -ml-1"
+          >
+            <X size={20} />
+          </button>
+          <h2 className="font-bold text-[var(--color-text)] leading-tight tracking-tight text-base">
+            Koken met AI
+          </h2>
+        </div>
+      </div>
 
       <main
-        className="min-h-dvh bg-[var(--color-bg)]"
-        style={{ paddingTop: "var(--header-height)" }}
+        className="min-h-dvh bg-[var(--color-bg)] pb-32"
+        style={{ paddingTop: "calc(env(safe-area-inset-top) + 3.5rem)" }}
       >
-        <div className="max-w-4xl mx-auto px-4 space-y-6 pt-4">
-          {/* AI illustratie */}
-          <div className="flex justify-center">
+        <div className="max-w-4xl mx-auto px-4 space-y-4 pt-4">
+          {/* Illustratie + intro */}
+          <div className="flex flex-col items-center pt-4 pb-2 gap-3">
             <img
               src="/ai-cooking.png"
               alt="AI cooking"
-              className="w-30 h-auto"
+              className="w-28 h-auto"
             />
+            <div className="text-center space-y-1">
+              <h2 className="text-lg font-semibold text-[var(--color-text)]">
+                Wat heb je nog in huis?
+              </h2>
+              <p className="text-sm text-[var(--color-text-secondary)]">
+                Vul je ingrediënten in en wij doen de rest
+              </p>
+            </div>
           </div>
 
-          <Card className="space-y-5">
-            {/* Intro */}
-            <div className="space-y-2 text-center mb-6">
-              <h2 className="text-lg font-semibold">Wat heb je nog in huis?</h2>
-              <p className="text-sm text-[var(--color-text-secondary)]">
-                Vul jouw ingrediënten in en wij doen de rest
+          {/* Input card */}
+          <Card className="p-5 space-y-4">
+            {/* Ingrediënten */}
+            <div>
+              <label className={clsx(styles.label.default, "mb-2")}>
+                Ingrediënten
+              </label>
+              <textarea
+                value={ingredientInput}
+                onChange={(e) => setIngredientInput(e.target.value)}
+                placeholder="Bijv: paprika, ui, zoete aardappel, rijst"
+                rows={4}
+                disabled={generating}
+                className={clsx(
+                  styles.input.default,
+                  generating && "opacity-60 cursor-not-allowed",
+                )}
+              />
+              <p className="text-xs text-gray-400 mt-1.5">
+                Scheid ingrediënten met een komma
               </p>
             </div>
 
-            {/* Ingrediënten */}
-            <textarea
-              value={ingredientInput}
-              onChange={(e) => setIngredientInput(e.target.value)}
-              placeholder="Bijv: paprika, ui, zoete aardappel, rijst"
-              rows={4}
-              disabled={generating}
-              className={clsx(
-                styles.input.default,
-                "transition-all duration-200",
-                generating && "opacity-60 bg-gray-50 cursor-not-allowed",
-              )}
-            />
-
             {/* Porties + Categorie */}
-            <div className="flex gap-4 mt-4">
-              {/* Porties */}
+            <div className="flex gap-4">
               <div className="flex flex-col gap-2 w-16">
-                <label className="text-sm font-medium">Porties</label>
-
+                <label className={styles.label.default}>Porties</label>
                 <div className="relative">
                   <select
                     value={selectedServings}
@@ -126,7 +145,6 @@ export default function AIPage() {
                       </option>
                     ))}
                   </select>
-
                   <Icon
                     icon={ChevronDown}
                     size={20}
@@ -135,10 +153,8 @@ export default function AIPage() {
                 </div>
               </div>
 
-              {/* Categorie */}
               <div className="flex flex-col gap-2 flex-1">
-                <label className="text-sm font-medium">Categorie</label>
-
+                <label className={styles.label.default}>Categorie</label>
                 <div className="relative">
                   <select
                     value={selectedCategory}
@@ -156,7 +172,6 @@ export default function AIPage() {
                       ),
                     )}
                   </select>
-
                   <Icon
                     icon={ChevronDown}
                     size={20}
@@ -165,23 +180,27 @@ export default function AIPage() {
                 </div>
               </div>
             </div>
-
             {/* Generate knop */}
             <button
               onClick={handleGenerate}
-              disabled={generating}
+              disabled={generating || !ingredientInput.trim()}
               className={clsx(
-                styles.button.primary,
-                "h-[58px] mt-6 relative flex items-center justify-center mx-auto transition-all duration-300",
-                generating
-                  ? "w-[58px] !px-0 bg-[var(--color-secondaccent)]"
-                  : "w-full",
+                styles.button.aigenerate,
+                "w-full mt-2",
+                (generating || !ingredientInput.trim()) &&
+                  "opacity-50 cursor-not-allowed",
               )}
             >
-              {!generating && <span className="absolute">Genereer recept</span>}
-
-              {generating && (
-                <RefreshCw className="w-6 h-6 animate-spin absolute text-white" />
+              {generating ? (
+                <span className="flex items-center justify-center gap-2">
+                  <WandSparkles size={18} className="animate-pulse" />
+                  Recept wordt gegenereerd…
+                </span>
+              ) : (
+                <span className="flex items-center justify-center gap-2">
+                  <WandSparkles size={18} />
+                  Genereer recept
+                </span>
               )}
             </button>
           </Card>
