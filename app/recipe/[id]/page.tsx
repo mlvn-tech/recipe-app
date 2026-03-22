@@ -29,15 +29,28 @@ import { formatTitle } from "@/lib/utils";
 import { useUI } from "@/components/UIContext";
 
 export default function RecipeDetail() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const from = searchParams.get("from");
   const params = useParams();
   const idParam = params.id;
   const id = Array.isArray(idParam) ? idParam[0] : idParam;
 
-  const searchParams = useSearchParams();
-  const fromCook = searchParams.get("from") === "cook";
+  const handleBack = () => {
+    switch (from) {
+      case "week":
+        router.replace("/week");
+        break;
+      case "cook":
+        router.replace("/cook");
+        break;
+      case "home":
+      default:
+        router.replace("/");
+    }
+  };
 
   const [isScrolled, setIsScrolled] = useState(false);
-  const router = useRouter();
 
   const [recipe, setRecipe] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -369,9 +382,7 @@ export default function RecipeDetail() {
                 />
                 {/* Terugknop over de afbeelding */}
                 <button
-                  onClick={() =>
-                    fromCook ? router.replace("/") : router.back()
-                  }
+                  onClick={handleBack}
                   className={clsx(
                     "fixed z-30 p-2 transition-all duration-300",
                     isScrolled
@@ -427,16 +438,12 @@ export default function RecipeDetail() {
                 {/* Chevron + terug */}
                 <div className="flex items-center gap-1 -ml-1">
                   <button
-                    onClick={() =>
-                      fromCook ? router.push("/") : router.back()
-                    }
-                    className="text-[var(--color-text-secondary)] active:opacity-70 transition-opacity"
+                    onClick={handleBack}
+                    className="flex items-center gap-1 -ml-1 text-[var(--color-text-secondary)] active:opacity-70 transition-opacity"
                   >
                     <Icon icon={ChevronLeft} size={20} />
+                    <span className="text-sm">Recepten</span>
                   </button>
-                  <span className="text-sm text-[var(--color-text-secondary)]">
-                    Recepten
-                  </span>
                 </div>
 
                 {/* Titel + icoontjes */}
